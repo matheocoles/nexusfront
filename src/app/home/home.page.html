@@ -1,36 +1,26 @@
 <ion-content [fullscreen]="true">
-  <div class="home-wrapper">
+  <div class="main-container">
 
-    <div class="brand-container">
-      <div class="nexus-logo-circle">
-        <img src="assets/icon/nexus-logo.png" alt="NEXUS" />
+    <header class="brand-header">
+      <div class="logo-container">
+        <img src="assets/logo.png" alt="NEXUS Logo" class="vortex-logo">
       </div>
-      <h1 class="brand-name">NEXUS</h1>
-    </div>
+      <h1 class="brand-title">N E X U S</h1>
+    </header>
 
-    <div class="section-container">
-      <h2 class="section-title">Archive</h2>
+    <section class="archive-section">
+      <h2 class="archive-header">Archive</h2>
 
-      <ion-card class="nexus-card">
-        <ion-item lines="none" class="nexus-item">
-          <ion-label>
-            <h3>Titre</h3>
-            <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
-          </ion-label>
-          <ion-note slot="end">25 m</ion-note>
-        </ion-item>
-      </ion-card>
-
-      <ion-card class="nexus-card">
-        <ion-item lines="none" class="nexus-item">
-          <ion-label>
-            <h3>Titre</h3>
-            <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
-          </ion-label>
-          <ion-note slot="end">25 m</ion-note>
-        </ion-item>
-      </ion-card>
-    </div>
+      <div class="nexus-card" *ngFor="let item of [1, 2]">
+        <div class="card-content">
+          <div class="text-group">
+            <h3 class="item-title">Titre</h3>
+            <p class="item-desc">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
+          </div>
+          <span class="item-duration">25 m</span>
+        </div>
+      </div>
+    </section>
 
   </div>
 </ion-content>

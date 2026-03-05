@@ -1,16 +1,8 @@
 :root {
-  /* Couleurs personnalisées Nexus */
-  --nexus-bg: #000000;
+  --nexus-bg: #0a0a0a;
   --nexus-card-bg: #111111;
-  --nexus-pink: #c2185b;
-  --nexus-purple: #6a1b9a;
-  --nexus-text-gray: #888888;
-
-  /* Overrides Ionic */
-  --ion-background-color: var(--nexus-bg);
-  --ion-text-color: #ffffff;
-  --ion-font-family: 'Inter', sans-serif;
+  --nexus-card-border: #1a1a1a;
+  --nexus-pink: #d81b60; // Le rose vif de l'image
+  --nexus-text-primary: #fdf6e3;
+  --nexus-text-secondary: #777777;
 }
-
-.pink-text { color: var(--nexus-pink); }
-.purple-text { color: var(--nexus-purple); }

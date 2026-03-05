@@ -1,0 +1,45 @@
+<ion-content [fullscreen]="true" class="nexus-bg">
+  <div class="login-container">
+
+    <header class="brand-header">
+      <img src="assets/logo.png" alt="NEXUS Logo" class="vortex-logo">
+      <h1 class="brand-title">N E X U S</h1>
+    </header>
+
+    <section class="form-section">
+      <div class="input-wrapper">
+        <ion-item lines="none" class="nexus-item">
+          <ion-input
+            type="text"
+            placeholder="Username"
+            [(ngModel)]="username"
+            autocomplete="username">
+          </ion-input>
+        </ion-item>
+
+        <ion-item lines="none" class="nexus-item">
+          <ion-input
+            type="password"
+            placeholder="Password"
+            [(ngModel)]="password"
+            [clearOnEdit]="false">
+          </ion-input>
+        </ion-item>
+      </div>
+
+      <ion-text color="danger" *ngIf="errorMessage" class="error-msg">
+        <p>{{ errorMessage }}</p>
+      </ion-text>
+
+      <ion-button
+        expand="block"
+        class="login-btn"
+        (click)="handleLogin()"
+        [disabled]="isLoading">
+        <span *ngIf="!isLoading">SE CONNECTER</span>
+        <ion-spinner name="crescent" *ngIf="isLoading"></ion-spinner>
+      </ion-button>
+    </section>
+
+  </div>
+</ion-content>

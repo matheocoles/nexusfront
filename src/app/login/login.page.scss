@@ -1,0 +1,70 @@
+.nexus-bg {
+  --background: #0a0a0a;
+}
+
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 30px;
+}
+
+.brand-header {
+  text-align: center;
+  margin-bottom: 50px;
+
+  .vortex-logo {
+    width: 120px;
+    margin-bottom: 20px;
+    filter: drop-shadow(0 0 15px rgba(194, 24, 91, 0.4));
+  }
+
+  .brand-title {
+    color: #fdf6e3;
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: 12px;
+    margin: 0;
+  }
+}
+
+.form-section {
+  width: 100%;
+  max-width: 400px;
+
+  .input-wrapper {
+    margin-bottom: 20px;
+  }
+
+  .nexus-item {
+    --background: #111111;
+    --border-radius: 12px;
+    --color: white;
+    margin-bottom: 12px;
+    border: 1px solid #1a1a1a;
+
+    ion-input {
+      --padding-start: 15px;
+      font-size: 1rem;
+    }
+  }
+
+  .login-btn {
+    --background: #c2185b;
+    --background-activated: #d81b60;
+    --border-radius: 12px;
+    --box-shadow: 0 4px 15px rgba(194, 24, 91, 0.3);
+    margin-top: 30px;
+    height: 56px;
+    font-weight: 700;
+    letter-spacing: 2px;
+  }
+
+  .error-msg {
+    text-align: center;
+    font-size: 0.85rem;
+    margin-top: 10px;
+  }
+}

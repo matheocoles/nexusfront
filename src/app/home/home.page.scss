@@ -1,73 +1,138 @@
-.home-wrapper {
-  padding: 40px 20px;
+.main-container {
+  background-color: var(--nexus-bg);
+  min-height: 100%;
+  padding: 40px 24px;
   display: flex;
   flex-direction: column;
-  align-items: center;
 }
 
-.brand-container {
+.brand-header {
   text-align: center;
-  margin-bottom: 50px;
   margin-top: 20px;
+  margin-bottom: 60px;
 
-  .nexus-logo-circle {
-    width: 180px;
-    height: 180px;
-    margin: 0 auto;
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
+  .logo-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+
+    .vortex-logo {
+      width: 140px;
+      filter: drop-shadow(0 0 15px rgba(123, 31, 162, 0.3));
     }
   }
 
-  .brand-name {
+  .brand-title {
+    color: var(--nexus-text-primary);
     font-size: 3.5rem;
     font-weight: 700;
-    letter-spacing: 12px;
-    color: #fdf6e3;
-    margin-top: 20px;
+    letter-spacing: 20px; // Espacement extrême du design
+    margin: 0;
+    padding-left: 20px; // Pour compenser l'espacement de la dernière lettre
   }
 }
 
-.section-container {
-  width: 100%;
-
-  .section-title {
+.archive-section {
+  .archive-header {
     color: var(--nexus-pink);
-    font-size: 1.2rem;
-    font-weight: 600;
-    margin-left: 10px;
-    margin-bottom: 15px;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 20px;
   }
 }
 
 .nexus-card {
   background: var(--nexus-card-bg);
-  border-radius: 15px;
-  margin: 0 0 15px 0;
-  border: 1px solid #222;
+  border: 1px solid var(--nexus-card-border);
+  border-radius: 18px;
+  padding: 20px;
+  margin-bottom: 16px;
+  transition: transform 0.2s ease;
 
-  .nexus-item {
-    --background: transparent;
-    --padding-start: 15px;
-    --padding-end: 15px;
+  &:active {
+    transform: scale(0.98);
+  }
 
-    h3 {
-      color: #fff;
-      font-weight: bold;
-      margin-bottom: 5px;
+  .card-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    .text-group {
+      max-width: 80%;
+
+      .item-title {
+        color: white;
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin: 0 0 4px 0;
+      }
+
+      .item-desc {
+        color: var(--nexus-text-secondary);
+        font-size: 0.85rem;
+        line-height: 1.4;
+        margin: 0;
+      }
     }
 
-    p {
-      color: var(--nexus-text-gray);
-      font-size: 0.85rem;
-      line-height: 1.2;
-    }
-
-    ion-note {
+    .item-duration {
       color: var(--nexus-pink);
-      font-weight: bold;
+      font-weight: 700;
+      font-size: 0.9rem;
+      white-space: nowrap;
     }
   }
+}
+
+.nexus-tab-bar {
+  --background: #000;
+  --border-color: #222;
+  height: 70px;
+
+  ion-tab-button {
+    --color: #666;
+    --color-selected: #c2185b;
+  }
+
+  .home-box {
+    border: 2px solid #c2185b;
+    border-radius: 12px;
+    padding: 6px;
+    display: flex;
+  }
+}
+
+.nexus-tab-bar {
+  --background: #000000;
+  --border-color: #1a1a1a;
+  height: 75px;
+  padding-bottom: 10px;
+
+  ion-tab-button {
+    --color: #555555;
+    --color-selected: #c2185b; /* Le rose/bordeaux Nexus */
+
+    &.active-home {
+      .home-box {
+        border: 2px solid #c2185b;
+        border-radius: 12px;
+        padding: 6px 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        /* Ajoute une légère lueur au bouton actif */
+        box-shadow: 0 0 10px rgba(194, 24, 91, 0.3);
+      }
+    }
+  }
+}
+
+.vortex-logo {
+  animation: rotateVortex 20s linear infinite;
+}
+
+@keyframes rotateVortex {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }

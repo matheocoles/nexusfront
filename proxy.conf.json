@@ -1,0 +1,10 @@
+{
+  "/api": {
+    "target": "https://nexusapi.up.railway.app",
+    "secure": true,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/api": ""
+    }
+  }
+}

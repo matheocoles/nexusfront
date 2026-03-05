@@ -1,0 +1,39 @@
+<ion-content [fullscreen]="true">
+  <div class="profile-container" *ngIf="userData">
+
+    <div class="user-welcome">
+      <ion-icon name="person-circle-outline" class="user-avatar"></ion-icon>
+      <h2>Bonjour {{ userData.username }}</h2>
+    </div>
+
+    <section class="stat-section">
+      <p class="section-label">Temps d'utilisation</p>
+      <div class="time-counter">
+        <div class="time-block"><span>{{ userData.days || '00' }}</span> <small>Jours</small></div>
+        <div class="divider">:</div>
+        <div class="time-block"><span>{{ userData.minutes || '00' }}</span> <small>Minutes</small></div>
+        <div class="divider">:</div>
+        <div class="time-block"><span>{{ userData.seconds || '00' }}</span> <small>Secondes</small></div>
+      </div>
+    </section>
+
+    <section class="trophy-section">
+      <p class="section-label">Trophées</p>
+
+      <div class="trophy-card" *ngFor="let trophy of userData.trophies">
+        <div class="trophy-icon-box">
+          <ion-icon name="trophy-outline"></ion-icon>
+        </div>
+        <div class="trophy-text">
+          <h3>{{ trophy.title }}</h3>
+          <p>{{ trophy.description }}</p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="loading-state" *ngIf="!userData">
+    <p>Connexion à Nexus API...</p>
+  </div>
+</ion-content>
