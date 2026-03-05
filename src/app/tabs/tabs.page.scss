@@ -1,0 +1,26 @@
+ion-tab-bar {
+  --background: #000000;
+  --border: none;
+  height: 70px;
+  border-top: 1px solid #222;
+
+  ion-tab-button {
+    --color: #555;
+    --color-selected: var(--nexus-pink);
+
+    ion-icon {
+      font-size: 24px;
+    }
+  }
+
+  .home-button {
+    .home-frame {
+      border: 2px solid var(--nexus-pink);
+      border-radius: 12px;
+      padding: 6px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+}

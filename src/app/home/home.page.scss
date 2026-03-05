@@ -1,27 +1,73 @@
-#container {
+.home-wrapper {
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.brand-container {
   text-align: center;
+  margin-bottom: 50px;
+  margin-top: 20px;
 
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  .nexus-logo-circle {
+    width: 180px;
+    height: 180px;
+    margin: 0 auto;
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+  }
+
+  .brand-name {
+    font-size: 3.5rem;
+    font-weight: 700;
+    letter-spacing: 12px;
+    color: #fdf6e3;
+    margin-top: 20px;
+  }
 }
 
-#container strong {
-  font-size: 20px;
-  line-height: 26px;
+.section-container {
+  width: 100%;
+
+  .section-title {
+    color: var(--nexus-pink);
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-left: 10px;
+    margin-bottom: 15px;
+  }
 }
 
-#container p {
-  font-size: 16px;
-  line-height: 22px;
+.nexus-card {
+  background: var(--nexus-card-bg);
+  border-radius: 15px;
+  margin: 0 0 15px 0;
+  border: 1px solid #222;
 
-  color: #8c8c8c;
+  .nexus-item {
+    --background: transparent;
+    --padding-start: 15px;
+    --padding-end: 15px;
 
-  margin: 0;
-}
+    h3 {
+      color: #fff;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
 
-#container a {
-  text-decoration: none;
+    p {
+      color: var(--nexus-text-gray);
+      font-size: 0.85rem;
+      line-height: 1.2;
+    }
+
+    ion-note {
+      color: var(--nexus-pink);
+      font-weight: bold;
+    }
+  }
 }

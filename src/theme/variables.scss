@@ -1,2 +1,16 @@
-// For information on how to create your own theme, please refer to:
-// https://ionicframework.com/docs/theming/
+:root {
+  /* Couleurs personnalisées Nexus */
+  --nexus-bg: #000000;
+  --nexus-card-bg: #111111;
+  --nexus-pink: #c2185b;
+  --nexus-purple: #6a1b9a;
+  --nexus-text-gray: #888888;
+
+  /* Overrides Ionic */
+  --ion-background-color: var(--nexus-bg);
+  --ion-text-color: #ffffff;
+  --ion-font-family: 'Inter', sans-serif;
+}
+
+.pink-text { color: var(--nexus-pink); }
+.purple-text { color: var(--nexus-purple); }

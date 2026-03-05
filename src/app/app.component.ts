@@ -1,11 +1,33 @@
-import { Component } from '@angular/core';
-import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
+import { Component, inject, OnInit } from '@angular/core'; // Ajoute inject
+import { Platform, IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
+import { StatusBar, Style } from '@capacitor/status-bar';
 
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
+  standalone: true,
   imports: [IonApp, IonRouterOutlet],
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
+  // On injecte la plateforme ici, plus besoin du constructeur pour ça
+  private platform = inject(Platform);
+
   constructor() {}
+
+  async ngOnInit() {
+    await this.initializeApp();
+  }
+
+  async initializeApp() {
+    await this.platform.ready();
+
+    if (this.platform.is('hybrid')) {
+      try {
+        await StatusBar.setStyle({ style: Style.Dark });
+        await StatusBar.setBackgroundColor({ color: '#000000' });
+      } catch (err) {
+        console.warn('StatusBar non disponible', err);
+      }
+    }
+  }
 }
