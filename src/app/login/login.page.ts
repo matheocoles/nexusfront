@@ -25,9 +25,7 @@ import {
     IonItem,
     IonInput,
     IonButton,
-    IonIcon,
     IonText,
-    IonLoading,
     IonSpinner
   ]
 })

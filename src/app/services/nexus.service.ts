@@ -6,7 +6,7 @@ import {HttpClient} from "@angular/common/http";
   providedIn: 'root'
 })
 export class NexusService {
-  private apiUrl = 'https://nexusapi.up.railway.app/';
+  private apiUrl = 'https://nexus-api-mocha.vercel.app';
 
   private readonly http = inject(HttpClient);
 
