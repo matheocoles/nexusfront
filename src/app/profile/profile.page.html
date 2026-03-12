@@ -1,39 +1,81 @@
-<ion-content [fullscreen]="true">
-  <div class="profile-container" *ngIf="userData">
-
-    <div class="user-welcome">
-      <ion-icon name="person-circle-outline" class="user-avatar"></ion-icon>
-      <h2>Bonjour {{ userData.username }}</h2>
-    </div>
-
-    <section class="stat-section">
-      <p class="section-label">Temps d'utilisation</p>
-      <div class="time-counter">
-        <div class="time-block"><span>{{ userData.days || '00' }}</span> <small>Jours</small></div>
-        <div class="divider">:</div>
-        <div class="time-block"><span>{{ userData.minutes || '00' }}</span> <small>Minutes</small></div>
-        <div class="divider">:</div>
-        <div class="time-block"><span>{{ userData.seconds || '00' }}</span> <small>Secondes</small></div>
-      </div>
-    </section>
-
-    <section class="trophy-section">
-      <p class="section-label">Trophées</p>
-
-      <div class="trophy-card" *ngFor="let trophy of userData.trophies">
-        <div class="trophy-icon-box">
-          <ion-icon name="trophy-outline"></ion-icon>
-        </div>
-        <div class="trophy-text">
-          <h3>{{ trophy.title }}</h3>
-          <p>{{ trophy.description }}</p>
-        </div>
-      </div>
-    </section>
-
+<ion-content class="profile-container">
+  <div *ngIf="!userData" class="loading-state" style="text-align: center; margin-top: 50px;">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+    <p style="color: white;">Chargement du profil...</p>
   </div>
 
-  <div class="loading-state" *ngIf="!userData">
-    <p>Connexion à Nexus API...</p>
+  <div *ngIf="userData" class="profile-wrapper">
+    <div class="header-background"></div>
+
+    <ion-card class="profile-card">
+      <div class="avatar-container">
+        <ion-icon name="person-circle-outline" class="user-avatar"></ion-icon>
+      </div>
+
+      <ion-card-content>
+        <div class="user-greeting">Bonjour {{ userData.username }}</div>
+
+        <div class="section-header">Temps d'utilisation</div>
+        <div class="time-row">
+          <div class="time-box box-dark">
+            <span class="time-val">{{ days | number:'2.0' }}</span>
+            <span class="time-lab">Jours</span>
+          </div>
+          <span class="dots">:</span>
+          <div class="time-box box-medium">
+            <span class="time-val">{{ minutes | number:'2.0' }}</span>
+            <span class="time-lab">Min</span>
+          </div>
+          <span class="dots">:</span>
+          <div class="time-box box-light">
+            <span class="time-val">{{ seconds | number:'2.0' }}</span>
+            <span class="time-lab">Sec</span>
+          </div>
+        </div>
+
+        <div class="progress-container">
+          <div class="progress-info">
+            <span>Cycle 24h</span>
+            <span>{{ (progress * 100) | number:'1.0-0' }}%</span>
+          </div>
+          <ion-progress-bar [value]="progress" class="nexus-progress"></ion-progress-bar>
+        </div>
+
+        <div class="section-header">
+          Edition
+          <ion-button fill="clear" size="small" (click)="toggleEdit()" style="--color: #b87a8e;">
+            {{ isEditing ? 'Annuler' : 'Modifier' }}
+          </ion-button>
+        </div>
+
+        <div class="edit-info-box">
+          <p>username :
+            <ion-input [(ngModel)]="userData.username" [readonly]="!isEditing" class="custom-input"></ion-input>
+          </p>
+          <p>password :
+            <ion-input type="password" [(ngModel)]="newPassword" [placeholder]="isEditing ? 'Nouveau password' : '********'" [readonly]="!isEditing" class="custom-input"></ion-input>
+          </p>
+
+          <ion-button *ngIf="isEditing" expand="block" color="success" (click)="saveChanges()" style="margin-top: 10px;">
+            SAUVEGARDER
+          </ion-button>
+        </div>
+
+        <div class="section-header">Trophée</div>
+        <div class="trophy-card">
+          <div class="trophy-icon">🏆</div>
+          <div class="trophy-text">
+            <strong>{{ getTrophyTitle() }}</strong>
+            <p *ngIf="days < 7">Continuez comme ça, vous progressez !</p>
+            <p *ngIf="days >= 7">Un véritable pilier de la communauté.</p>
+          </div>
+        </div>
+
+        <ion-button expand="block" class="logout-btn" (click)="handleLogout()">
+          <ion-icon name="log-out-outline" slot="start"></ion-icon>
+          DÉCONNEXION
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
   </div>
 </ion-content>

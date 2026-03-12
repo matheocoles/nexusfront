@@ -12,6 +12,8 @@ import {
   IonText,
   IonLoading, IonSpinner
 } from '@ionic/angular/standalone';
+import {NexusService} from "../services/nexus.service";
+import {jwtDecode} from "jwt-decode";
 
 @Component({
   selector: 'app-login',
@@ -30,20 +32,16 @@ import {
   ]
 })
 export class LoginPage {
-  // Injections
+  private nexusService = inject(NexusService);
   private http = inject(HttpClient);
   private router = inject(Router);
 
-  // Modèles de données
   username = '';
   password = '';
   isLoading = false;
   errorMessage = '';
 
-  constructor() {}
-
   handleLogin() {
-    // Validation simple
     if (!this.username || !this.password) {
       this.errorMessage = 'Veuillez remplir tous les champs.';
       return;
@@ -52,39 +50,29 @@ export class LoginPage {
     this.isLoading = true;
     this.errorMessage = '';
 
-    const body = {
-      username: this.username,
-      password: this.password
-    };
+    const body = { username: this.username, password: this.password };
 
-    // Note : On utilise /api/api/Login car ton proxy /api cible la racine
-    // et ton swagger indique que la route commence par /api/
-    this.http.post('/api/api/Login', body).subscribe({
+    this.http.post('https://nexusapi.up.railway.app/api/login', body).subscribe({
       next: (res: any) => {
-        this.isLoading = false;
-
-        // On sauvegarde le token (vérifie si ton API renvoie 'token' ou 'accessToken')
-        const token = res.token || res.accessToken || res.jwt;
+        this.isLoading = false; // Arrêter le chargement
+        const token = res.token;
 
         if (token) {
-          localStorage.setItem('nexus_token', token);
-          // Navigation vers la page home des onglets
+          const decoded: any = jwtDecode(token);
+          console.log("Token décodé :", decoded);
+
+          const userId = parseInt(decoded.UserId, 10).toString();
+          this.nexusService.saveSession(token, userId);
+
           this.router.navigate(['/tabs/home']);
         } else {
-          this.errorMessage = "Erreur : Token non reçu par l'API.";
+          this.errorMessage = "Token manquant dans la réponse.";
         }
       },
       error: (err) => {
         this.isLoading = false;
-        console.error("Erreur de connexion :", err);
-
-        if (err.status === 401) {
-          this.errorMessage = "Identifiants incorrects.";
-        } else if (err.status === 404) {
-          this.errorMessage = "Route d'API introuvable (/api/api/Login).";
-        } else {
-          this.errorMessage = "Impossible de contacter le serveur Nexus.";
-        }
+        console.error("Erreur API :", err);
+        this.errorMessage = "Identifiants incorrects ou serveur injoignable.";
       }
     });
   }

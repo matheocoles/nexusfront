@@ -1,138 +1,141 @@
 .main-container {
-  background-color: var(--nexus-bg);
+  background: #0d0d0d;
   min-height: 100%;
-  padding: 40px 24px;
-  display: flex;
-  flex-direction: column;
+  padding: 20px;
 }
 
+/* Header NEXUS */
 .brand-header {
   text-align: center;
-  margin-top: 20px;
-  margin-bottom: 60px;
+  margin-bottom: 30px;
+  .logo-container .vortex-logo {
+    width: 80px; // Un peu plus petit pour laisser de la place
+    animation: rotateVortex 20s linear infinite;
+    filter: drop-shadow(0 0 10px #c2185b);
+  }
+  .brand-title {
+    color: white; font-size: 1.8rem; letter-spacing: 10px; margin: 0;
+  }
+}
 
-  .logo-container {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 30px;
+/* Emploi du temps */
+.schedule-section {
+  .schedule-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 20px;
+    h2 { color: white; font-size: 1.5rem; font-weight: bold; margin: 0; }
+    .add-btn { color: #c2185b; font-size: 2rem; }
+  }
 
-    .vortex-logo {
-      width: 140px;
-      filter: drop-shadow(0 0 15px rgba(123, 31, 162, 0.3));
+  .search-bar {
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 10px 15px;
+    display: flex; align-items: center;
+    margin-bottom: 25px;
+    ion-icon { color: #888; font-size: 1.2rem; }
+    input {
+      background: transparent; border: none; color: white;
+      flex: 1; margin: 0 10px; outline: none;
+    }
+  }
+}
+
+.schedule-container {
+  background: #161616;
+  border-radius: 24px;
+  padding: 20px 0;
+  overflow: hidden;
+
+  .date-selector {
+    display: flex; justify-content: center; align-items: center;
+    gap: 30px; color: white; margin-bottom: 20px;
+    span { font-weight: bold; font-size: 1.1rem; }
+  }
+
+  .course-item {
+    display: flex; align-items: center;
+    padding: 15px;
+    margin-bottom: 2px; // Sépare légèrement les blocs
+    color: white;
+
+    .course-number { font-weight: bold; margin-right: 15px; font-size: 1.1rem; }
+    .course-time {
+      display: flex; flex-direction: column; font-size: 0.7rem;
+      margin-right: 20px; opacity: 0.8;
+    }
+    .course-info {
+      flex: 1;
+      display: flex; flex-direction: column;
+      .course-name { font-weight: bold; font-size: 1rem; }
+      .course-room { font-size: 0.75rem; opacity: 0.7; }
+    }
+    .course-duration-badge {
+      background: rgba(255, 255, 255, 0.9);
+      color: black;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: bold;
     }
   }
 
-  .brand-title {
-    color: var(--nexus-text-primary);
-    font-size: 3.5rem;
-    font-weight: 700;
-    letter-spacing: 20px; // Espacement extrême du design
-    margin: 0;
-    padding-left: 20px; // Pour compenser l'espacement de la dernière lettre
+  .scroll-indicator {
+    text-align: center; color: white; margin-top: 15px; opacity: 0.5;
   }
 }
 
-.archive-section {
-  .archive-header {
-    color: var(--nexus-pink);
-    font-size: 1.4rem;
-    font-weight: 700;
-    margin-bottom: 20px;
-  }
-}
+@keyframes rotateVortex { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-.nexus-card {
-  background: var(--nexus-card-bg);
-  border: 1px solid var(--nexus-card-border);
-  border-radius: 18px;
-  padding: 20px;
-  margin-bottom: 16px;
-  transition: transform 0.2s ease;
+.course-item {
+  transition: transform 0.1s ease, filter 0.2s ease;
+  cursor: pointer;
 
   &:active {
-    transform: scale(0.98);
-  }
-
-  .card-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-
-    .text-group {
-      max-width: 80%;
-
-      .item-title {
-        color: white;
-        font-size: 1.1rem;
-        font-weight: 700;
-        margin: 0 0 4px 0;
-      }
-
-      .item-desc {
-        color: var(--nexus-text-secondary);
-        font-size: 0.85rem;
-        line-height: 1.4;
-        margin: 0;
-      }
-    }
-
-    .item-duration {
-      color: var(--nexus-pink);
-      font-weight: 700;
-      font-size: 0.9rem;
-      white-space: nowrap;
-    }
+    transform: scale(0.96);
+    filter: brightness(1.2);
   }
 }
 
-.nexus-tab-bar {
-  --background: #000;
-  --border-color: #222;
-  height: 70px;
+/* Dans ton fichier .scss */
+.add-btn {
+  color: #ffffff;
+  background: linear-gradient(135deg, #c2185b, #632c4a);
+  border-radius: 50%;
+  padding: 8px;
+  font-size: 2.2rem;
+  box-shadow: 0 0 15px rgba(194, 24, 91, 0.4);
+  transition: all 0.3s ease;
 
-  ion-tab-button {
-    --color: #666;
-    --color-selected: #c2185b;
+  &:hover {
+    transform: rotate(90deg) scale(1.1);
+    box-shadow: 0 0 25px rgba(194, 24, 91, 0.7);
   }
 
-  .home-box {
-    border: 2px solid #c2185b;
-    border-radius: 12px;
-    padding: 6px;
-    display: flex;
-  }
-}
-
-.nexus-tab-bar {
-  --background: #000000;
-  --border-color: #1a1a1a;
-  height: 75px;
-  padding-bottom: 10px;
-
-  ion-tab-button {
-    --color: #555555;
-    --color-selected: #c2185b; /* Le rose/bordeaux Nexus */
-
-    &.active-home {
-      .home-box {
-        border: 2px solid #c2185b;
-        border-radius: 12px;
-        padding: 6px 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        /* Ajoute une légère lueur au bouton actif */
-        box-shadow: 0 0 10px rgba(194, 24, 91, 0.3);
-      }
-    }
+  &:active {
+    transform: scale(0.9);
   }
 }
 
-.vortex-logo {
-  animation: rotateVortex 20s linear infinite;
+/* On centre mieux le header de l'emploi du temps */
+.schedule-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  padding: 0 5px;
+
+  h2 {
+    font-size: 1.6rem;
+    letter-spacing: 1px;
+    background: linear-gradient(to right, #fff, #888);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
 }
 
-@keyframes rotateVortex {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+::ng-deep .nexus-toast {
+  --background: #c2185b;
+  --color: white;
+  font-weight: bold;
 }
