@@ -2,18 +2,17 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import {
   IonContent,
   IonItem,
   IonInput,
   IonButton,
-  IonIcon,
   IonText,
-  IonLoading, IonSpinner
+  IonSpinner
 } from '@ionic/angular/standalone';
-import {NexusService} from "../services/nexus.service";
-import {jwtDecode} from "jwt-decode";
+import { NexusService } from "../services/nexus.service";
+import { jwtDecode } from "jwt-decode";
+import {HttpClient} from "@angular/common/http";
 
 @Component({
   selector: 'app-login',
@@ -33,8 +32,8 @@ import {jwtDecode} from "jwt-decode";
 })
 export class LoginPage {
   private nexusService = inject(NexusService);
-  private http = inject(HttpClient);
   private router = inject(Router);
+  private readonly http = inject(HttpClient);
 
   username = '';
   password = '';
@@ -43,36 +42,39 @@ export class LoginPage {
 
   handleLogin() {
     if (!this.username || !this.password) {
-      this.errorMessage = 'Veuillez remplir tous les champs.';
+      this.errorMessage = 'Identifiants requis.';
       return;
     }
 
     this.isLoading = true;
     this.errorMessage = '';
 
-    const body = { username: this.username, password: this.password };
+    const loginCredentials = { username: this.username, password: this.password };
 
-    this.http.post('https://nexusapi.up.railway.app/api/login', body).subscribe({
+    this.nexusService.login(loginCredentials).subscribe({
       next: (res: any) => {
-        this.isLoading = false; // Arrêter le chargement
-        const token = res.token;
+        if (res.token) {
+          const decoded: any = jwtDecode(res.token);
+          console.log("Contenu du Token :", decoded); // <--- REGARDE TA CONSOLE NAVIGATEUR (F12)
 
-        if (token) {
-          const decoded: any = jwtDecode(token);
-          console.log("Token décodé :", decoded);
+          // Si 'UserId' est vide, essaie les autres variantes courantes
+          const userId = decoded.UserId || decoded.userid || decoded.id || decoded.sub;
 
-          const userId = parseInt(decoded.UserId, 10).toString();
-          this.nexusService.saveSession(token, userId);
-
-          this.router.navigate(['/tabs/home']);
-        } else {
-          this.errorMessage = "Token manquant dans la réponse.";
+          if (userId) {
+            this.nexusService.saveSession(res.token, userId);
+            this.router.navigate(['/tabs/home']);
+          } else {
+            console.error("Impossible de trouver l'ID utilisateur dans le token");
+          }
         }
       },
       error: (err) => {
         this.isLoading = false;
-        console.error("Erreur API :", err);
-        this.errorMessage = "Identifiants incorrects ou serveur injoignable.";
+        console.error("Erreur détaillée :", err);
+        // Si c'est encore une 404, on affiche un message clair
+        this.errorMessage = err.status === 404
+          ? "Le serveur ne trouve pas la route /api/login"
+          : "Identifiants incorrects.";
       }
     });
   }
