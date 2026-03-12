@@ -1,27 +1,27 @@
 <ion-tabs>
-  <ion-router-outlet></ion-router-outlet>
 
   <ion-tab-bar slot="bottom" class="nexus-tab-bar">
-    <ion-tab-button tab="archive">
+    <ion-tab-button tab="timer" href="/tabs/timer">
       <ion-icon name="time-outline"></ion-icon>
     </ion-tab-button>
 
-    <ion-tab-button tab="database">
+    <ion-tab-button tab="database" href="/tabs/database">
       <ion-icon name="server-outline"></ion-icon>
     </ion-tab-button>
 
-    <ion-tab-button tab="home" class="active-home">
+    <ion-tab-button tab="home" href="/tabs/home">
       <div class="home-box">
         <ion-icon name="home"></ion-icon>
       </div>
     </ion-tab-button>
 
-    <ion-tab-button tab="calendar">
+    <ion-tab-button tab="calendar" href="/tabs/calendar">
       <ion-icon name="calendar-outline"></ion-icon>
     </ion-tab-button>
 
-    <ion-tab-button tab="profile">
+    <ion-tab-button tab="profile" href="/tabs/profile">
       <ion-icon name="person-outline"></ion-icon>
     </ion-tab-button>
   </ion-tab-bar>
+
 </ion-tabs>

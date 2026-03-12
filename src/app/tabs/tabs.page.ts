@@ -8,7 +8,7 @@ import { home, timeOutline, calendarOutline, personOutline, serverOutline } from
   templateUrl: './tabs.page.html',
   styleUrls: ['./tabs.page.scss'],
   standalone: true,
-  imports: [IonTabs, IonTabBar, IonTabButton, IonIcon, IonRouterOutlet]
+  imports: [IonTabs, IonTabBar, IonTabButton, IonIcon]
 })
 export class TabsPage {
   constructor() {

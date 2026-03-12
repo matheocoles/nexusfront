@@ -16,12 +16,7 @@ import {
   standalone: true,
   imports: [
     CommonModule,
-    IonContent,
-    IonCard,
-    IonItem,
-    IonLabel,
-    IonNote,
-    IonIcon
+    IonContent
   ]
 })
 export class HomePage  {

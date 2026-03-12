@@ -1,0 +1,347 @@
+// ─── Page ─────────────────────────────────────────────────────────────────────
+ion-content {
+  --background: #000;
+  --padding-bottom: 80px;
+}
+
+.timer-wrapper {
+  padding: 16px 16px 100px;
+  background: #000;
+  min-height: 100%;
+}
+
+// ─── Offline banner ───────────────────────────────────────────────────────────
+.offline-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #3a0a0a;
+  border: 1px solid #7f1d1d;
+  border-radius: 10px;
+  color: #f87171;
+  font-size: 13px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+
+  ion-icon { font-size: 18px; flex-shrink: 0; }
+}
+
+// ─── Titres ───────────────────────────────────────────────────────────────────
+.page-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
+  margin: 12px 0 18px;
+  letter-spacing: -0.5px;
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 10px;
+}
+
+.section-container { margin-bottom: 20px; }
+
+// ─── Cards ────────────────────────────────────────────────────────────────────
+.nexus-card {
+  --background: #1a1a1a;
+  background: #1a1a1a;
+  border-radius: 14px;
+  margin: 0 0 10px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.4);
+  border: 1px solid #242424;
+}
+
+.nexus-item {
+  --background: transparent;
+  --color: #fff;
+  --border-color: transparent;
+
+  h3 { color: #fff; font-weight: 600; font-size: 15px; }
+  p  { color: #888; font-size: 13px; margin-top: 3px; }
+}
+
+ion-note {
+  color: #c2185b;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+// ─── Session card ─────────────────────────────────────────────────────────────
+.session-type-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  margin-right: 10px;
+  flex-shrink: 0;
+
+  &.academic { background: #9b1d6e; }
+  &.sport    { background: #5b21b6; }
+  &.extra    { background: #7c3aed; }
+}
+
+// ─── Chips ────────────────────────────────────────────────────────────────────
+.activity-chips {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.chip {
+  background: #1a1a1a;
+  color: #aaa;
+  border: 1px solid #333;
+  border-radius: 20px;
+  padding: 7px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .2s;
+
+  &.active             { background: #9b1d6e; border-color: #9b1d6e; color: #fff; }
+  &:hover:not(.active) { border-color: #9b1d6e; color: #fff; }
+}
+
+// ─── Select ───────────────────────────────────────────────────────────────────
+.nexus-select {
+  color: #fff;
+  width: 100%;
+  --placeholder-color: #555;
+}
+
+// ─── Formulaire création activité ─────────────────────────────────────────────
+.create-form {
+  border-top: 1px solid #242424;
+  padding-top: 8px;
+}
+
+.form-group-label {
+  color: #555;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  padding: 12px 16px 4px;
+  font-weight: 600;
+}
+
+// ─── Timer ────────────────────────────────────────────────────────────────────
+.timer-card { padding: 20px 12px; }
+
+.timer-display {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0;
+}
+
+.timer-digits {
+  font-size: 54px;
+  font-weight: 700;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 2px;
+  font-family: 'Courier New', monospace;
+}
+
+.timer-controls {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  padding: 8px 0 4px;
+}
+
+.ctrl-btn {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform .15s, opacity .15s;
+
+  ion-icon { font-size: 22px; }
+  &:active { transform: scale(.92); opacity: .85; }
+
+  &.start, &.resume { background: #9b1d6e; color: #fff; }
+  &.pause           { background: #5b21b6; color: #fff; }
+  &.stop            { background: #7f1d1d; color: #fff; }
+}
+
+// ─── Manual time entry ────────────────────────────────────────────────────────
+.enter-time-label {
+  color: #666;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  padding: 12px 16px 0;
+}
+
+.duration-preview {
+  color: #9b1d6e;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 16px 8px;
+  letter-spacing: .3px;
+}
+
+.time-entry-grid {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 10px 16px 8px;
+}
+
+.time-entry-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+
+.entry-label {
+  font-size: 11px;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+
+.time-input {
+  background: #111;
+  color: #fff;
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 28px;
+  font-weight: 700;
+  width: 100%;
+  text-align: center;
+  font-family: 'Courier New', monospace;
+
+  &:focus        { outline: none; border-color: #9b1d6e; }
+  &::placeholder { color: #3a3a3a; }
+}
+
+.time-separator {
+  font-size: 32px;
+  color: #fff;
+  font-weight: 700;
+  padding-bottom: 8px;
+}
+
+.nexus-input {
+  --color: #fff;
+  --placeholder-color: #444;
+  --background: transparent;
+}
+
+.entry-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px 12px;
+}
+
+.spacer { flex: 1; }
+
+.clock-icon { font-size: 22px; color: #555; }
+
+.action-btn {
+  padding: 8px 22px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  min-width: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .15s;
+
+  &:disabled { opacity: .5; pointer-events: none; }
+
+  &.cancel {
+    background: transparent;
+    color: #888;
+    border: 1px solid #333;
+    &:hover { border-color: #666; color: #ccc; }
+  }
+
+  &.confirm {
+    background: #9b1d6e;
+    color: #fff;
+    &:hover  { background: #be185d; }
+    &:active { transform: scale(.95); }
+  }
+
+  &.create-activity-btn {
+    background: transparent;
+    color: #9b1d6e;
+    border: 1px solid #9b1d6e;
+    display: flex;
+    align-items: center;
+
+    &:hover { background: rgba(155,29,110,.12); }
+  }
+}
+
+// ─── Recurrence ───────────────────────────────────────────────────────────────
+.nexus-toggle {
+  --track-background: #333;
+  --track-background-checked: #9b1d6e;
+  --handle-background: #fff;
+}
+
+.day-selector {
+  display: flex;
+  justify-content: space-around;
+  padding: 8px 16px;
+}
+
+.day-btn {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: #111;
+  color: #666;
+  border: 1px solid #333;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .15s;
+
+  &.active { background: #9b1d6e; border-color: #9b1d6e; color: #fff; }
+}
+
+// ─── Chart ────────────────────────────────────────────────────────────────────
+.chart-section canvas {
+  border-radius: 12px;
+  background: #0e0e0e;
+  padding: 12px;
+  width: 100% !important;
+  max-height: 210px;
+}
+
+// ─── Empty state ──────────────────────────────────────────────────────────────
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  color: #3a3a3a;
+
+  ion-icon { font-size: 40px; margin-bottom: 10px; }
+  p        { font-size: 14px; }
+}
+
+// ─── Datetime ─────────────────────────────────────────────────────────────────
+ion-datetime {
+  --background: #1a1a1a;
+  --background-rgb: 26, 26, 26;
+  color: #fff;
+}
