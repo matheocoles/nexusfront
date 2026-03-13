@@ -13,7 +13,7 @@
       </div>
 
       <ion-card-content>
-        <div class="user-greeting">Bonjour {{ userData.username }}</div>
+        <div class="user-greeting">Bonjour {{ userData.fullName }}</div>
 
         <div class="section-header">Temps d'utilisation</div>
         <div class="time-row">
@@ -50,7 +50,7 @@
 
         <div class="edit-info-box">
           <p>username :
-            <ion-input [(ngModel)]="userData.username" [readonly]="!isEditing" class="custom-input"></ion-input>
+            <ion-input [(ngModel)]="userData.fullName" [readonly]="!isEditing" class="custom-input"></ion-input>
           </p>
           <p>password :
             <ion-input type="password" [(ngModel)]="newPassword" [placeholder]="isEditing ? 'Nouveau password' : '********'" [readonly]="!isEditing" class="custom-input"></ion-input>

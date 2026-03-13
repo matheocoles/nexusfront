@@ -1,13 +1,17 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonContent, IonIcon, IonSpinner, ToastController, AlertController } from '@ionic/angular/standalone';
+import { FormsModule } from '@angular/forms';
+import {
+  IonContent, IonIcon, IonSpinner, ToastController,
+  IonModal, IonInput, IonButton
+} from '@ionic/angular/standalone';
 import { NexusService } from '../services/nexus.service';
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import {
   addOutline, searchOutline, menuOutline,
   chevronBackOutline, chevronForwardOutline, arrowDownOutline,
-  playOutline
+  playOutline, bookOutline, fitnessOutline, rocketOutline
 } from 'ionicons/icons';
 
 @Component({
@@ -15,18 +19,29 @@ import {
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
   standalone: true,
-  imports: [CommonModule, IonContent, IonIcon, IonSpinner]
+  imports: [
+    CommonModule, FormsModule, IonContent, IonIcon, IonSpinner,
+    IonModal,
+  ]
 })
 export class HomePage implements OnInit {
   private nexusService = inject(NexusService);
   private toastController = inject(ToastController);
-  private alertController = inject(AlertController);
   private router = inject(Router);
 
   courses: any[] = [];
   isLoading: boolean = true;
-  // Dégradé Bordeaux -> Mauve (selon tes images)
   private colorPalette = ['#2a0a14', '#5e102e', '#3f255e', '#5e4c85', '#7a6a9e'];
+
+  isModalOpen = false;
+  newSessionTitle = '';
+  selectedType = 'class';
+
+  modalIcons = {
+    book: bookOutline,
+    fitness: fitnessOutline,
+    rocket: rocketOutline
+  };
 
   constructor() {
     addIcons({
@@ -42,60 +57,120 @@ export class HomePage implements OnInit {
   loadSchedule() {
     this.isLoading = true;
     this.nexusService.getSchedule().subscribe({
-      next: (data) => {
-        this.courses = data.map((item, index) => ({
-          ...item,
-          // Extraction dynamique du nom selon la table liée
-          name: item.class?.name || item.sport?.name || item.extraActivity?.name || 'Activité libre',
-          room: item.class?.room || (item.sport ? 'Gymnase' : 'Nexus Zone'),
-          displayColor: this.colorPalette[index % this.colorPalette.length]
-        }));
+      next: (data: any[]) => {
+        if (data && data.length > 0) {
+          console.log("CLÉS DÉTECTÉES :", Object.keys(data[0]));
+          console.log("PREMIER OBJET COMPLET :", data[0]);
+        }
+
+        this.courses = data.map((item, index) => {
+          const name = item.activityName || item.status || `Session #${item.id}`;
+
+          const rawStart = item.dateTimeStart;
+          const rawEnd = item.dateTimeEnd;
+
+          let start = '--:--';
+          if (rawStart) {
+            start = rawStart.includes('T') ? rawStart.split('T')[1].substring(0, 5) : '08:00';
+          }
+
+          return {
+            ...item,
+            name: name,
+            room: item.room || 'Nexus Zone',
+            startTime: start,
+            endTime: '--:--',
+            duration: '01:00',
+            displayColor: this.colorPalette[index % this.colorPalette.length]
+          };
+        });
+
+        console.log("COURS AFFICHÉS (MAPPED) :", this.courses);
         this.isLoading = false;
       },
       error: (err) => {
-        console.error("Erreur API Activity:", err);
+        console.error("ERREUR API :", err);
         this.isLoading = false;
       }
     });
   }
 
-  // Action pour le bouton "+" (Ajout manuel)
-  async addNewSession() {
-    const alert = await this.alertController.create({
-      header: 'Nouvelle activité',
-      cssClass: 'nexus-alert',
-      inputs: [{ name: 'title', type: 'text', placeholder: 'Nom de l\'activité (ex: Révision)' }],
-      buttons: [
-        { text: 'Annuler', role: 'cancel' },
-        {
-          text: 'Démarrer',
-          handler: (data) => this.startSession({ status: data.title || 'Session Libre' })
-        }
-      ]
-    });
-    await alert.present();
+  calculateDuration(start: string, end: string): string {
+    try {
+      if (!start || !end) return '01:00';
+      const s = new Date(start);
+      const e = new Date(end);
+      if (isNaN(s.getTime()) || isNaN(e.getTime())) return '01:00';
+
+      const diffMs = e.getTime() - s.getTime();
+      const diffHrs = Math.floor(diffMs / 3600000);
+      const diffMins = Math.floor((diffMs % 3600000) / 60000);
+      return `${diffHrs.toString().padStart(2, '0')}:${diffMins.toString().padStart(2, '0')}`;
+    } catch {
+      return '01:00';
+    }
   }
 
-  // Clic sur un cours de la liste
-  async startSession(item: any) {
-    const sessionPayload = {
-      dateTimeStart: new Date().toISOString(),
-      status: item.status || 'In Progress',
-      classId: item.classId || null,
-      sportId: item.sportId || null,
-      extraActivityId: item.extraActivityId || null,
-      achievementIds: []
+  // --- LOGIQUE MODAL & SESSIONS ---
+  addNewSession() {
+    this.newSessionTitle = '';
+    this.isModalOpen = true;
+  }
+
+  confirmAddSession() {
+    if (!this.newSessionTitle.trim()) {
+      this.showToast("Donnez un nom à l'activité");
+      return;
+    }
+    this.isModalOpen = false;
+    this.startManualSession(this.newSessionTitle, this.selectedType);
+  }
+
+  async startManualSession(title: string, type: string) {
+    const userId = this.nexusService.getUserId();
+    const today = new Date().toISOString().split('T')[0];
+
+    const sessionPayload: any = {
+      "DateTimeStart": today,
+      "DateTimeEnd": null,
+      "Status": title,
+      "LoginId": userId ? parseInt(userId, 10) : 0,
+      "AchievementIds": []
     };
 
     this.nexusService.createSession(sessionPayload).subscribe({
       next: (res) => {
-        this.showToast(res.activityName || 'Session démarrée');
-        // Redirection vers la page Timer après un court délai
-        setTimeout(() => {
-          this.router.navigate(['/timer'], { state: { session: res } });
-        }, 1200);
+        this.showToast(`Session "${title}" démarrée`);
+        this.router.navigate(['/tabs/timer'], { state: { session: res } });
       },
-      error: (err) => console.error("Erreur POST /sessions (405?):", err)
+      error: () => this.showToast("Erreur lors de la création")
+    });
+  }
+
+  async startSession(item: any) {
+    const userId = this.nexusService.getUserId();
+    const today = new Date().toISOString().split('T')[0];
+
+    // On utilise les nouveaux champs du DTO pour identifier le type d'activité
+    const sessionPayload: any = {
+      "DateTimeStart": today,
+      "DateTimeEnd": null,
+      "Status": "En cours",
+      "LoginId": userId ? parseInt(userId, 10) : 0,
+      "AchievementIds": []
+    };
+
+    // Mapping selon le type renvoyé par le Backend
+    if (item.typeLabel === "Cours") sessionPayload["ClassId"] = item.id;
+    else if (item.typeLabel === "Sport") sessionPayload["SportId"] = item.id;
+    else if (item.typeLabel === "Extra") sessionPayload["ExtraActivityId"] = item.id;
+
+    this.nexusService.createSession(sessionPayload).subscribe({
+      next: (res) => {
+        this.showToast(res.activityName || 'Session démarrée');
+        this.router.navigate(['/tabs/timer'], { state: { session: res } });
+      },
+      error: () => this.showToast("Erreur serveur")
     });
   }
 

@@ -67,4 +67,13 @@
     font-size: 0.85rem;
     margin-top: 10px;
   }
+
+  .error-text {
+    color: #ff4081; /* Rose néon */
+    font-size: 0.85rem;
+    text-align: center;
+    margin-top: 15px;
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(255, 64, 129, 0.4);
+  }
 }

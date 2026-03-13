@@ -1,46 +1,88 @@
+/* --- STRUCTURE GLOBALE --- */
 .main-container {
   background: #0d0d0d;
-  min-height: 100%;
+  min-height: 100vh;
   padding: 20px;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Header NEXUS */
+/* --- HEADER NEXUS (LOGO + TITRE) --- */
 .brand-header {
   text-align: center;
   margin-bottom: 30px;
+
   .logo-container .vortex-logo {
-    width: 80px; // Un peu plus petit pour laisser de la place
+    width: 80px;
     animation: rotateVortex 20s linear infinite;
     filter: drop-shadow(0 0 10px #c2185b);
   }
+
   .brand-title {
-    color: white; font-size: 1.8rem; letter-spacing: 10px; margin: 0;
+    color: white;
+    font-size: 1.8rem;
+    letter-spacing: 10px;
+    margin: 10px 0 0 0;
+    font-weight: 300;
   }
 }
 
-/* Emploi du temps */
+/* --- SECTION EMPLOI DU TEMPS --- */
 .schedule-section {
   .schedule-header {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 20px;
-    h2 { color: white; font-size: 1.5rem; font-weight: bold; margin: 0; }
-    .add-btn { color: #c2185b; font-size: 2rem; }
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding: 0 5px;
+
+    h2 {
+      font-size: 1.6rem;
+      font-weight: bold;
+      margin: 0;
+      color: white;
+      letter-spacing: 1px;
+    }
+
+    .add-btn {
+      color: #ffffff;
+      background: linear-gradient(135deg, #c2185b, #632c4a);
+      border-radius: 50%;
+      padding: 8px;
+      font-size: 2.2rem;
+      box-shadow: 0 0 15px rgba(194, 24, 91, 0.4);
+      transition: all 0.3s ease;
+      cursor: pointer;
+
+      &:hover {
+        transform: rotate(90deg) scale(1.1);
+      }
+      &:active { transform: scale(0.9); }
+    }
   }
 
   .search-bar {
     background: #1a1a1a;
     border-radius: 12px;
     padding: 10px 15px;
-    display: flex; align-items: center;
+    display: flex;
+    align-items: center;
     margin-bottom: 25px;
+    border: 1px solid #222;
+
     ion-icon { color: #888; font-size: 1.2rem; }
     input {
-      background: transparent; border: none; color: white;
-      flex: 1; margin: 0 10px; outline: none;
+      background: transparent;
+      border: none;
+      color: white;
+      flex: 1;
+      margin: 0 10px;
+      outline: none;
     }
   }
 }
 
+/* --- LISTE DES COURS (CARTES DÉGRADÉES) --- */
 .schedule-container {
   background: #161616;
   border-radius: 24px;
@@ -48,28 +90,43 @@
   overflow: hidden;
 
   .date-selector {
-    display: flex; justify-content: center; align-items: center;
-    gap: 30px; color: white; margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    color: white;
+    margin-bottom: 20px;
     span { font-weight: bold; font-size: 1.1rem; }
+    ion-icon { color: #c2185b; font-size: 1.2rem; }
   }
 
   .course-item {
-    display: flex; align-items: center;
-    padding: 15px;
-    margin-bottom: 2px; // Sépare légèrement les blocs
+    display: flex;
+    align-items: center;
+    padding: 18px 15px;
+    margin-bottom: 2px;
     color: white;
+    transition: all 0.2s ease;
+    cursor: pointer;
 
-    .course-number { font-weight: bold; margin-right: 15px; font-size: 1.1rem; }
+    &:active { transform: scale(0.98); filter: brightness(1.2); }
+
+    .course-number { font-weight: bold; margin-right: 15px; font-size: 1.1rem; opacity: 0.6; }
+
     .course-time {
-      display: flex; flex-direction: column; font-size: 0.7rem;
-      margin-right: 20px; opacity: 0.8;
+      display: flex;
+      flex-direction: column;
+      font-size: 0.75rem;
+      margin-right: 20px;
+      opacity: 0.8;
     }
+
     .course-info {
       flex: 1;
-      display: flex; flex-direction: column;
-      .course-name { font-weight: bold; font-size: 1rem; }
-      .course-room { font-size: 0.75rem; opacity: 0.7; }
+      .course-name { font-weight: bold; font-size: 1rem; display: block; }
+      .course-room { font-size: 0.75rem; opacity: 0.6; }
     }
+
     .course-duration-badge {
       background: rgba(255, 255, 255, 0.9);
       color: black;
@@ -79,59 +136,123 @@
       font-weight: bold;
     }
   }
+}
 
-  .scroll-indicator {
-    text-align: center; color: white; margin-top: 15px; opacity: 0.5;
+/* --- LE MODAL DE CRÉATION (LE ADD) --- */
+.nexus-modal {
+  --background: #0d0d0d;
+  --height: 480px;
+  --border-radius: 30px 30px 0 0;
+  --box-shadow: 0 -10px 40px rgba(194, 24, 91, 0.4);
+
+  &::part(content) {
+    position: absolute;
+    bottom: 0;
+    border-top: 1px solid rgba(194, 24, 91, 0.3);
+  }
+
+  .modal-wrapper {
+    background: #0d0d0d;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .modal-header {
+    background: linear-gradient(to bottom, #2a0a14, #0d0d0d);
+    padding: 30px 20px;
+    text-align: center;
+    h3 {
+      color: white;
+      margin: 0;
+      letter-spacing: 6px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+  }
+
+  .modal-body {
+    padding: 20px 25px;
+    background: #0d0d0d;
+
+    .input-group {
+      margin-bottom: 25px;
+      label { color: #888; font-size: 0.7rem; letter-spacing: 2px; margin-bottom: 10px; display: block; }
+      input {
+        width: 100%;
+        background: #1a1a1a;
+        border: 1px solid #333;
+        padding: 15px;
+        border-radius: 12px;
+        color: white;
+        font-size: 1rem;
+        outline: none;
+        &:focus { border-color: #c2185b; }
+      }
+    }
+
+    .section-label { color: #888; font-size: 0.7rem; letter-spacing: 2px; margin-bottom: 10px; display: block; }
+
+    .radio-group {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 35px;
+
+      .radio-item {
+        flex: 1;
+        background: #161616;
+        padding: 15px 10px;
+        border-radius: 18px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        color: #555;
+        border: 1px solid transparent;
+        transition: all 0.3s ease;
+
+        ion-icon { font-size: 1.8rem; }
+        span { font-size: 0.7rem; font-weight: bold; }
+
+        &.active {
+          background: rgba(194, 24, 91, 0.15);
+          border-color: #c2185b;
+          color: white;
+          ion-icon { color: #c2185b; }
+        }
+      }
+    }
+
+    .modal-footer {
+      display: flex;
+      gap: 15px;
+      margin-top: auto;
+      padding-bottom: 20px;
+
+      button {
+        flex: 1;
+        padding: 18px;
+        border-radius: 15px;
+        font-weight: bold;
+        letter-spacing: 2px;
+        border: none;
+        cursor: pointer;
+      }
+      .btn-cancel { background: #1a1a1a; color: #888; }
+      .btn-confirm {
+        background: linear-gradient(135deg, #c2185b, #632c4a);
+        color: white;
+        box-shadow: 0 4px 15px rgba(194, 24, 91, 0.4);
+      }
+    }
   }
 }
 
-@keyframes rotateVortex { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-.course-item {
-  transition: transform 0.1s ease, filter 0.2s ease;
-  cursor: pointer;
-
-  &:active {
-    transform: scale(0.96);
-    filter: brightness(1.2);
-  }
-}
-
-/* Dans ton fichier .scss */
-.add-btn {
-  color: #ffffff;
-  background: linear-gradient(135deg, #c2185b, #632c4a);
-  border-radius: 50%;
-  padding: 8px;
-  font-size: 2.2rem;
-  box-shadow: 0 0 15px rgba(194, 24, 91, 0.4);
-  transition: all 0.3s ease;
-
-  &:hover {
-    transform: rotate(90deg) scale(1.1);
-    box-shadow: 0 0 25px rgba(194, 24, 91, 0.7);
-  }
-
-  &:active {
-    transform: scale(0.9);
-  }
-}
-
-/* On centre mieux le header de l'emploi du temps */
-.schedule-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 25px;
-  padding: 0 5px;
-
-  h2 {
-    font-size: 1.6rem;
-    letter-spacing: 1px;
-    background: linear-gradient(to right, #fff, #888);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
+/* --- ANIMATIONS & DÉTAILS --- */
+@keyframes rotateVortex {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 ::ng-deep .nexus-toast {

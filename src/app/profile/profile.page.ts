@@ -14,6 +14,7 @@ import { addIcons } from 'ionicons';
 import {
   personCircleOutline, shieldCheckmarkOutline, logOutOutline, fingerPrintOutline
 } from 'ionicons/icons';
+import {jwtDecode} from "jwt-decode";
 
 @Component({
   selector: 'app-profile',
@@ -90,10 +91,28 @@ export class ProfilePage implements OnInit, OnDestroy {
 
   loadProfileData() {
     const id = this.nexusService.getUserId();
+
+    const token = localStorage.getItem('nexus_token');
+    if (token) {
+      try {
+        const decoded: any = jwtDecode(token);
+        this.userData = {
+          username: decoded.Username,
+          fullName: decoded.FullName,
+          id: decoded.UserId
+        };
+      } catch(e) {}
+    }
+
     if (id) {
       this.nexusService.getUserProfile(id).subscribe({
-        next: (data: any) => { this.userData = data; },
-        error: (err: any) => console.error("Erreur profil :", err)
+        next: (data) => {
+          this.userData = data;
+          console.log("Profil chargé depuis l'API !");
+        },
+        error: (err) => {
+          console.error("L'API rejette encore l'ID. On garde les infos du token.", err);
+        }
       });
     }
   }
@@ -113,15 +132,17 @@ export class ProfilePage implements OnInit, OnDestroy {
         password: this.newPassword || ""
       };
 
-      this.http.put(`https://nexusapi.up.railway.app/api/logins`, updateData)
-        .subscribe({
-          next: (res: any) => {
-            this.isEditing = false;
-            this.newPassword = "";
-            this.loadProfileData();
-          },
-          error: (err: any) => console.error("Erreur update", err)
-        });
+      this.http.put(`https://nexusapi.up.railway.app/api/logins`, updateData, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('nexus_token')}` }
+      }).subscribe({
+        next: (res: any) => {
+          this.isEditing = false;
+          this.newPassword = "";
+          this.loadProfileData();
+          console.log("Changements enregistrés !");
+        },
+        error: (err: any) => console.error("Erreur update", err)
+      });
     }
   }
 

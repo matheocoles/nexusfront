@@ -32,7 +32,7 @@
           <ion-icon name="chevron-forward-outline"></ion-icon>
         </div>
 
-        <div class="course-list">
+        <div class="course-list" *ngIf="!isLoading">
           <div class="course-item"
                *ngFor="let c of courses; let i = index"
                [style.background]="c.displayColor"
@@ -41,26 +41,54 @@
             <div class="course-number">{{ i + 1 }}</div>
 
             <div class="course-time">
-              <span>{{ c.startTime || '08:00' }}</span>
-              <span>{{ c.endTime || '09:00' }}</span>
+              <span>{{ c.startTime }}</span>
+              <span>{{ c.endTime }}</span>
             </div>
 
             <div class="course-info">
               <span class="course-name">{{ c.name }}</span>
-              <span class="course-room">{{ c.room || 'Salle N/A' }}</span>
+              <span class="course-room">{{ c.room }}</span>
             </div>
 
             <div class="course-duration-badge">
-              {{ c.duration || '00:00' }}
+              {{ c.duration }}
             </div>
           </div>
         </div>
-
-        <div class="scroll-indicator" *ngIf="courses.length > 4">
-          <ion-icon name="arrow-down-outline"></ion-icon>
-        </div>
       </div>
     </section>
-
   </div>
+
+  <ion-modal [isOpen]="isModalOpen" (didDismiss)="isModalOpen = false" class="nexus-modal">
+    <ng-template>
+      <header class="modal-header">
+        <h3>NOUVELLE ACTIVITÉ</h3>
+      </header>
+
+      <div class="modal-body">
+        <div class="input-group">
+          <label>NOM DE LA SESSION</label>
+          <input type="text" [(ngModel)]="newSessionTitle" placeholder="Ex: Musculation, Révision...">
+        </div>
+
+        <label class="section-label">CATÉGORIE</label>
+        <div class="radio-group">
+          <div class="radio-item" [class.active]="selectedType === 'class'" (click)="selectedType = 'class'">
+            <ion-icon [icon]="modalIcons.book"></ion-icon> <span>Études</span>
+          </div>
+          <div class="radio-item" [class.active]="selectedType === 'sport'" (click)="selectedType = 'sport'">
+            <ion-icon [icon]="modalIcons.fitness"></ion-icon> <span>Sport</span>
+          </div>
+          <div class="radio-item" [class.active]="selectedType === 'extra'" (click)="selectedType = 'extra'">
+            <ion-icon [icon]="modalIcons.rocket"></ion-icon> <span>Autre</span>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn-cancel" (click)="isModalOpen = false">ANNULER</button>
+          <button class="btn-confirm" (click)="confirmAddSession()">DÉMARRER</button>
+        </div>
+      </div>
+    </ng-template>
+  </ion-modal>
 </ion-content>
