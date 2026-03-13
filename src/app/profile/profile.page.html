@@ -1,17 +1,17 @@
 <ion-content class="profile-container">
-  <div *ngIf="!userData" class="loading-state" style="text-align: center; margin-top: 50px;">
+  <div *ngIf="!userData" class="loading-state">
     <ion-spinner name="crescent" color="primary"></ion-spinner>
-    <p style="color: white;">Chargement du profil...</p>
+    <p>Initialisation Nexus...</p>
   </div>
 
   <div *ngIf="userData" class="profile-wrapper">
-    <div class="header-background"></div>
-
-    <ion-card class="profile-card">
+    <div class="header-background">
       <div class="avatar-container">
         <ion-icon name="person-circle-outline" class="user-avatar"></ion-icon>
       </div>
+    </div>
 
+    <ion-card class="profile-card">
       <ion-card-content>
         <div class="user-greeting">Bonjour {{ userData.fullName }}</div>
 
@@ -53,7 +53,9 @@
             <ion-input [(ngModel)]="userData.fullName" [readonly]="!isEditing" class="custom-input"></ion-input>
           </p>
           <p>password :
-            <ion-input type="password" [(ngModel)]="newPassword" [placeholder]="isEditing ? 'Nouveau password' : '********'" [readonly]="!isEditing" class="custom-input"></ion-input>
+            <ion-input type="password" [(ngModel)]="newPassword"
+                       [placeholder]="isEditing ? 'Nouveau password' : '********'"
+                       [readonly]="!isEditing" class="custom-input"></ion-input>
           </p>
 
           <ion-button *ngIf="isEditing" expand="block" color="success" (click)="saveChanges()" style="margin-top: 10px;">

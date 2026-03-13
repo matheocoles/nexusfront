@@ -4,9 +4,8 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import {
-  IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle,
-  IonCardTitle, IonContent, IonIcon, IonItem, IonLabel, IonList,
-  IonSpinner, AlertController, IonInput, IonProgressBar // Ajout de IonProgressBar
+  IonButton, IonCard, IonCardContent, IonContent, IonIcon,
+  IonSpinner, AlertController, IonInput, IonProgressBar, LoadingController
 } from '@ionic/angular/standalone';
 
 import { NexusService } from "../services/nexus.service";
@@ -14,7 +13,7 @@ import { addIcons } from 'ionicons';
 import {
   personCircleOutline, shieldCheckmarkOutline, logOutOutline, fingerPrintOutline
 } from 'ionicons/icons';
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 @Component({
   selector: 'app-profile',
@@ -31,9 +30,10 @@ export class ProfilePage implements OnInit, OnDestroy {
   private nexusService = inject(NexusService);
   private router = inject(Router);
   private alertController = inject(AlertController);
+  private loadingController = inject(LoadingController);
   private http = inject(HttpClient);
 
-  userData: any;
+  userData: any = null;
   isEditing: boolean = false;
   newPassword: string = "";
 
@@ -73,14 +73,10 @@ export class ProfilePage implements OnInit, OnDestroy {
   updateTimerDisplay(startTime: number) {
     const now = new Date().getTime();
     const diffInSeconds = Math.floor((now - startTime) / 1000);
-
     this.days = Math.floor(diffInSeconds / 86400);
     this.minutes = Math.floor((diffInSeconds % 3600) / 60);
     this.seconds = diffInSeconds % 60;
-
-    // Progression sur un cycle de 24h (86400 secondes)
-    const secondsToday = diffInSeconds % 86400;
-    this.progress = secondsToday / 86400;
+    this.progress = (diffInSeconds % 86400) / 86400;
   }
 
   getTrophyTitle(): string {
@@ -90,30 +86,37 @@ export class ProfilePage implements OnInit, OnDestroy {
   }
 
   loadProfileData() {
-    const id = this.nexusService.getUserId();
-
     const token = localStorage.getItem('nexus_token');
-    if (token) {
-      try {
-        const decoded: any = jwtDecode(token);
-        this.userData = {
-          username: decoded.Username,
-          fullName: decoded.FullName,
-          id: decoded.UserId
-        };
-      } catch(e) {}
-    }
+    if (!token) return;
 
-    if (id) {
-      this.nexusService.getUserProfile(id).subscribe({
+    try {
+      const decoded: any = jwtDecode(token);
+      // On initialise avec les données du token (PascalCase souvent présent dans le JWT)
+      this.userData = {
+        username: decoded.Username || '',
+        fullName: decoded.FullName || '',
+        id: decoded.UserId // "004"
+      };
+
+      // Conversion de "004" -> 4 pour l'API
+      const cleanId = parseInt(decoded.UserId, 10);
+
+      this.nexusService.getUserProfile(cleanId.toString()).subscribe({
         next: (data) => {
-          this.userData = data;
-          console.log("Profil chargé depuis l'API !");
+          // On fusionne les données de l'API (qui peuvent être en camelCase ou PascalCase)
+          this.userData = {
+            id: data.id || data.Id || this.userData.id,
+            username: data.username || data.Username || this.userData.username,
+            fullName: data.fullName || data.FullName || this.userData.fullName
+          };
+          console.log("Profil synchronisé !");
         },
         error: (err) => {
-          console.error("L'API rejette encore l'ID. On garde les infos du token.", err);
+          console.error("Erreur API (ID " + cleanId + "), on garde le token.", err);
         }
       });
+    } catch (e) {
+      console.error("Erreur Token", e);
     }
   }
 
@@ -123,27 +126,32 @@ export class ProfilePage implements OnInit, OnDestroy {
   }
 
   async saveChanges() {
-    const id = this.nexusService.getUserId();
-    if (id && this.userData) {
-      const updateData = {
-        id: parseInt(id),
-        username: this.userData.username,
-        fullName: this.userData.fullName,
-        password: this.newPassword || ""
-      };
+    if (!this.userData) return;
 
-      this.http.put(`https://nexusapi.up.railway.app/api/logins`, updateData, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('nexus_token')}` }
-      }).subscribe({
-        next: (res: any) => {
-          this.isEditing = false;
-          this.newPassword = "";
-          this.loadProfileData();
-          console.log("Changements enregistrés !");
-        },
-        error: (err: any) => console.error("Erreur update", err)
-      });
-    }
+    const loading = await this.loadingController.create({ message: 'Enregistrement...' });
+    await loading.present();
+
+    const updateData = {
+      Id: parseInt(this.userData.id, 10),
+      Username: this.userData.username,
+      FullName: this.userData.fullName,
+      Password: this.newPassword || null
+    };
+
+    this.http.put(`https://nexusapi.up.railway.app/api/logins`, updateData, {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('nexus_token')}` }
+    }).subscribe({
+      next: () => {
+        loading.dismiss();
+        this.isEditing = false;
+        this.newPassword = "";
+        this.loadProfileData();
+      },
+      error: (err) => {
+        loading.dismiss();
+        console.error("Erreur update", err);
+      }
+    });
   }
 
   async handleLogout() {

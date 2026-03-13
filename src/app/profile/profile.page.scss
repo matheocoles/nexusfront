@@ -1,49 +1,48 @@
 .profile-container {
   --background: #0d0d0d;
 
-  .profile-wrapper {
-    padding: 16px;
-    padding-top: 0;
+  .loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: white;
   }
 
   .header-background {
     background: linear-gradient(135deg, #632c4a 0%, #3e1f5e 100%);
-    height: 140px;
+    height: 160px;
     margin: 0 -16px;
-    border-radius: 0 0 30px 30px;
+    border-radius: 0 0 40px 40px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    padding-bottom: 20px;
+
+    .avatar-container {
+      margin-bottom: -50px;
+      z-index: 10;
+      .user-avatar {
+        font-size: 110px;
+        background: #1a1a1a;
+        color: white;
+        border: 5px solid #1a1a1a;
+        border-radius: 50%;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+      }
+    }
   }
 
   .profile-card {
     background: #1a1a1a;
-    margin-top: -60px;
-    border-radius: 20px;
+    margin: 40px 0 20px 0;
+    border-radius: 25px;
     border: 1px solid #333;
-    overflow: visible !important;
-    contain: none !important;
-    --overflow: visible;
-
-    .avatar-container {
-      position: absolute;
-      top: -50px;
-      left: 0;
-      right: 0;
-      display: flex;
-      justify-content: center;
-      z-index: 100;
-
-      .user-avatar {
-        font-size: 100px; /* Taille fixe pour éviter qu'il soit énorme */
-        width: 100px;
-        height: 100px;
-        background: #1a1a1a;
-        color: white;
-        border: 4px solid #632c4a;
-        border-radius: 50%;
-      }
-    }
+    box-shadow: none;
 
     ion-card-content {
-      padding-top: 60px; // Laisse de la place pour l'avatar
+      padding: 50px 20px 20px;
     }
 
     .user-greeting {
@@ -51,105 +50,97 @@
       font-size: 1.4rem;
       font-weight: bold;
       color: white;
-      margin-bottom: 20px;
+      margin-bottom: 30px;
     }
 
     .section-header {
-      font-size: 0.9rem;
-      color: white;
-      font-weight: bold;
-      border-bottom: 1px solid #333;
-      padding-bottom: 5px;
+      font-size: 0.8rem;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-bottom: 1px solid #262626;
+      padding-bottom: 8px;
       margin-bottom: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
-    /* Temps d'utilisation style */
     .time-row {
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       margin-bottom: 25px;
-
-      .dots { color: white; font-weight: bold; font-size: 1.5rem; }
-
+      .dots { color: #632c4a; font-weight: bold; font-size: 1.5rem; }
       .time-box {
         display: flex;
         flex-direction: column;
         align-items: center;
-        padding: 10px;
-        border-radius: 12px;
-        min-width: 70px;
-
-        .time-val { font-size: 1.5rem; font-weight: bold; color: white; }
-        .time-lab { font-size: 0.6rem; text-transform: uppercase; color: #ddd; }
-
-        &.box-dark { background: #5a122d; }
-        &.box-medium { background: #8e2148; }
-        &.box-light { background: #b87a8e; }
+        padding: 12px;
+        border-radius: 15px;
+        min-width: 65px;
+        .time-val { font-size: 1.4rem; font-weight: bold; color: white; }
+        .time-lab { font-size: 0.55rem; text-transform: uppercase; color: rgba(255,255,255,0.5); }
+        &.box-dark { background: #4a1028; }
+        &.box-medium { background: #632c4a; }
+        &.box-light { background: #8e2148; }
       }
     }
 
-    /* Edition style */
     .edit-info-box {
       background: #262626;
-      border-radius: 10px;
-      padding: 15px;
+      border-radius: 15px;
+      padding: 10px 15px;
       margin-bottom: 20px;
-      p {
-        margin: 5px 0; color: #888; font-size: 0.9rem;
-        span { color: white; }
+      .custom-input {
+        --color: white;
+        --padding-start: 0;
+        font-size: 0.95rem;
+        margin-top: -5px;
+      }
+      p { margin: 10px 0; color: #666; font-size: 0.8rem; }
+    }
+
+    .progress-container {
+      margin-bottom: 25px;
+      .progress-info {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.7rem;
+        color: #8e2148;
+        font-weight: bold;
+        margin-bottom: 8px;
+      }
+      .nexus-progress {
+        height: 8px;
+        border-radius: 10px;
+        --background: #262626;
+        --progress-background: #8e2148;
       }
     }
 
-    /* Trophée style */
     .trophy-card {
       display: flex;
       align-items: center;
-      background: #262626;
-      border-radius: 12px;
-      padding: 12px;
+      background: linear-gradient(to right, #262626, #1a1a1a);
+      border-radius: 15px;
+      padding: 15px;
       margin-bottom: 25px;
-      .trophy-icon { font-size: 1.8rem; margin-right: 15px; }
+      border: 1px solid #333;
+      .trophy-icon { font-size: 2rem; margin-right: 15px; }
       .trophy-text {
-        strong { color: white; font-size: 0.9rem; }
-        p { margin: 2px 0 0; font-size: 0.75rem; color: #777; line-height: 1.2; }
+        strong { color: white; font-size: 0.95rem; }
+        p { margin: 4px 0 0; font-size: 0.75rem; color: #666; }
       }
     }
 
     .logout-btn {
       --background: #f0505c;
-      --border-radius: 12px;
+      --border-radius: 15px;
       font-weight: bold;
-      height: 48px;
+      height: 52px;
+      margin-top: 10px;
     }
   }
-}
-
-
-.progress-container {
-  margin-bottom: 30px;
-  padding: 0 5px;
-
-  .progress-info {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.7rem;
-    color: #b87a8e;
-    text-transform: uppercase;
-    font-weight: bold;
-    margin-bottom: 6px;
-  }
-
-  .nexus-progress {
-    height: 8px;
-    border-radius: 10px;
-    --background: #262626;
-    --progress-background: linear-gradient(90deg, #632c4a 0%, #f0505c 100%);
-    box-shadow: 0 0 10px rgba(240, 80, 92, 0.2);
-  }
-}
-
-.time-box {
-  min-width: 65px !important;
 }
