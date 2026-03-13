@@ -1,28 +1,35 @@
+/* --- VARIABLES ET RESET --- */
+:host {
+  --nexus-primary: #c2185b;
+  --nexus-primary-dark: #632c4a;
+  --nexus-bg: #0d0d0d;
+  --nexus-card-bg: #161616;
+  --nexus-input-bg: #1a1a1a;
+}
+
 /* --- STRUCTURE GLOBALE --- */
 .main-container {
-  background: #0d0d0d;
+  background: var(--nexus-bg);
   min-height: 100vh;
   padding: 20px;
   display: flex;
   flex-direction: column;
 }
 
-/* --- HEADER NEXUS (LOGO + TITRE) --- */
+/* --- HEADER NEXUS --- */
 .brand-header {
   text-align: center;
   margin-bottom: 30px;
-
   .logo-container .vortex-logo {
     width: 80px;
     animation: rotateVortex 20s linear infinite;
-    filter: drop-shadow(0 0 10px #c2185b);
+    filter: drop-shadow(0 0 10px var(--nexus-primary));
   }
-
   .brand-title {
     color: white;
     font-size: 1.8rem;
     letter-spacing: 10px;
-    margin: 10px 0 0 0;
+    margin: 10px 0;
     font-weight: 300;
   }
 }
@@ -34,229 +41,98 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 25px;
-    padding: 0 5px;
-
-    h2 {
-      font-size: 1.6rem;
-      font-weight: bold;
-      margin: 0;
-      color: white;
-      letter-spacing: 1px;
-    }
-
-    .add-btn {
-      color: #ffffff;
-      background: linear-gradient(135deg, #c2185b, #632c4a);
+    h2 { font-size: 1.6rem; color: white; font-weight: bold; }
+    .add-btn-container {
+      background: linear-gradient(135deg, var(--nexus-primary), var(--nexus-primary-dark));
       border-radius: 50%;
-      padding: 8px;
-      font-size: 2.2rem;
-      box-shadow: 0 0 15px rgba(194, 24, 91, 0.4);
-      transition: all 0.3s ease;
-      cursor: pointer;
-
-      &:hover {
-        transform: rotate(90deg) scale(1.1);
-      }
-      &:active { transform: scale(0.9); }
+      width: 48px; height: 48px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 15px rgba(194, 24, 91, 0.4);
+      .add-btn { color: white; font-size: 2rem; }
     }
   }
 
   .search-bar {
-    background: #1a1a1a;
+    background: var(--nexus-input-bg);
     border-radius: 12px;
-    padding: 10px 15px;
-    display: flex;
-    align-items: center;
+    padding: 12px;
+    display: flex; align-items: center;
     margin-bottom: 25px;
     border: 1px solid #222;
-
-    ion-icon { color: #888; font-size: 1.2rem; }
-    input {
-      background: transparent;
-      border: none;
-      color: white;
-      flex: 1;
-      margin: 0 10px;
-      outline: none;
-    }
+    input { background: transparent; border: none; color: white; flex: 1; margin: 0 10px; outline: none; }
+    ion-icon { color: #888; }
   }
 }
 
-/* --- LISTE DES COURS (CARTES DÉGRADÉES) --- */
+/* --- LISTE DES COURS --- */
 .schedule-container {
-  background: #161616;
+  background: var(--nexus-card-bg);
   border-radius: 24px;
   padding: 20px 0;
-  overflow: hidden;
-
   .date-selector {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 30px;
-    color: white;
-    margin-bottom: 20px;
-    span { font-weight: bold; font-size: 1.1rem; }
-    ion-icon { color: #c2185b; font-size: 1.2rem; }
+    display: flex; justify-content: center; align-items: center; gap: 30px;
+    color: white; margin-bottom: 20px;
+    span { font-weight: bold; letter-spacing: 2px; }
+    ion-icon { color: var(--nexus-primary); }
   }
-
   .course-item {
-    display: flex;
-    align-items: center;
-    padding: 18px 15px;
-    margin-bottom: 2px;
-    color: white;
-    transition: all 0.2s ease;
-    cursor: pointer;
-
-    &:active { transform: scale(0.98); filter: brightness(1.2); }
-
-    .course-number { font-weight: bold; margin-right: 15px; font-size: 1.1rem; opacity: 0.6; }
-
+    display: flex; align-items: center; padding: 18px 15px; margin-bottom: 2px; color: white;
+    .course-number { width: 25px; opacity: 0.4; }
     .course-time {
-      display: flex;
-      flex-direction: column;
-      font-size: 0.75rem;
-      margin-right: 20px;
-      opacity: 0.8;
+      display: flex; flex-direction: column; margin-right: 20px; text-align: center;
+      .start { font-weight: bold; font-size: 0.9rem; }
+      .end { font-size: 0.7rem; opacity: 0.5; }
     }
-
-    .course-info {
-      flex: 1;
-      .course-name { font-weight: bold; font-size: 1rem; display: block; }
-      .course-room { font-size: 0.75rem; opacity: 0.6; }
-    }
-
-    .course-duration-badge {
-      background: rgba(255, 255, 255, 0.9);
-      color: black;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: bold;
-    }
+    .course-info { flex: 1; .course-name { font-weight: bold; display: block; } .course-room { font-size: 0.75rem; opacity: 0.6; } }
+    .course-duration-badge { background: #fff; color: #000; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; }
   }
 }
 
-/* --- LE MODAL DE CRÉATION (LE ADD) --- */
+/* --- MODAL --- */
 .nexus-modal {
-  --background: #0d0d0d;
-  --height: 480px;
-  --border-radius: 30px 30px 0 0;
-  --box-shadow: 0 -10px 40px rgba(194, 24, 91, 0.4);
+  --background: var(--nexus-bg);
+  --height: 80%;
+  --border-radius: 40px 40px 0 0;
 
-  &::part(content) {
-    position: absolute;
-    bottom: 0;
-    border-top: 1px solid rgba(194, 24, 91, 0.3);
+  .modal-content { padding: 20px; display: flex; flex-direction: column; height: 100%; }
+  .modal-handle { width: 40px; height: 4px; background: #333; border-radius: 10px; margin: 0 auto 20px; }
+  .modal-header { text-align: center; margin-bottom: 30px; h3 { color: white; letter-spacing: 5px; } p { color: #666; font-size: 0.8rem; } }
+
+  .input-group {
+    margin-bottom: 25px;
+    label { color: var(--nexus-primary); font-size: 0.7rem; font-weight: bold; letter-spacing: 2px; }
+    input { width: 100%; background: #161616; border: 1px solid #222; padding: 16px; border-radius: 15px; color: white; margin-top: 10px; outline: none; }
   }
 
-  .modal-wrapper {
-    background: #0d0d0d;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .modal-header {
-    background: linear-gradient(to bottom, #2a0a14, #0d0d0d);
-    padding: 30px 20px;
-    text-align: center;
-    h3 {
-      color: white;
-      margin: 0;
-      letter-spacing: 6px;
-      font-size: 1.2rem;
-      font-weight: bold;
-      text-transform: uppercase;
+  .category-grid {
+    display: flex; gap: 15px;
+    .cat-card {
+      flex: 1; background: #161616; padding: 20px 10px; border-radius: 20px;
+      display: flex; flex-direction: column; align-items: center; gap: 10px; color: #444; transition: 0.3s;
+      .icon-circle { width: 45px; height: 45px; background: #222; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+      &.active { background: rgba(194, 24, 91, 0.1); border: 1px solid var(--nexus-primary); color: white; .icon-circle { background: var(--nexus-primary); color: white; } }
     }
   }
 
-  .modal-body {
-    padding: 20px 25px;
-    background: #0d0d0d;
-
-    .input-group {
-      margin-bottom: 25px;
-      label { color: #888; font-size: 0.7rem; letter-spacing: 2px; margin-bottom: 10px; display: block; }
-      input {
-        width: 100%;
-        background: #1a1a1a;
-        border: 1px solid #333;
-        padding: 15px;
-        border-radius: 12px;
-        color: white;
-        font-size: 1rem;
-        outline: none;
-        &:focus { border-color: #c2185b; }
-      }
+  /* --- STYLE DU SÉLECTEUR DE DURÉE --- */
+  .duration-selector {
+    display: flex; justify-content: space-between; gap: 10px; margin-top: 10px;
+    .duration-chip {
+      flex: 1; background: #161616; color: #666; padding: 12px 5px; border-radius: 12px;
+      text-align: center; font-size: 0.8rem; font-weight: bold; transition: 0.2s;
+      &.active { background: rgba(194, 24, 91, 0.2); border: 1px solid var(--nexus-primary); color: white; }
     }
+  }
 
-    .section-label { color: #888; font-size: 0.7rem; letter-spacing: 2px; margin-bottom: 10px; display: block; }
-
-    .radio-group {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 35px;
-
-      .radio-item {
-        flex: 1;
-        background: #161616;
-        padding: 15px 10px;
-        border-radius: 18px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 8px;
-        color: #555;
-        border: 1px solid transparent;
-        transition: all 0.3s ease;
-
-        ion-icon { font-size: 1.8rem; }
-        span { font-size: 0.7rem; font-weight: bold; }
-
-        &.active {
-          background: rgba(194, 24, 91, 0.15);
-          border-color: #c2185b;
-          color: white;
-          ion-icon { color: #c2185b; }
-        }
-      }
-    }
-
-    .modal-footer {
-      display: flex;
-      gap: 15px;
-      margin-top: auto;
-      padding-bottom: 20px;
-
-      button {
-        flex: 1;
-        padding: 18px;
-        border-radius: 15px;
-        font-weight: bold;
-        letter-spacing: 2px;
-        border: none;
-        cursor: pointer;
-      }
-      .btn-cancel { background: #1a1a1a; color: #888; }
-      .btn-confirm {
-        background: linear-gradient(135deg, #c2185b, #632c4a);
-        color: white;
-        box-shadow: 0 4px 15px rgba(194, 24, 91, 0.4);
-      }
+  .modal-footer {
+    margin-top: 40px;
+    .btn-confirm {
+      width: 100%; background: linear-gradient(135deg, var(--nexus-primary), var(--nexus-primary-dark));
+      color: white; padding: 20px; border-radius: 20px; font-weight: bold;
+      display: flex; align-items: center; justify-content: center; gap: 12px; border: none;
     }
   }
 }
 
-/* --- ANIMATIONS & DÉTAILS --- */
-@keyframes rotateVortex {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-::ng-deep .nexus-toast {
-  --background: #c2185b;
-  --color: white;
-  font-weight: bold;
-}
+.state-container { display: flex; flex-direction: column; align-items: center; padding: 60px; ion-spinner { --color: var(--nexus-primary); } }
+@keyframes rotateVortex { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }

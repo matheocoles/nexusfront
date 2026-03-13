@@ -3,15 +3,16 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
   IonContent, IonIcon, IonSpinner, ToastController,
-  IonModal, IonInput, IonButton
+  IonModal, IonInput, IonButton, LoadingController
 } from '@ionic/angular/standalone';
 import { NexusService } from '../services/nexus.service';
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import {
-  addOutline, searchOutline, menuOutline,
+  addOutline, searchOutline, menuOutline, calendarOutline,
   chevronBackOutline, chevronForwardOutline, arrowDownOutline,
-  playOutline, bookOutline, fitnessOutline, rocketOutline
+  playOutline, bookOutline, fitnessOutline, rocketOutline,
+  checkmarkCircleOutline, timeOutline, locationOutline
 } from 'ionicons/icons';
 
 @Component({
@@ -21,12 +22,13 @@ import {
   standalone: true,
   imports: [
     CommonModule, FormsModule, IonContent, IonIcon, IonSpinner,
-    IonModal,
+    IonModal, IonInput, IonButton // Ajoutés pour la stabilité du Modal
   ]
 })
 export class HomePage implements OnInit {
   private nexusService = inject(NexusService);
   private toastController = inject(ToastController);
+  private loadingController = inject(LoadingController);
   private router = inject(Router);
 
   courses: any[] = [];
@@ -35,7 +37,9 @@ export class HomePage implements OnInit {
 
   isModalOpen = false;
   newSessionTitle = '';
+  newSessionRoom = ''; // Nouvelle variable pour le lieu
   selectedType = 'class';
+  selectedDuration = 60;
 
   modalIcons = {
     book: bookOutline,
@@ -45,8 +49,10 @@ export class HomePage implements OnInit {
 
   constructor() {
     addIcons({
-      addOutline, searchOutline, menuOutline,
-      chevronBackOutline, chevronForwardOutline, arrowDownOutline, playOutline
+      addOutline, searchOutline, menuOutline, calendarOutline,
+      chevronBackOutline, chevronForwardOutline, arrowDownOutline,
+      playOutline, checkmarkCircleOutline, bookOutline, fitnessOutline, rocketOutline,
+      timeOutline, locationOutline
     });
   }
 
@@ -58,129 +64,113 @@ export class HomePage implements OnInit {
     this.isLoading = true;
     this.nexusService.getSchedule().subscribe({
       next: (data: any[]) => {
-        if (data && data.length > 0) {
-          console.log("CLÉS DÉTECTÉES :", Object.keys(data[0]));
-          console.log("PREMIER OBJET COMPLET :", data[0]);
-        }
+        this.courses = data.sort((a, b) =>
+          new Date(a.dateTimeStart).getTime() - new Date(b.dateTimeStart).getTime()
+        ).map((item, index) => {
+          const name = item.activityName || item.status || `Activité #${item.id}`;
 
-        this.courses = data.map((item, index) => {
-          const name = item.activityName || item.status || `Session #${item.id}`;
-
-          const rawStart = item.dateTimeStart;
-          const rawEnd = item.dateTimeEnd;
-
-          let start = '--:--';
-          if (rawStart) {
-            start = rawStart.includes('T') ? rawStart.split('T')[1].substring(0, 5) : '08:00';
-          }
+          const formatTime = (dateStr: string) => {
+            if (!dateStr) return '--:--';
+            const date = new Date(dateStr);
+            return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+          };
 
           return {
             ...item,
             name: name,
-            room: item.room || 'Nexus Zone',
-            startTime: start,
-            endTime: '--:--',
-            duration: '01:00',
+            room: item.room || (item.sportId ? 'Gymnase' : 'Zone Nexus'),
+            startTime: formatTime(item.dateTimeStart),
+            endTime: formatTime(item.dateTimeEnd),
+            duration: this.calculateDuration(item.dateTimeStart, item.dateTimeEnd),
             displayColor: this.colorPalette[index % this.colorPalette.length]
           };
         });
-
-        console.log("COURS AFFICHÉS (MAPPED) :", this.courses);
         this.isLoading = false;
       },
-      error: (err) => {
-        console.error("ERREUR API :", err);
+      error: () => {
         this.isLoading = false;
+        this.showToast("Erreur de connexion Nexus");
+      }
+    });
+  }
+
+  async confirmAddSession() {
+    if (!this.newSessionTitle.trim() || !this.newSessionRoom.trim()) {
+      this.showToast("Veuillez saisir un titre et un lieu");
+      return;
+    }
+
+    const loading = await this.loadingController.create({
+      message: 'Initialisation Nexus...',
+      spinner: 'crescent',
+      cssClass: 'nexus-loader'
+    });
+    await loading.present();
+
+    const userId = this.nexusService.getUserId();
+    const now = new Date();
+    const end = new Date(now.getTime() + (this.selectedDuration * 60000));
+
+    const sessionPayload = {
+      "DateTimeStart": now.toISOString(),
+      "DateTimeEnd": end.toISOString(),
+      "Status": this.newSessionTitle,
+      "Room": this.newSessionRoom, // Champ Room envoyé au Backend
+      "LoginId": userId ? parseInt(userId, 10) : 0,
+      "AchievementIds": [],
+      "ClassId": null,
+      "SportId": null,
+      "ExtraActivityId": null
+    };
+
+    this.nexusService.createSession(sessionPayload).subscribe({
+      next: () => {
+        loading.dismiss();
+        this.isModalOpen = false;
+        this.showToast(`Session créée avec succès !`);
+        this.loadSchedule();
+      },
+      error: (err) => {
+        loading.dismiss();
+        console.error("Erreur API :", err);
+        this.showToast("Erreur lors de la création");
       }
     });
   }
 
   calculateDuration(start: string, end: string): string {
+    if (!start || !end) return '01h00';
     try {
-      if (!start || !end) return '01:00';
       const s = new Date(start);
       const e = new Date(end);
-      if (isNaN(s.getTime()) || isNaN(e.getTime())) return '01:00';
+      if (isNaN(s.getTime()) || isNaN(e.getTime())) return '01h00';
 
       const diffMs = e.getTime() - s.getTime();
-      const diffHrs = Math.floor(diffMs / 3600000);
-      const diffMins = Math.floor((diffMs % 3600000) / 60000);
-      return `${diffHrs.toString().padStart(2, '0')}:${diffMins.toString().padStart(2, '0')}`;
+      const mins = Math.floor(Math.abs(diffMs) / 60000);
+
+      if (mins < 60) return `${mins}min`;
+      const hrs = Math.floor(mins / 60);
+      const remainingMins = mins % 60;
+      return remainingMins > 0 ? `${hrs}h${remainingMins.toString().padStart(2, '0')}` : `${hrs}h00`;
     } catch {
-      return '01:00';
+      return '01h00';
     }
-  }
-
-  // --- LOGIQUE MODAL & SESSIONS ---
-  addNewSession() {
-    this.newSessionTitle = '';
-    this.isModalOpen = true;
-  }
-
-  confirmAddSession() {
-    if (!this.newSessionTitle.trim()) {
-      this.showToast("Donnez un nom à l'activité");
-      return;
-    }
-    this.isModalOpen = false;
-    this.startManualSession(this.newSessionTitle, this.selectedType);
-  }
-
-  async startManualSession(title: string, type: string) {
-    const userId = this.nexusService.getUserId();
-    const today = new Date().toISOString().split('T')[0];
-
-    const sessionPayload: any = {
-      "DateTimeStart": today,
-      "DateTimeEnd": null,
-      "Status": title,
-      "LoginId": userId ? parseInt(userId, 10) : 0,
-      "AchievementIds": []
-    };
-
-    this.nexusService.createSession(sessionPayload).subscribe({
-      next: (res) => {
-        this.showToast(`Session "${title}" démarrée`);
-        this.router.navigate(['/tabs/timer'], { state: { session: res } });
-      },
-      error: () => this.showToast("Erreur lors de la création")
-    });
-  }
-
-  async startSession(item: any) {
-    const userId = this.nexusService.getUserId();
-    const today = new Date().toISOString().split('T')[0];
-
-    // On utilise les nouveaux champs du DTO pour identifier le type d'activité
-    const sessionPayload: any = {
-      "DateTimeStart": today,
-      "DateTimeEnd": null,
-      "Status": "En cours",
-      "LoginId": userId ? parseInt(userId, 10) : 0,
-      "AchievementIds": []
-    };
-
-    // Mapping selon le type renvoyé par le Backend
-    if (item.typeLabel === "Cours") sessionPayload["ClassId"] = item.id;
-    else if (item.typeLabel === "Sport") sessionPayload["SportId"] = item.id;
-    else if (item.typeLabel === "Extra") sessionPayload["ExtraActivityId"] = item.id;
-
-    this.nexusService.createSession(sessionPayload).subscribe({
-      next: (res) => {
-        this.showToast(res.activityName || 'Session démarrée');
-        this.router.navigate(['/tabs/timer'], { state: { session: res } });
-      },
-      error: () => this.showToast("Erreur serveur")
-    });
   }
 
   async showToast(message: string) {
     const toast = await this.toastController.create({
       message: `🚀 ${message}`,
-      duration: 2000,
+      duration: 2500,
       position: 'bottom',
       cssClass: 'nexus-toast'
     });
     await toast.present();
+  }
+
+  addNewSession() {
+    this.newSessionTitle = '';
+    this.newSessionRoom = ''; // Reset du lieu
+    this.selectedDuration = 60;
+    this.isModalOpen = true;
   }
 }
