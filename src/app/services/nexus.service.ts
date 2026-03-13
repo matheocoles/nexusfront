@@ -6,11 +6,9 @@ import { inject, Injectable } from "@angular/core";
   providedIn: 'root'
 })
 export class NexusService {
-  // L'URL de base sans slash final pour éviter les soucis de concaténation
   private apiUrl = 'https://nexusapi.up.railway.app/api';
   private readonly http = inject(HttpClient);
 
-  // Génération des headers avec le token d'authentification
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('nexus_token');
     let headers = new HttpHeaders({
@@ -18,7 +16,6 @@ export class NexusService {
     });
 
     if (token) {
-      // On s'assure que le token est bien envoyé pour les routes sécurisées
       headers = headers.set('Authorization', `Bearer ${token}`);
     }
     return headers;
@@ -39,9 +36,8 @@ export class NexusService {
     return this.http.get(`${this.apiUrl}/logins/${cleanId}`, { headers: this.getHeaders() });
   }
 
-  // Récupération de l'emploi du temps
   getSchedule(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/activity`, { headers: this.getHeaders() });
+    return this.http.get<any[]>(`${this.apiUrl}/sessions`, { headers: this.getHeaders() });
   }
 
   // Création de session (C'est ici qu'on règle la 400 !)

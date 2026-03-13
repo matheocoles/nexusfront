@@ -32,21 +32,27 @@
           <ion-icon name="chevron-forward-outline"></ion-icon>
         </div>
 
-        <div class="course-list">
+        <div class="course-list" *ngIf="!isLoading">
           <div class="course-item"
                *ngFor="let c of courses; let i = index"
                [style.background]="c.displayColor"
                (click)="startSession(c)">
+
             <div class="course-number">{{ i + 1 }}</div>
+
             <div class="course-time">
-              <span>{{ c.startTime || '08:00' }}</span>
-              <span>{{ c.endTime || '09:00' }}</span>
+              <span>{{ c.startTime }}</span>
+              <span>{{ c.endTime }}</span>
             </div>
+
             <div class="course-info">
               <span class="course-name">{{ c.name }}</span>
-              <span class="course-room">{{ c.room || 'Salle N/A' }}</span>
+              <span class="course-room">{{ c.room }}</span>
             </div>
-            <div class="course-duration-badge">{{ c.duration || '01:30' }}</div>
+
+            <div class="course-duration-badge">
+              {{ c.duration }}
+            </div>
           </div>
         </div>
       </div>
