@@ -1,13 +1,17 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonContent, IonIcon, IonSpinner, ToastController, AlertController } from '@ionic/angular/standalone';
+import { FormsModule } from '@angular/forms';
+import {
+  IonContent, IonIcon, IonSpinner, ToastController, AlertController,
+  IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonInput
+} from '@ionic/angular/standalone';
 import { NexusService } from '../services/nexus.service';
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import {
   addOutline, searchOutline, menuOutline,
   chevronBackOutline, chevronForwardOutline, arrowDownOutline,
-  playOutline
+  playOutline, bookOutline, fitnessOutline, rocketOutline
 } from 'ionicons/icons';
 
 @Component({
@@ -15,17 +19,32 @@ import {
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
   standalone: true,
-  imports: [CommonModule, IonContent, IonIcon, IonSpinner]
+  imports: [
+    CommonModule, FormsModule, IonContent, IonIcon, IonSpinner,
+    IonModal
+  ]
 })
 export class HomePage implements OnInit {
   private nexusService = inject(NexusService);
   private toastController = inject(ToastController);
-  private alertController = inject(AlertController);
   private router = inject(Router);
 
+  // Données
   courses: any[] = [];
   isLoading: boolean = true;
   private colorPalette = ['#2a0a14', '#5e102e', '#3f255e', '#5e4c85', '#7a6a9e'];
+
+  // Variables pour le Modal
+  isModalOpen = false;
+  newSessionTitle = '';
+  selectedType = 'class';
+
+  // Sécurité pour les icônes du modal (évite l'erreur URL constructor)
+  modalIcons = {
+    book: bookOutline,
+    fitness: fitnessOutline,
+    rocket: rocketOutline
+  };
 
   constructor() {
     addIcons({
@@ -57,46 +76,20 @@ export class HomePage implements OnInit {
     });
   }
 
-  async addNewSession() {
-    const alert = await this.alertController.create({
-      header: 'Nouvelle activité manuelle',
-      cssClass: 'nexus-alert',
-      inputs: [
-        {
-          name: 'title',
-          type: 'text',
-          placeholder: 'Nom de l\'activité (ex: Musculation)'
-        },
-        {
-          type: 'radio',
-          label: 'Cours / Études',
-          value: 'class',
-          checked: true
-        },
-        {
-          type: 'radio',
-          label: 'Sport',
-          value: 'sport'
-        },
-        {
-          type: 'radio',
-          label: 'Autre activité',
-          value: 'extra'
-        }
-      ],
-      buttons: [
-        { text: 'Annuler', role: 'cancel' },
-        {
-          text: 'Démarrer',
-          handler: (data) => {
-            if (!data.title) return false;
-            this.startManualSession(data.title, data.value);
-            return true;
-          }
-        }
-      ]
-    });
-    await alert.present();
+  // Ouvre le modal bordeaux
+  addNewSession() {
+    this.newSessionTitle = '';
+    this.isModalOpen = true;
+  }
+
+  // Valide le modal
+  confirmAddSession() {
+    if (!this.newSessionTitle.trim()) {
+      this.showToast("Donnez un nom à l'activité");
+      return;
+    }
+    this.isModalOpen = false;
+    this.startManualSession(this.newSessionTitle, this.selectedType);
   }
 
   async startManualSession(title: string, type: string) {
@@ -106,11 +99,10 @@ export class HomePage implements OnInit {
     const sessionPayload: any = {
       "DateTimeStart": today,
       "DateTimeEnd": null,
-      "Status": title, // On met le nom choisi dans le status pour le retrouver
+      "Status": title,
       "LoginId": userId ? parseInt(userId, 10) : 0,
       "AchievementIds": []
     };
-
 
     this.nexusService.createSession(sessionPayload).subscribe({
       next: (res) => {
@@ -118,7 +110,7 @@ export class HomePage implements OnInit {
         this.router.navigate(['/tabs/timer'], { state: { session: res } });
       },
       error: (err) => {
-        console.error("Erreur session manuelle :", err.error.errors);
+        console.error("Erreur session manuelle :", err);
         this.showToast("Erreur lors de la création");
       }
     });
@@ -126,28 +118,20 @@ export class HomePage implements OnInit {
 
   async startSession(item: any) {
     const userId = this.nexusService.getUserId();
-
     const today = new Date().toISOString().split('T')[0];
 
     const sessionPayload: any = {
-      "DateTimeStart": today, // Plus d'heure, juste la date
+      "DateTimeStart": today,
       "DateTimeEnd": null,
       "Status": item.status || 'En cours',
       "LoginId": userId ? parseInt(userId, 10) : 0,
       "AchievementIds": []
     };
 
-    const activityId = item.Id || item.id || item.classId || item.sportId || item.extraActivityId;
-
-    if (item.class || item.classId) {
-      sessionPayload["ClassId"] = activityId;
-    } else if (item.sport || item.sportId) {
-      sessionPayload["SportId"] = activityId;
-    } else if (item.extraActivity || item.extraActivityId) {
-      sessionPayload["ExtraActivityId"] = activityId;
-    }
-
-    console.log("Payload corrigé (DateOnly) :", sessionPayload);
+    const activityId = item.id || item.Id || item.classId || item.sportId || item.extraActivityId;
+    if (item.class || item.classId) sessionPayload["ClassId"] = activityId;
+    else if (item.sport || item.sportId) sessionPayload["SportId"] = activityId;
+    else if (item.extraActivity || item.extraActivityId) sessionPayload["ExtraActivityId"] = activityId;
 
     this.nexusService.createSession(sessionPayload).subscribe({
       next: (res) => {
@@ -155,7 +139,7 @@ export class HomePage implements OnInit {
         this.router.navigate(['/tabs/timer'], { state: { session: res } });
       },
       error: (err) => {
-        console.error("Erreur détaillée du serveur :", err.error.errors);
+        console.error("Erreur serveur :", err);
         this.showToast("Erreur de format (DateOnly)");
       }
     });
