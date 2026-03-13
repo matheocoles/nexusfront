@@ -8,6 +8,7 @@
       API inaccessible — mode hors ligne
     </div>
 
+    <!-- ── Sélection activité ───────────────────────────────────────────────── -->
     <div class="section-container">
       <div class="activity-chips">
         <button class="chip" [class.active]="selectedType === 'academic'" (click)="selectType('academic')">Cours</button>
@@ -46,12 +47,21 @@
       </ion-card>
     </div>
 
+    <!-- ── Chronomètre ──────────────────────────────────────────────────────── -->
     <div class="section-container" *ngIf="selectedActivityId">
       <h2 class="section-title">Chronomètre</h2>
       <ion-card class="nexus-card timer-card">
+
+        <!-- Heure de début affichée dès le démarrage -->
+        <div class="timer-start-info" *ngIf="isRunning || isPaused">
+          <ion-icon name="time-outline"></ion-icon>
+          Démarré à {{ timerStartDate | date:'HH:mm' }} le {{ timerStartDate | date:'dd/MM' }}
+        </div>
+
         <div class="timer-display">
           <span class="timer-digits">{{ formattedTime }}</span>
         </div>
+
         <div class="timer-controls">
           <button class="ctrl-btn start"  (click)="startTimer()"
                   *ngIf="!isRunning && !isPaused">
@@ -70,14 +80,37 @@
             <ion-icon name="stop"></ion-icon>
           </button>
         </div>
+
+        <!-- Aperçu de l'intervalle qui sera enregistré -->
+        <div class="session-interval-preview" *ngIf="isRunning || isPaused">
+          <span>Fin estimée : maintenant → enregistré à l'arrêt</span>
+        </div>
+
       </ion-card>
     </div>
 
+    <!-- ── Ajouter un temps passé (manuel) ──────────────────────────────────── -->
     <div class="section-container" *ngIf="selectedActivityId">
       <h2 class="section-title">Ajouter un temps passé</h2>
       <ion-card class="nexus-card">
-        <div class="enter-time-label">Durée de la session</div>
 
+        <!-- Date & heure de début -->
+        <ion-item lines="none" class="nexus-item">
+          <ion-label>Début</ion-label>
+          <ion-datetime-button datetime="manualStartDt" slot="end"></ion-datetime-button>
+          <ion-modal [keepContentsMounted]="true">
+            <ng-template>
+              <ion-datetime id="manualStartDt"
+                            [(ngModel)]="manualStartDate"
+                            presentation="date-time"
+                            [max]="today">
+              </ion-datetime>
+            </ng-template>
+          </ion-modal>
+        </ion-item>
+
+        <!-- Durée -->
+        <div class="enter-time-label">Durée de la session</div>
         <div class="time-entry-grid">
           <div class="time-entry-block">
             <input type="number" class="time-input" [(ngModel)]="manualHours"
@@ -92,9 +125,12 @@
           </div>
         </div>
 
+        <!-- Aperçu de l'intervalle calculé -->
         <div class="duration-preview"
-             *ngIf="manualHours > 0 || manualMinutes > 0">
-          Durée : {{ manualHours > 0 ? manualHours + ' h ' : '' }}{{ manualMinutes > 0 ? manualMinutes + ' min' : '' }}
+             *ngIf="manualEndDate">
+          De {{ manualStartDate | date:'dd/MM HH:mm' }}
+          à&nbsp;{{ manualEndDate | date:'dd/MM HH:mm' }}
+          ({{ manualHours > 0 ? manualHours + ' h ' : '' }}{{ manualMinutes > 0 ? manualMinutes + ' min' : '' }})
         </div>
 
         <ion-item lines="none" class="nexus-item">
@@ -125,84 +161,121 @@
       </ion-card>
     </div>
 
+    <!-- ── Récurrence ────────────────────────────────────────────────────────── -->
     <div class="section-container" *ngIf="selectedActivityId">
       <h2 class="section-title">Récurrence</h2>
       <ion-card class="nexus-card">
+
+        <!-- Toggle activation -->
         <ion-item lines="none" class="nexus-item">
-          <ion-label>Activer</ion-label>
-          <ion-toggle [(ngModel)]="recurrenceEnabled"
-                      slot="end" class="nexus-toggle">
-          </ion-toggle>
+          <ion-label>Activer une récurrence</ion-label>
+          <ion-toggle [(ngModel)]="recurrenceEnabled" slot="end" class="nexus-toggle"></ion-toggle>
         </ion-item>
 
         <ng-container *ngIf="recurrenceEnabled">
+
+          <!-- Titre de la récurrence -->
           <ion-item lines="none" class="nexus-item">
-            <ion-select [(ngModel)]="recurrenceType"
-                        placeholder="Fréquence"
-                        interface="popover"
-                        class="nexus-select">
+            <ion-input [(ngModel)]="recTitle"
+                       placeholder="Nom de la récurrence (ex: Cours de maths)"
+                       class="nexus-input">
+            </ion-input>
+          </ion-item>
+
+          <!-- ① Type de récurrence -->
+          <div class="rec-section-label">Type de répétition</div>
+          <ion-item lines="none" class="nexus-item">
+            <ion-select [(ngModel)]="recurrenceType" interface="popover" class="nexus-select">
               <ion-select-option value="daily">Chaque jour</ion-select-option>
               <ion-select-option value="weekly">Chaque semaine</ion-select-option>
               <ion-select-option value="monthly">Chaque mois</ion-select-option>
             </ion-select>
           </ion-item>
 
-          <div class="day-selector" *ngIf="recurrenceType === 'weekly'">
-            <button class="day-btn"
-                    *ngFor="let d of weekDays"
-                    [class.active]="selectedDays.includes(d.value)"
-                    (click)="toggleDay(d.value)">
-              {{ d.label }}
-            </button>
-          </div>
-
-          <div class="time-entry-grid" style="padding: 8px 16px 4px;">
-            <div class="time-entry-block">
-              <input type="number" class="time-input"
-                     [(ngModel)]="recHour" min="0" max="23" placeholder="HH" />
-              <label class="entry-label">Heure</label>
-            </div>
-            <span class="time-separator">:</span>
-            <div class="time-entry-block">
-              <input type="number" class="time-input"
-                     [(ngModel)]="recMinute" min="0" max="59" placeholder="MM" />
-              <label class="entry-label">Durée (min)</label>
-            </div>
-          </div>
-
+          <!-- ② Fréquence (tous les N) -->
           <ion-item lines="none" class="nexus-item">
-            <ion-label>Fin le</ion-label>
-            <ion-datetime-button datetime="recEndDt" slot="end"></ion-datetime-button>
-            <ion-modal [keepContentsMounted]="true">
-              <ng-template>
-                <ion-datetime id="recEndDt"
-                              [(ngModel)]="recurrenceEndDate"
-                              presentation="date"
-                              [min]="today">
-                </ion-datetime>
-              </ng-template>
-            </ion-modal>
+            <ion-label>Répéter tous les</ion-label>
+            <div class="rec-freq-row" slot="end">
+              <input type="number" class="rec-num-input"
+                     [(ngModel)]="recFrequency" min="1" max="52" />
+              <span class="rec-freq-unit">
+                {{ recurrenceType === 'daily' ? 'jour(s)' :
+                recurrenceType === 'weekly' ? 'sem.' : 'mois' }}
+              </span>
+            </div>
           </ion-item>
 
+          <!-- ③ Jours actifs (weekly uniquement) -->
+          <ng-container *ngIf="recurrenceType === 'weekly'">
+            <div class="rec-section-label">Jours actifs</div>
+            <div class="day-selector">
+              <button class="day-btn"
+                      *ngFor="let d of weekDays"
+                      [class.active]="selectedDays.includes(d.value)"
+                      (click)="toggleDay(d.value)">
+                {{ d.label }}
+              </button>
+            </div>
+          </ng-container>
+
+          <!-- ④ Horaire de chaque séance -->
+          <div class="rec-section-label">Horaire de chaque séance</div>
+          <div class="rec-time-row">
+            <div class="rec-time-block">
+              <label class="rec-time-label">Début</label>
+              <input type="time" class="rec-time-input" [(ngModel)]="recTimeStart" />
+            </div>
+            <span class="rec-arrow">→</span>
+            <div class="rec-time-block">
+              <label class="rec-time-label">Fin</label>
+              <input type="time" class="rec-time-input" [(ngModel)]="recTimeEnd" />
+            </div>
+          </div>
+
+          <!-- ⑤ Période globale de la récurrence -->
+          <div class="rec-section-label">Période</div>
+          <div class="rec-period-row">
+            <div class="rec-period-block">
+              <label class="rec-time-label">À partir du</label>
+              <input type="date" class="rec-date-input" [(ngModel)]="recDateStart" />
+            </div>
+            <span class="rec-arrow">→</span>
+            <div class="rec-period-block">
+              <label class="rec-time-label">Jusqu'au</label>
+              <input type="date" class="rec-date-input"
+                     [(ngModel)]="recDateEnd" [min]="recDateStart" />
+            </div>
+          </div>
+
+          <!-- ⑥ Résumé généré automatiquement -->
+          <div class="rec-summary" *ngIf="recurrenceSummary">
+            <ion-icon name="time-outline"></ion-icon>
+            {{ recurrenceSummary }}
+          </div>
+
+          <!-- Actions -->
           <div class="entry-actions">
+            <button class="action-btn cancel" (click)="resetRecurrence()">Réinitialiser</button>
             <span class="spacer"></span>
             <button class="action-btn confirm"
                     (click)="saveRecurrence()"
                     [disabled]="savingRec">
-              <ion-spinner *ngIf="savingRec"  name="crescent"
-                           style="width:16px;height:16px"></ion-spinner>
-              <span       *ngIf="!savingRec">Enregistrer</span>
+              <ion-spinner *ngIf="savingRec" name="crescent" style="width:16px;height:16px"></ion-spinner>
+              <span *ngIf="!savingRec">Enregistrer</span>
             </button>
           </div>
+
         </ng-container>
       </ion-card>
     </div>
 
+    <!-- ── Graphique (archive visuelle) ─────────────────────────────────────── -->
     <div class="section-container chart-section" *ngIf="sessions.length > 0">
       <h2 class="section-title">Activité</h2>
       <canvas id="activityChart"></canvas>
     </div>
 
+    <!-- ── Archive textuelle ─────────────────────────────────────────────────── -->
     <div class="section-container">
       <h2 class="section-title">Archive</h2>
 
@@ -211,14 +284,37 @@
       </div>
 
       <ng-container *ngIf="!loadingSessions">
-        <ion-card class="nexus-card" *ngFor="let s of sessions">
+        <ion-card class="nexus-card session-card" [class]="'session-card--' + s.activityType"
+                  *ngFor="let s of sessions">
           <ion-item lines="none" class="nexus-item">
-            <div class="session-type-dot" [class]="s.activityType"></div>
+
+            <!-- Pastille couleur domaine -->
+            <div class="domain-badge" [class]="'domain-badge--' + s.activityType" slot="start">
+              <span class="domain-icon">
+                {{ s.activityType === 'academic' ? '📚' : s.activityType === 'sport' ? '🏃' : '🎨' }}
+              </span>
+            </div>
+
             <ion-label>
-              <h3>{{ s.title || activityLabel(s.activityId) }}</h3>
-              <p>{{ s.description || formatSessionInterval(s) }}</p>
+              <!-- Nom activité + type -->
+              <h3 class="session-name">{{ s.title || activityLabel(s.activityId) }}</h3>
+              <!-- Intervalle horaire réel -->
+              <p class="session-interval">
+                <ion-icon name="time-outline" style="vertical-align:middle;margin-right:3px"></ion-icon>
+                {{ formatSessionInterval(s) }}
+              </p>
+              <!-- Description optionnelle -->
+              <p class="session-desc" *ngIf="s.description">{{ s.description }}</p>
             </ion-label>
-            <ion-note slot="end">{{ formatDuration(s.durationSeconds) }}</ion-note>
+
+            <!-- Durée + label domaine -->
+            <div class="session-meta" slot="end">
+              <span class="session-duration">{{ formatDuration(s.durationSeconds) }}</span>
+              <span class="session-type-label" [class]="'label--' + s.activityType">
+                {{ s.activityType === 'academic' ? 'Cours' : s.activityType === 'sport' ? 'Sport' : 'Extra' }}
+              </span>
+            </div>
+
           </ion-item>
         </ion-card>
 
