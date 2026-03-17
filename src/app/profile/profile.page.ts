@@ -87,36 +87,30 @@ export class ProfilePage implements OnInit, OnDestroy {
 
   loadProfileData() {
     const token = localStorage.getItem('nexus_token');
-    if (!token) return;
+    if (!token) {
+      this.router.navigate(['/login']);
+      return;
+    }
 
     try {
       const decoded: any = jwtDecode(token);
-      // On initialise avec les données du token (PascalCase souvent présent dans le JWT)
+
+      // Extraction sécurisée
+      const userId = String(decoded.UserId || decoded.id || '004');
+      const userName = decoded.Username || decoded.username || 'Utilisateur';
+      const fullName = decoded.FullName || decoded.fullname || 'Membre Nexus';
+
       this.userData = {
-        username: decoded.Username || '',
-        fullName: decoded.FullName || '',
-        id: decoded.UserId // "004"
+        id: userId,
+        username: userName,
+        fullName: fullName
       };
 
-      // Conversion de "004" -> 4 pour l'API
-      const cleanId = parseInt(decoded.UserId, 10);
+      console.log("Profil chargé depuis le Token pour l'ID:", userId);
 
-      this.nexusService.getUserProfile(cleanId.toString()).subscribe({
-        next: (data) => {
-          // On fusionne les données de l'API (qui peuvent être en camelCase ou PascalCase)
-          this.userData = {
-            id: data.id || data.Id || this.userData.id,
-            username: data.username || data.Username || this.userData.username,
-            fullName: data.fullName || data.FullName || this.userData.fullName
-          };
-          console.log("Profil synchronisé !");
-        },
-        error: (err) => {
-          console.error("Erreur API (ID " + cleanId + "), on garde le token.", err);
-        }
-      });
     } catch (e) {
-      console.error("Erreur Token", e);
+      console.error("Erreur décodage Token", e);
+      this.router.navigate(['/login']);
     }
   }
 

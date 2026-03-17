@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
   IonContent, IonIcon, IonSpinner, ToastController,
-  IonModal, IonInput, IonButton, LoadingController
+  IonModal, IonInput, IonButton, LoadingController, ActionSheetController
 } from '@ionic/angular/standalone';
 import { NexusService } from '../services/nexus.service';
 import { Router } from '@angular/router';
@@ -12,7 +12,8 @@ import {
   addOutline, searchOutline, menuOutline, calendarOutline,
   chevronBackOutline, chevronForwardOutline, arrowDownOutline,
   playOutline, bookOutline, fitnessOutline, rocketOutline,
-  checkmarkCircleOutline, timeOutline, locationOutline
+  checkmarkCircleOutline, timeOutline, locationOutline,
+  trashOutline, createOutline, closeOutline
 } from 'ionicons/icons';
 
 @Component({
@@ -22,13 +23,14 @@ import {
   standalone: true,
   imports: [
     CommonModule, FormsModule, IonContent, IonIcon, IonSpinner,
-    IonModal, IonInput, IonButton // Ajoutés pour la stabilité du Modal
+    IonModal
   ]
 })
 export class HomePage implements OnInit {
   private nexusService = inject(NexusService);
   private toastController = inject(ToastController);
   private loadingController = inject(LoadingController);
+  private actionSheetController = inject(ActionSheetController);
   private router = inject(Router);
 
   courses: any[] = [];
@@ -36,8 +38,11 @@ export class HomePage implements OnInit {
   private colorPalette = ['#2a0a14', '#5e102e', '#3f255e', '#5e4c85', '#7a6a9e'];
 
   isModalOpen = false;
+  isEditMode = false;
+  editingSessionId: number | null = null;
+
   newSessionTitle = '';
-  newSessionRoom = ''; // Nouvelle variable pour le lieu
+  newSessionRoom = '';
   selectedType = 'class';
   selectedDuration = 60;
 
@@ -52,7 +57,7 @@ export class HomePage implements OnInit {
       addOutline, searchOutline, menuOutline, calendarOutline,
       chevronBackOutline, chevronForwardOutline, arrowDownOutline,
       playOutline, checkmarkCircleOutline, bookOutline, fitnessOutline, rocketOutline,
-      timeOutline, locationOutline
+      timeOutline, locationOutline, trashOutline, createOutline, closeOutline
     });
   }
 
@@ -66,25 +71,15 @@ export class HomePage implements OnInit {
       next: (data: any[]) => {
         this.courses = data.sort((a, b) =>
           new Date(a.dateTimeStart).getTime() - new Date(b.dateTimeStart).getTime()
-        ).map((item, index) => {
-          const name = item.activityName || item.status || `Activité #${item.id}`;
-
-          const formatTime = (dateStr: string) => {
-            if (!dateStr) return '--:--';
-            const date = new Date(dateStr);
-            return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-          };
-
-          return {
-            ...item,
-            name: name,
-            room: item.room || (item.sportId ? 'Gymnase' : 'Zone Nexus'),
-            startTime: formatTime(item.dateTimeStart),
-            endTime: formatTime(item.dateTimeEnd),
-            duration: this.calculateDuration(item.dateTimeStart, item.dateTimeEnd),
-            displayColor: this.colorPalette[index % this.colorPalette.length]
-          };
-        });
+        ).map((item, index) => ({
+          ...item,
+          name: item.status || item.Status || `Activité #${item.id}`,
+          room: item.room || item.Room || 'Zone Nexus',
+          startTime: this.formatTime(item.dateTimeStart),
+          endTime: this.formatTime(item.dateTimeEnd),
+          duration: this.calculateDuration(item.dateTimeStart, item.dateTimeEnd),
+          displayColor: this.colorPalette[index % this.colorPalette.length]
+        }));
         this.isLoading = false;
       },
       error: () => {
@@ -94,83 +89,123 @@ export class HomePage implements OnInit {
     });
   }
 
-  async confirmAddSession() {
+  formatTime(dateStr: string) {
+    if (!dateStr) return '--:--';
+    const date = new Date(dateStr);
+    const h = date.getHours().toString().padStart(2, '0');
+    const m = date.getMinutes().toString().padStart(2, '0');
+    return `${h}:${m}`;
+  }
+
+  calculateDuration(start: string, end: string): string {
+    if (!start || !end) return '1h';
+    const diffMs = new Date(end).getTime() - new Date(start).getTime();
+    const mins = Math.floor(Math.abs(diffMs) / 60000);
+    if (mins < 60) return `${mins}min`;
+    const hrs = Math.floor(mins / 60);
+    const rMins = mins % 60;
+    return rMins > 0 ? `${hrs}h${rMins.toString().padStart(2, '0')}` : `${hrs}h`;
+  }
+
+  async presentActionSheet(course: any) {
+    const actionSheet = await this.actionSheetController.create({
+      header: course.name.toUpperCase(),
+      subHeader: `Lieu : ${course.room}`,
+      cssClass: 'nexus-action-sheet',
+      buttons: [
+        { text: 'Modifier', icon: createOutline, handler: () => this.openEditModal(course) },
+        { text: 'Supprimer', role: 'destructive', icon: trashOutline, handler: () => this.deleteSession(course.id) },
+        { text: 'Annuler', icon: closeOutline, role: 'cancel' }
+      ]
+    });
+    await actionSheet.present();
+  }
+
+  openEditModal(course: any) {
+    this.isEditMode = true;
+    this.editingSessionId = course.id;
+    this.newSessionTitle = course.name;
+    this.newSessionRoom = course.room;
+    this.isModalOpen = true;
+  }
+
+  addNewSession() {
+    this.isEditMode = false;
+    this.editingSessionId = null;
+    this.newSessionTitle = '';
+    this.newSessionRoom = '';
+    this.isModalOpen = true;
+  }
+
+  async deleteSession(id: number) {
+    const loading = await this.loadingController.create({
+      message: 'Suppression Nexus...',
+      cssClass: 'nexus-loader'
+    });
+    await loading.present();
+
+    this.nexusService.deleteSession(id).subscribe({
+      next: () => {
+        loading.dismiss();
+
+        this.courses = this.courses.filter(course => course.id !== id);
+
+        this.showToast("Session supprimée");
+      },
+      error: (err) => {
+        loading.dismiss();
+        console.error("Erreur suppression:", err);
+        this.showToast("Erreur lors de la suppression");
+      }
+    });
+  }
+
+  async confirmSave() {
     if (!this.newSessionTitle.trim() || !this.newSessionRoom.trim()) {
-      this.showToast("Veuillez saisir un titre et un lieu");
+      this.showToast("Veuillez remplir tous les champs");
       return;
     }
 
-    const loading = await this.loadingController.create({
-      message: 'Initialisation Nexus...',
-      spinner: 'crescent',
-      cssClass: 'nexus-loader'
-    });
+    const loading = await this.loadingController.create({ message: 'Synchronisation...' });
     await loading.present();
 
     const userId = this.nexusService.getUserId();
     const now = new Date();
     const end = new Date(now.getTime() + (this.selectedDuration * 60000));
 
-    const sessionPayload = {
+    const payload = {
+      "Id": this.editingSessionId,
       "DateTimeStart": now.toISOString(),
       "DateTimeEnd": end.toISOString(),
       "Status": this.newSessionTitle,
-      "Room": this.newSessionRoom, // Champ Room envoyé au Backend
-      "LoginId": userId ? parseInt(userId, 10) : 0,
-      "AchievementIds": [],
-      "ClassId": null,
-      "SportId": null,
-      "ExtraActivityId": null
+      "Room": this.newSessionRoom,
+      "LoginId": userId ? parseInt(userId, 10) : 0
     };
 
-    this.nexusService.createSession(sessionPayload).subscribe({
+    const request = (this.isEditMode && this.editingSessionId)
+      ? this.nexusService.updateSession(this.editingSessionId, payload)
+      : this.nexusService.createSession(payload);
+
+    request.subscribe({
       next: () => {
         loading.dismiss();
         this.isModalOpen = false;
-        this.showToast(`Session créée avec succès !`);
+        this.showToast(this.isEditMode ? "Mise à jour réussie !" : "Session créée !");
         this.loadSchedule();
       },
-      error: (err) => {
+      error: () => {
         loading.dismiss();
-        console.error("Erreur API :", err);
-        this.showToast("Erreur lors de la création");
+        this.showToast("Erreur de synchronisation");
       }
     });
-  }
-
-  calculateDuration(start: string, end: string): string {
-    if (!start || !end) return '01h00';
-    try {
-      const s = new Date(start);
-      const e = new Date(end);
-      if (isNaN(s.getTime()) || isNaN(e.getTime())) return '01h00';
-
-      const diffMs = e.getTime() - s.getTime();
-      const mins = Math.floor(Math.abs(diffMs) / 60000);
-
-      if (mins < 60) return `${mins}min`;
-      const hrs = Math.floor(mins / 60);
-      const remainingMins = mins % 60;
-      return remainingMins > 0 ? `${hrs}h${remainingMins.toString().padStart(2, '0')}` : `${hrs}h00`;
-    } catch {
-      return '01h00';
-    }
   }
 
   async showToast(message: string) {
     const toast = await this.toastController.create({
       message: `🚀 ${message}`,
-      duration: 2500,
-      position: 'bottom',
+      duration: 2000,
       cssClass: 'nexus-toast'
     });
     await toast.present();
-  }
-
-  addNewSession() {
-    this.newSessionTitle = '';
-    this.newSessionRoom = ''; // Reset du lieu
-    this.selectedDuration = 60;
-    this.isModalOpen = true;
   }
 }

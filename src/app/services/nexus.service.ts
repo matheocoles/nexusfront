@@ -9,6 +9,7 @@ export class NexusService {
   private apiUrl = 'https://nexusapi.up.railway.app/api';
   private readonly http = inject(HttpClient);
 
+  // Génération centralisée des headers avec Token
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('nexus_token');
     let headers = new HttpHeaders({
@@ -30,27 +31,34 @@ export class NexusService {
     return localStorage.getItem('nexus_user_id');
   }
 
-  // Récupération du profil : cleanId gère le format "004" -> 4
   getUserProfile(id: string): Observable<any> {
-    const cleanId = parseInt(id, 10);
-    return this.http.get(`${this.apiUrl}/logins/${cleanId}`, { headers: this.getHeaders() });
+    return this.http.get(`${this.apiUrl}/logins/${id}`, { headers: this.getHeaders() });
   }
 
   getSchedule(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/sessions`, { headers: this.getHeaders() });
   }
 
-  // Création de session (C'est ici qu'on règle la 400 !)
   createSession(sessionData: any): Observable<any> {
-    // On s'assure que l'URL est propre
-    const url = `${this.apiUrl}/sessions`;
+    return this.http.post(`${this.apiUrl}/sessions`, sessionData, { headers: this.getHeaders() });
+  }
 
-    // TRÈS IMPORTANT : On envoie les headers, sinon le serveur rejette la requête
-    return this.http.post(url, sessionData, { headers: this.getHeaders() });
+  updateSession(id: number | string, payload: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/sessions/${id}`, payload, { headers: this.getHeaders() });
+  }
+
+  deleteSession(id: number | string): Observable<any> {
+    const url = `${this.apiUrl}/sessions/${id}`;
+
+    const options = {
+      headers: this.getHeaders(),
+      body: { id: id }
+    };
+
+    return this.http.delete(url, options);
   }
 
   login(credentials: any): Observable<any> {
-    // Le login ne nécessite pas de token Bearer
     return this.http.post(`${this.apiUrl}/login`, credentials);
   }
 

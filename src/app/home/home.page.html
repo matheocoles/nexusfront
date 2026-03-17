@@ -11,7 +11,7 @@
       <div class="schedule-header">
         <h2>Emploi du temps</h2>
         <div class="add-btn-container" (click)="addNewSession()">
-          <ion-icon name="add-outline" class="add-btn"></ion-icon>
+          <ion-icon name="add-outline"></ion-icon>
         </div>
       </div>
 
@@ -34,7 +34,7 @@
 
         <div class="course-list">
           <div class="course-item" *ngFor="let c of courses; let i = index"
-               [style.background]="c.displayColor" (click)="showToast('Session: ' + c.name)">
+               [style.background]="c.displayColor" (click)="presentActionSheet(c)">
             <div class="course-number">{{ i + 1 }}</div>
             <div class="course-time">
               <span class="start">{{ c.startTime }}</span>
@@ -42,7 +42,10 @@
             </div>
             <div class="course-info">
               <span class="course-name">{{ c.name }}</span>
-              <span class="course-room">{{ c.room }}</span>
+              <span class="course-room">
+                <ion-icon name="location-outline" style="font-size: 10px; margin-right: 4px;"></ion-icon>
+                {{ c.room }}
+              </span>
             </div>
             <div class="course-duration-badge">{{ c.duration }}</div>
           </div>
@@ -52,28 +55,27 @@
   </div>
 
   <ion-modal [isOpen]="isModalOpen" (didDismiss)="isModalOpen = false" class="nexus-modal"
-             [breakpoints]="[0, 0.85]" [initialBreakpoint]="0.85">
+             [breakpoints]="[0, 0.9]" [initialBreakpoint]="0.9">
     <ng-template>
       <div class="modal-content">
         <div class="modal-handle"></div>
-
         <header class="modal-header">
-          <h3>NOUVELLE ACTIVITÉ</h3>
-          <p>Configurez votre prochaine session</p>
+          <h3>{{ isEditMode ? 'MODIFIER' : 'NOUVELLE' }} ACTIVITÉ</h3>
+          <p>Configurez les paramètres de session</p>
         </header>
 
         <div class="modal-body">
           <div class="input-group">
             <label>TITRE DE L'ACTIVITÉ</label>
-            <input type="text" [(ngModel)]="newSessionTitle" placeholder="Ex: Entrainement Pecs...">
+            <input type="text" [(ngModel)]="newSessionTitle" placeholder="Ex: Musculation...">
           </div>
 
-          <div class="input-group" style="margin-top: 15px;">
+          <div class="input-group">
             <label>LIEU / SALLE</label>
-            <input type="text" [(ngModel)]="newSessionRoom" placeholder="Ex: Salle de muscu, Zone A...">
+            <input type="text" [(ngModel)]="newSessionRoom" placeholder="Ex: Salle A, Gymnase...">
           </div>
 
-          <label class="section-label" style="margin-top: 20px;">TYPE D'ACTIVITÉ</label>
+          <label class="section-label">TYPE D'ACTIVITÉ</label>
           <div class="category-grid">
             <div class="cat-card" [class.active]="selectedType === 'class'" (click)="selectedType = 'class'">
               <div class="icon-circle"><ion-icon [icon]="modalIcons.book"></ion-icon></div>
@@ -89,7 +91,7 @@
             </div>
           </div>
 
-          <label class="section-label" style="margin-top: 25px;">DURÉE DE LA SESSION</label>
+          <label class="section-label" style="margin-top: 20px;">DURÉE</label>
           <div class="duration-selector">
             <div class="duration-chip" [class.active]="selectedDuration === 30" (click)="selectedDuration = 30">30 min</div>
             <div class="duration-chip" [class.active]="selectedDuration === 60" (click)="selectedDuration = 60">1 h</div>
@@ -98,8 +100,8 @@
           </div>
 
           <div class="modal-footer">
-            <button class="btn-confirm" (click)="confirmAddSession()">
-              CRÉER LA SESSION
+            <button class="btn-confirm" (click)="confirmSave()">
+              {{ isEditMode ? 'ENREGISTRER' : 'CRÉER LA SESSION' }}
               <ion-icon name="checkmark-circle-outline"></ion-icon>
             </button>
           </div>

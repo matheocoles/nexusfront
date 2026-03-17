@@ -1,138 +1,319 @@
-/* --- VARIABLES ET RESET --- */
 :host {
   --nexus-primary: #c2185b;
-  --nexus-primary-dark: #632c4a;
   --nexus-bg: #0d0d0d;
   --nexus-card-bg: #161616;
-  --nexus-input-bg: #1a1a1a;
 }
 
-/* --- STRUCTURE GLOBALE --- */
 .main-container {
   background: var(--nexus-bg);
   min-height: 100vh;
   padding: 20px;
-  display: flex;
-  flex-direction: column;
 }
 
-/* --- HEADER NEXUS --- */
 .brand-header {
   text-align: center;
   margin-bottom: 30px;
-  .logo-container .vortex-logo {
+
+  .vortex-logo {
     width: 80px;
-    animation: rotateVortex 20s linear infinite;
     filter: drop-shadow(0 0 10px var(--nexus-primary));
   }
+
   .brand-title {
     color: white;
-    font-size: 1.8rem;
     letter-spacing: 10px;
-    margin: 10px 0;
     font-weight: 300;
+    margin-top: 10px;
   }
 }
 
-/* --- SECTION EMPLOI DU TEMPS --- */
-.schedule-section {
-  .schedule-header {
+.schedule-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+
+  h2 {
+    color: white;
+    font-size: 1.6rem;
+    margin: 0;
+  }
+
+  .add-btn-container {
+    background: var(--nexus-primary);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 25px;
-    h2 { font-size: 1.6rem; color: white; font-weight: bold; }
-    .add-btn-container {
-      background: linear-gradient(135deg, var(--nexus-primary), var(--nexus-primary-dark));
-      border-radius: 50%;
-      width: 48px; height: 48px;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 4px 15px rgba(194, 24, 91, 0.4);
-      .add-btn { color: white; font-size: 2rem; }
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(194, 24, 91, 0.4);
+
+    ion-icon {
+      color: white;
+      font-size: 2rem;
+    }
+  }
+}
+
+.search-bar {
+  background: #1a1a1a;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 25px;
+  border: 1px solid #222;
+
+  input {
+    background: transparent;
+    border: none;
+    color: white;
+    flex: 1;
+    margin: 0 10px;
+    outline: none;
+  }
+
+  ion-icon {
+    color: #888;
+  }
+}
+
+.date-selector {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  color: white;
+  margin-bottom: 25px;
+
+  span {
+    font-weight: 800;
+    letter-spacing: 2px;
+    font-size: 0.9rem;
+  }
+
+  ion-icon {
+    color: var(--nexus-primary);
+    font-size: 1.2rem;
+  }
+}
+
+.course-item {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  border-radius: 16px;
+  color: white;
+  transition: transform 0.1s;
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  .course-number {
+    width: 20px;
+    font-size: 0.75rem;
+    opacity: 0.4;
+    font-weight: bold;
+  }
+
+  .course-time {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 65px;
+    margin-right: 15px;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+
+    .start {
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    .end {
+      font-size: 0.7rem;
+      opacity: 0.5;
+      margin-top: 2px;
     }
   }
 
-  .search-bar {
-    background: var(--nexus-input-bg);
+  .course-info {
+    flex: 1;
+    overflow: hidden;
+
+    .course-name {
+      font-weight: 700;
+      font-size: 0.95rem;
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .course-room {
+      font-size: 0.75rem;
+      opacity: 0.6;
+      display: block;
+      margin-top: 2px;
+    }
+  }
+
+  .course-duration-badge {
+    background: rgba(255, 255, 255, 0.9);
+    color: #000;
+    padding: 4px 10px;
     border-radius: 12px;
-    padding: 12px;
-    display: flex; align-items: center;
-    margin-bottom: 25px;
-    border: 1px solid #222;
-    input { background: transparent; border: none; color: white; flex: 1; margin: 0 10px; outline: none; }
-    ion-icon { color: #888; }
+    font-size: 0.7rem;
+    font-weight: 800;
+    margin-left: 10px;
+    min-width: 50px;
+    text-align: center;
   }
 }
 
-/* --- LISTE DES COURS --- */
-.schedule-container {
-  background: var(--nexus-card-bg);
-  border-radius: 24px;
-  padding: 20px 0;
-  .date-selector {
-    display: flex; justify-content: center; align-items: center; gap: 30px;
-    color: white; margin-bottom: 20px;
-    span { font-weight: bold; letter-spacing: 2px; }
-    ion-icon { color: var(--nexus-primary); }
-  }
-  .course-item {
-    display: flex; align-items: center; padding: 18px 15px; margin-bottom: 2px; color: white;
-    .course-number { width: 25px; opacity: 0.4; }
-    .course-time {
-      display: flex; flex-direction: column; margin-right: 20px; text-align: center;
-      .start { font-weight: bold; font-size: 0.9rem; }
-      .end { font-size: 0.7rem; opacity: 0.5; }
-    }
-    .course-info { flex: 1; .course-name { font-weight: bold; display: block; } .course-room { font-size: 0.75rem; opacity: 0.6; } }
-    .course-duration-badge { background: #fff; color: #000; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; }
-  }
-}
-
-/* --- MODAL --- */
 .nexus-modal {
   --background: var(--nexus-bg);
-  --height: 80%;
+  --height: 90%;
   --border-radius: 40px 40px 0 0;
 
-  .modal-content { padding: 20px; display: flex; flex-direction: column; height: 100%; }
-  .modal-handle { width: 40px; height: 4px; background: #333; border-radius: 10px; margin: 0 auto 20px; }
-  .modal-header { text-align: center; margin-bottom: 30px; h3 { color: white; letter-spacing: 5px; } p { color: #666; font-size: 0.8rem; } }
+  .modal-content {
+    padding: 20px;
+    color: white;
+    overflow-y: auto;
+  }
+
+  .modal-handle {
+    width: 40px;
+    height: 4px;
+    background: #333;
+    border-radius: 10px;
+    margin: 0 auto 20px;
+  }
+
+  .section-label {
+    color: var(--nexus-primary);
+    font-size: 0.7rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+    display: block;
+    margin-bottom: 10px;
+    margin-top: 20px;
+  }
 
   .input-group {
-    margin-bottom: 25px;
-    label { color: var(--nexus-primary); font-size: 0.7rem; font-weight: bold; letter-spacing: 2px; }
-    input { width: 100%; background: #161616; border: 1px solid #222; padding: 16px; border-radius: 15px; color: white; margin-top: 10px; outline: none; }
+    margin-bottom: 20px;
+
+    label {
+      @extend .section-label;
+      margin-top: 0;
+    }
+
+    input {
+      width: 100%;
+      background: #161616;
+      border: 1px solid #222;
+      padding: 16px;
+      border-radius: 15px;
+      color: white;
+      margin-top: 5px;
+      outline: none;
+    }
   }
 
   .category-grid {
-    display: flex; gap: 15px;
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+
     .cat-card {
-      flex: 1; background: #161616; padding: 20px 10px; border-radius: 20px;
-      display: flex; flex-direction: column; align-items: center; gap: 10px; color: #444; transition: 0.3s;
-      .icon-circle { width: 45px; height: 45px; background: #222; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-      &.active { background: rgba(194, 24, 91, 0.1); border: 1px solid var(--nexus-primary); color: white; .icon-circle { background: var(--nexus-primary); color: white; } }
+      flex: 1;
+      background: #161616;
+      padding: 15px 5px;
+      border-radius: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: #666;
+
+      &.active {
+        border: 1px solid var(--nexus-primary);
+        color: white;
+
+        .icon-circle {
+          background: var(--nexus-primary);
+          color: white;
+        }
+      }
+
+      .icon-circle {
+        width: 40px;
+        height: 40px;
+        background: #222;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      span {
+        font-size: 0.7rem;
+        font-weight: bold;
+      }
     }
   }
 
-  /* --- STYLE DU SÉLECTEUR DE DURÉE --- */
   .duration-selector {
-    display: flex; justify-content: space-between; gap: 10px; margin-top: 10px;
+    display: flex;
+    gap: 8px;
+
     .duration-chip {
-      flex: 1; background: #161616; color: #666; padding: 12px 5px; border-radius: 12px;
-      text-align: center; font-size: 0.8rem; font-weight: bold; transition: 0.2s;
-      &.active { background: rgba(194, 24, 91, 0.2); border: 1px solid var(--nexus-primary); color: white; }
+      flex: 1;
+      background: #161616;
+      padding: 12px 5px;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 0.75rem;
+      color: #666;
+
+      &.active {
+        background: rgba(194, 24, 91, 0.2);
+        color: white;
+        border: 1px solid var(--nexus-primary);
+      }
     }
   }
 
-  .modal-footer {
-    margin-top: 40px;
-    .btn-confirm {
-      width: 100%; background: linear-gradient(135deg, var(--nexus-primary), var(--nexus-primary-dark));
-      color: white; padding: 20px; border-radius: 20px; font-weight: bold;
-      display: flex; align-items: center; justify-content: center; gap: 12px; border: none;
-    }
+  .btn-confirm {
+    width: 100%;
+    background: var(--nexus-primary);
+    color: white;
+    padding: 20px;
+    border-radius: 20px;
+    font-weight: bold;
+    border: none;
+    margin-top: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
   }
 }
 
-.state-container { display: flex; flex-direction: column; align-items: center; padding: 60px; ion-spinner { --color: var(--nexus-primary); } }
-@keyframes rotateVortex { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.state-container {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+
+  ion-spinner {
+    --color: var(--nexus-primary);
+  }
+}
+
+.nexus-action-sheet {
+  --background: #161616;
+  --color: white;
+}
