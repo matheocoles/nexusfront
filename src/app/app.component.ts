@@ -1,7 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core'; // Ajoute inject
 import { Platform, IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
 import { StatusBar, Style } from '@capacitor/status-bar';
-import {SplashScreen} from "@capacitor/splash-screen";
+import {SplashScreen} from '@capacitor/splash-screen';
 
 @Component({
   selector: 'app-root',
