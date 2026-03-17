@@ -1,0 +1,72 @@
+.splash-container {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #0d0d0d !important;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.vortex-wrapper {
+  position: relative;
+  margin-bottom: 40px;
+
+  .vortex-logo {
+    width: 140px;
+    filter: drop-shadow(0 0 20px #c2185b);
+    animation: vortexRotate 6s linear infinite;
+  }
+
+  .glow-ring {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 160px; height: 160px;
+    border: 1px solid rgba(194, 24, 91, 0.3);
+    border-radius: 50%;
+    animation: ringPulse 2s infinite ease-out;
+  }
+}
+
+.text-content {
+  text-align: center;
+  .nexus-title {
+    color: white;
+    font-size: 2.5rem;
+    font-weight: 300;
+    letter-spacing: 15px;
+    margin: 0;
+  }
+  .nexus-subtitle {
+    color: #c2185b;
+    font-size: 0.7rem;
+    letter-spacing: 4px;
+    margin-top: 10px;
+    font-weight: bold;
+  }
+}
+
+.loader-container {
+  position: absolute;
+  bottom: 80px;
+  width: 200px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  .progress-bar {
+    width: 100%;
+    height: 100%;
+    background: #c2185b;
+    animation: loadingBar 3.5s ease-in-out forwards;
+  }
+}
+
+@keyframes vortexRotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes ringPulse {
+  0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.8; }
+  100% { transform: translate(-50%, -50%) scale(1.4); opacity: 0; }
+}
+@keyframes loadingBar { from { transform: translateX(-100%); } to { transform: translateX(0%); } }

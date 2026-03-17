@@ -3,9 +3,21 @@ import { authGuard } from "./auth.guard";
 
 export const routes: Routes = [
   {
+    path: 'splash',
+    loadComponent: () => import('./splash/splash.page').then(m => m.SplashPage),
+  },
+
+  {
+    path: '',
+    redirectTo: 'splash',
+    pathMatch: 'full',
+  },
+
+  {
     path: 'login',
     loadComponent: () => import('./login/login.page').then(m => m.LoginPage),
   },
+
   {
     path: 'tabs',
     canActivate: [authGuard],
@@ -30,13 +42,9 @@ export const routes: Routes = [
       },
     ],
   },
-  {
-    path: '',
-    redirectTo: 'tabs/home',
-    pathMatch: 'full',
-  },
+
   {
     path: '**',
-    redirectTo: 'login',
+    redirectTo: 'splash',
   },
 ];
