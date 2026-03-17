@@ -1,15 +1,18 @@
+/* --- VARIABLES GLOBALES NEXUS --- */
 :host {
   --nexus-primary: #c2185b;
   --nexus-bg: #0d0d0d;
   --nexus-card-bg: #161616;
 }
 
+/* --- STRUCTURE PRINCIPALE --- */
 .main-container {
   background: var(--nexus-bg);
   min-height: 100vh;
   padding: 20px;
 }
 
+/* --- HEADER & LOGO --- */
 .brand-header {
   text-align: center;
   margin-bottom: 30px;
@@ -24,9 +27,11 @@
     letter-spacing: 10px;
     font-weight: 300;
     margin-top: 10px;
+    text-transform: uppercase;
   }
 }
 
+/* --- SECTION EMPLOI DU TEMPS --- */
 .schedule-header {
   display: flex;
   justify-content: space-between;
@@ -37,6 +42,7 @@
     color: white;
     font-size: 1.6rem;
     margin: 0;
+    font-weight: 700;
   }
 
   .add-btn-container {
@@ -48,6 +54,7 @@
     align-items: center;
     justify-content: center;
     box-shadow: 0 4px 15px rgba(194, 24, 91, 0.4);
+    cursor: pointer;
 
     ion-icon {
       color: white;
@@ -56,6 +63,7 @@
   }
 }
 
+/* --- BARRE DE RECHERCHE --- */
 .search-bar {
   background: #1a1a1a;
   border-radius: 12px;
@@ -79,6 +87,7 @@
   }
 }
 
+/* --- DATE SELECTOR --- */
 .date-selector {
   display: flex;
   justify-content: center;
@@ -99,23 +108,24 @@
   }
 }
 
+/* --- CARTES DE COURS (LISTE) --- */
 .course-item {
   display: flex;
   align-items: center;
   padding: 14px 16px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   border-radius: 16px;
   color: white;
-  transition: transform 0.1s;
+  transition: transform 0.15s ease;
 
   &:active {
-    transform: scale(0.98);
+    transform: scale(0.97);
   }
 
   .course-number {
-    width: 20px;
+    width: 25px;
     font-size: 0.75rem;
-    opacity: 0.4;
+    opacity: 0.3;
     font-weight: bold;
   }
 
@@ -155,9 +165,15 @@
 
     .course-room {
       font-size: 0.75rem;
-      opacity: 0.6;
-      display: block;
-      margin-top: 2px;
+      opacity: 0.7;
+      display: flex;
+      align-items: center;
+      margin-top: 3px;
+
+      ion-icon {
+        margin-right: 4px;
+        font-size: 0.9rem;
+      }
     }
   }
 
@@ -169,20 +185,20 @@
     font-size: 0.7rem;
     font-weight: 800;
     margin-left: 10px;
-    min-width: 50px;
+    min-width: 55px;
     text-align: center;
   }
 }
 
+/* --- MODAL D'AJOUT / MODIFICATION --- */
 .nexus-modal {
   --background: var(--nexus-bg);
   --height: 90%;
   --border-radius: 40px 40px 0 0;
 
   .modal-content {
-    padding: 20px;
+    padding: 25px;
     color: white;
-    overflow-y: auto;
   }
 
   .modal-handle {
@@ -200,16 +216,12 @@
     letter-spacing: 2px;
     display: block;
     margin-bottom: 10px;
-    margin-top: 20px;
+    margin-top: 25px;
+    text-transform: uppercase;
   }
 
   .input-group {
     margin-bottom: 20px;
-
-    label {
-      @extend .section-label;
-      margin-top: 0;
-    }
 
     input {
       width: 100%;
@@ -218,21 +230,23 @@
       padding: 16px;
       border-radius: 15px;
       color: white;
-      margin-top: 5px;
       outline: none;
+
+      &:focus {
+        border-color: var(--nexus-primary);
+      }
     }
   }
 
   .category-grid {
     display: flex;
-    gap: 10px;
-    margin-bottom: 25px;
+    gap: 12px;
 
     .cat-card {
       flex: 1;
       background: #161616;
       padding: 15px 5px;
-      border-radius: 15px;
+      border-radius: 18px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -250,8 +264,8 @@
       }
 
       .icon-circle {
-        width: 40px;
-        height: 40px;
+        width: 42px;
+        height: 42px;
         background: #222;
         border-radius: 50%;
         display: flex;
@@ -268,21 +282,20 @@
 
   .duration-selector {
     display: flex;
-    gap: 8px;
+    gap: 10px;
 
     .duration-chip {
       flex: 1;
       background: #161616;
-      padding: 12px 5px;
-      border-radius: 10px;
+      padding: 14px 5px;
+      border-radius: 12px;
       text-align: center;
-      font-size: 0.75rem;
+      font-weight: bold;
       color: #666;
 
       &.active {
-        background: rgba(194, 24, 91, 0.2);
+        background: var(--nexus-primary);
         color: white;
-        border: 1px solid var(--nexus-primary);
       }
     }
   }
@@ -291,18 +304,103 @@
     width: 100%;
     background: var(--nexus-primary);
     color: white;
-    padding: 20px;
+    padding: 22px;
     border-radius: 20px;
-    font-weight: bold;
+    font-weight: 800;
     border: none;
-    margin-top: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
+    margin-top: 35px;
+    box-shadow: 0 10px 20px rgba(194, 24, 91, 0.3);
   }
 }
 
+/* --- NOTIFICATION HUD CENTRALE (MODAL NOTIF) --- */
+.nexus-hud-modal {
+  --width: 280px;
+  --height: fit-content;
+  --border-radius: 30px;
+  --background: transparent;
+  --box-shadow: none;
+  align-items: center;
+
+  &::part(content) {
+    background: rgba(10, 10, 10, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--nexus-primary);
+    border-radius: 30px;
+    box-shadow: 0 0 40px rgba(194, 24, 91, 0.5);
+    overflow: hidden;
+  }
+
+  .hud-wrapper {
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: var(--nexus-primary);
+      box-shadow: 0 0 15px var(--nexus-primary);
+      animation: scanLoopHUD 2.5s infinite linear;
+    }
+
+    .hud-icon {
+      font-size: 4rem;
+      color: var(--nexus-primary);
+      filter: drop-shadow(0 0 15px var(--nexus-primary));
+      margin-bottom: 15px;
+    }
+
+    .hud-title {
+      color: white;
+      font-weight: 900;
+      font-size: 1.2rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin: 0;
+    }
+
+    .hud-msg {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.8rem;
+      margin-top: 8px;
+    }
+
+    .hud-footer {
+      margin-top: 20px;
+      font-size: 0.6rem;
+      letter-spacing: 2px;
+      color: var(--nexus-primary);
+      opacity: 0.5;
+      text-transform: uppercase;
+    }
+  }
+}
+
+/* --- ANIMATIONS --- */
+@keyframes scanLoopHUD {
+  0% {
+    top: 0%;
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+/* --- UI HELPERS & OVERLAYS --- */
 .state-container {
   display: flex;
   justify-content: center;
@@ -316,4 +414,12 @@
 .nexus-action-sheet {
   --background: #161616;
   --color: white;
+}
+
+.nexus-alert {
+  --background: #161616;
+
+  button {
+    color: var(--nexus-primary) !important;
+  }
 }

@@ -50,12 +50,10 @@ export class NexusService {
   deleteSession(id: number | string): Observable<any> {
     const url = `${this.apiUrl}/sessions/${id}`;
 
-    const options = {
+    return this.http.delete(url, {
       headers: this.getHeaders(),
-      body: { id: id }
-    };
-
-    return this.http.delete(url, options);
+      body: {}
+    });
   }
 
   login(credentials: any): Observable<any> {

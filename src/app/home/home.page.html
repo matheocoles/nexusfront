@@ -43,7 +43,7 @@
             <div class="course-info">
               <span class="course-name">{{ c.name }}</span>
               <span class="course-room">
-                <ion-icon name="location-outline" style="font-size: 10px; margin-right: 4px;"></ion-icon>
+                <ion-icon name="location-outline"></ion-icon>
                 {{ c.room }}
               </span>
             </div>
@@ -66,12 +66,12 @@
 
         <div class="modal-body">
           <div class="input-group">
-            <label>TITRE DE L'ACTIVITÉ</label>
+            <label class="section-label">TITRE DE L'ACTIVITÉ</label>
             <input type="text" [(ngModel)]="newSessionTitle" placeholder="Ex: Musculation...">
           </div>
 
           <div class="input-group">
-            <label>LIEU / SALLE</label>
+            <label class="section-label">LIEU / SALLE</label>
             <input type="text" [(ngModel)]="newSessionRoom" placeholder="Ex: Salle A, Gymnase...">
           </div>
 
@@ -99,13 +99,26 @@
             <div class="duration-chip" [class.active]="selectedDuration === 120" (click)="selectedDuration = 120">2 h</div>
           </div>
 
-          <div class="modal-footer">
-            <button class="btn-confirm" (click)="confirmSave()">
-              {{ isEditMode ? 'ENREGISTRER' : 'CRÉER LA SESSION' }}
-              <ion-icon name="checkmark-circle-outline"></ion-icon>
-            </button>
-          </div>
+          <button class="btn-confirm" (click)="confirmSave()">
+            {{ isEditMode ? 'ENREGISTRER LES MODIFS' : 'CRÉER LA SESSION' }}
+            <ion-icon name="checkmark-circle-outline"></ion-icon>
+          </button>
         </div>
+      </div>
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal [isOpen]="isNotifOpen" (didDismiss)="isNotifOpen = false" class="nexus-hud-modal">
+    <ng-template>
+      <div class="hud-wrapper">
+        <div class="hud-icon">
+          <ion-icon name="shield-checkmark-outline"></ion-icon>
+        </div>
+        <div class="hud-content">
+          <h3 class="hud-title">{{ notifTitle }}</h3>
+          <p class="hud-msg">{{ notifMsg }}</p>
+        </div>
+        <div class="hud-footer">SYSTÈME NEXUS OPTIMISÉ</div>
       </div>
     </ng-template>
   </ion-modal>

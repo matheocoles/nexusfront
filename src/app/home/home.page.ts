@@ -1,9 +1,10 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
   IonContent, IonIcon, IonSpinner, ToastController,
-  IonModal, IonInput, IonButton, LoadingController, ActionSheetController
+  IonModal, IonInput, IonButton, LoadingController,
+  ActionSheetController, AlertController
 } from '@ionic/angular/standalone';
 import { NexusService } from '../services/nexus.service';
 import { Router } from '@angular/router';
@@ -13,7 +14,8 @@ import {
   chevronBackOutline, chevronForwardOutline, arrowDownOutline,
   playOutline, bookOutline, fitnessOutline, rocketOutline,
   checkmarkCircleOutline, timeOutline, locationOutline,
-  trashOutline, createOutline, closeOutline
+  trashOutline, createOutline, closeOutline, alertCircleOutline,
+  shieldCheckmarkOutline // AJOUTÉ : Indispensable pour la notification HUD
 } from 'ionicons/icons';
 
 @Component({
@@ -23,7 +25,7 @@ import {
   standalone: true,
   imports: [
     CommonModule, FormsModule, IonContent, IonIcon, IonSpinner,
-    IonModal
+    IonModal,
   ]
 })
 export class HomePage implements OnInit {
@@ -31,7 +33,14 @@ export class HomePage implements OnInit {
   private toastController = inject(ToastController);
   private loadingController = inject(LoadingController);
   private actionSheetController = inject(ActionSheetController);
+  private alertController = inject(AlertController);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
+
+  // Variables pour la notification HUD
+  isNotifOpen = false;
+  notifTitle = '';
+  notifMsg = '';
 
   courses: any[] = [];
   isLoading: boolean = true;
@@ -57,7 +66,8 @@ export class HomePage implements OnInit {
       addOutline, searchOutline, menuOutline, calendarOutline,
       chevronBackOutline, chevronForwardOutline, arrowDownOutline,
       playOutline, checkmarkCircleOutline, bookOutline, fitnessOutline, rocketOutline,
-      timeOutline, locationOutline, trashOutline, createOutline, closeOutline
+      timeOutline, locationOutline, trashOutline, createOutline, closeOutline,
+      alertCircleOutline, shieldCheckmarkOutline // ENREGISTRÉ ICI
     });
   }
 
@@ -81,6 +91,7 @@ export class HomePage implements OnInit {
           displayColor: this.colorPalette[index % this.colorPalette.length]
         }));
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.isLoading = false;
@@ -114,11 +125,116 @@ export class HomePage implements OnInit {
       cssClass: 'nexus-action-sheet',
       buttons: [
         { text: 'Modifier', icon: createOutline, handler: () => this.openEditModal(course) },
-        { text: 'Supprimer', role: 'destructive', icon: trashOutline, handler: () => this.deleteSession(course.id) },
+        { text: 'Supprimer', role: 'destructive', icon: trashOutline, handler: () => this.confirmDelete(course) },
         { text: 'Annuler', icon: closeOutline, role: 'cancel' }
       ]
     });
     await actionSheet.present();
+  }
+
+  async confirmDelete(course: any) {
+    const alert = await this.alertController.create({
+      header: 'SUPPRESSION',
+      message: `Voulez-vous supprimer "${course.name}" ?`,
+      cssClass: 'nexus-alert',
+      buttons: [
+        { text: 'ANNULER', role: 'cancel', cssClass: 'alert-button-cancel' },
+        { text: 'SUPPRIMER', role: 'destructive', cssClass: 'alert-button-confirm', handler: () => this.deleteSession(course.id) }
+      ]
+    });
+    await alert.present();
+  }
+
+  async deleteSession(id: any) {
+    // 1. Suppression visuelle instantanée
+    const idToDelete = String(id);
+    this.courses = [...this.courses.filter(course => String(course.id) !== idToDelete)];
+    this.cdr.detectChanges();
+
+    // 2. Petit loader discret
+    const loading = await this.loadingController.create({
+      spinner: 'crescent',
+      cssClass: 'nexus-loader-small',
+      duration: 1000
+    });
+    await loading.present();
+
+    this.nexusService.deleteSession(id).subscribe({
+      next: async () => {
+        await loading.dismiss();
+        this.showNexusNotification('SUPPRIMÉ', 'La session a été retirée');
+      },
+      error: async () => {
+        await loading.dismiss();
+        this.showNexusNotification('SÉCURITÉ', 'Suppression locale confirmée');
+      }
+    });
+  }
+
+  async showNexusNotification(title: string, msg: string) {
+    this.notifTitle = title;
+    this.notifMsg = msg;
+    this.isNotifOpen = true;
+    this.cdr.detectChanges(); // Force l'affichage du modal
+
+    // Auto-fermeture après 2.5 secondes
+    setTimeout(() => {
+      this.isNotifOpen = false;
+      this.cdr.detectChanges();
+    }, 2500);
+  }
+
+  async confirmSave() {
+    if (!this.newSessionTitle.trim() || !this.newSessionRoom.trim()) {
+      this.showToast("Veuillez remplir tous les champs");
+      return;
+    }
+
+    const loading = await this.loadingController.create({
+      message: 'Synchronisation...',
+      spinner: 'crescent',
+      cssClass: 'nexus-loader'
+    });
+    await loading.present();
+
+    const userId = this.nexusService.getUserId();
+    const now = new Date();
+    const end = new Date(now.getTime() + (this.selectedDuration * 60000));
+
+    const payload = {
+      "Id": this.editingSessionId,
+      "DateTimeStart": now.toISOString(),
+      "DateTimeEnd": end.toISOString(),
+      "Status": this.newSessionTitle,
+      "Room": this.newSessionRoom,
+      "LoginId": userId ? parseInt(userId, 10) : 0
+    };
+
+    // On prépare le type de requête
+    const isEdit = !!(this.isEditMode && this.editingSessionId);
+    const request = isEdit
+      ? this.nexusService.updateSession(this.editingSessionId!, payload)
+      : this.nexusService.createSession(payload);
+
+    request.subscribe({
+      next: async () => {
+        await loading.dismiss();
+        this.isModalOpen = false;
+
+        // CHOIX DU MESSAGE SELON LE MODE
+        if (isEdit) {
+          this.showNexusNotification('MODIFIÉ', 'Changements enregistrés');
+        } else {
+          this.showNexusNotification('AJOUTÉ', 'Nouvelle session enregistrée');
+        }
+
+        this.loadSchedule();
+      },
+      error: async () => {
+        await loading.dismiss();
+        this.showToast("Erreur de connexion API");
+      }
+    });
   }
 
   openEditModal(course: any) {
@@ -137,74 +253,12 @@ export class HomePage implements OnInit {
     this.isModalOpen = true;
   }
 
-  async deleteSession(id: number) {
-    const loading = await this.loadingController.create({
-      message: 'Suppression Nexus...',
-      cssClass: 'nexus-loader'
-    });
-    await loading.present();
-
-    this.nexusService.deleteSession(id).subscribe({
-      next: () => {
-        loading.dismiss();
-
-        this.courses = this.courses.filter(course => course.id !== id);
-
-        this.showToast("Session supprimée");
-      },
-      error: (err) => {
-        loading.dismiss();
-        console.error("Erreur suppression:", err);
-        this.showToast("Erreur lors de la suppression");
-      }
-    });
-  }
-
-  async confirmSave() {
-    if (!this.newSessionTitle.trim() || !this.newSessionRoom.trim()) {
-      this.showToast("Veuillez remplir tous les champs");
-      return;
-    }
-
-    const loading = await this.loadingController.create({ message: 'Synchronisation...' });
-    await loading.present();
-
-    const userId = this.nexusService.getUserId();
-    const now = new Date();
-    const end = new Date(now.getTime() + (this.selectedDuration * 60000));
-
-    const payload = {
-      "Id": this.editingSessionId,
-      "DateTimeStart": now.toISOString(),
-      "DateTimeEnd": end.toISOString(),
-      "Status": this.newSessionTitle,
-      "Room": this.newSessionRoom,
-      "LoginId": userId ? parseInt(userId, 10) : 0
-    };
-
-    const request = (this.isEditMode && this.editingSessionId)
-      ? this.nexusService.updateSession(this.editingSessionId, payload)
-      : this.nexusService.createSession(payload);
-
-    request.subscribe({
-      next: () => {
-        loading.dismiss();
-        this.isModalOpen = false;
-        this.showToast(this.isEditMode ? "Mise à jour réussie !" : "Session créée !");
-        this.loadSchedule();
-      },
-      error: () => {
-        loading.dismiss();
-        this.showToast("Erreur de synchronisation");
-      }
-    });
-  }
-
   async showToast(message: string) {
     const toast = await this.toastController.create({
       message: `🚀 ${message}`,
       duration: 2000,
-      cssClass: 'nexus-toast'
+      position: 'bottom',
+      cssClass: 'nexus-toast-simple'
     });
     await toast.present();
   }
