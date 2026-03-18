@@ -9,7 +9,6 @@ export class NexusService {
   private apiUrl = 'https://nexusapi.up.railway.app/api';
   private readonly http = inject(HttpClient);
 
-  // Génération centralisée des headers avec Token
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('nexus_token');
     let headers = new HttpHeaders({
@@ -31,11 +30,20 @@ export class NexusService {
     return localStorage.getItem('nexus_user_id');
   }
 
+  logout() {
+    localStorage.removeItem('nexus_token');
+    localStorage.removeItem('nexus_user_id');
+  }
+
+  login(credentials: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/logins/authenticate`, credentials);
+  }
+
   getUserProfile(id: string): Observable<any> {
     return this.http.get(`${this.apiUrl}/logins/${id}`, { headers: this.getHeaders() });
   }
 
-  getSchedule(): Observable<any[]> {
+  getSessions(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/sessions`, { headers: this.getHeaders() });
   }
 
@@ -48,20 +56,6 @@ export class NexusService {
   }
 
   deleteSession(id: number | string): Observable<any> {
-    const url = `${this.apiUrl}/sessions/${id}`;
-
-    return this.http.delete(url, {
-      headers: this.getHeaders(),
-      body: {}
-    });
-  }
-
-  login(credentials: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/login`, credentials);
-  }
-
-  logout() {
-    localStorage.removeItem('nexus_token');
-    localStorage.removeItem('nexus_user_id');
+    return this.http.delete(`${this.apiUrl}/sessions/${id}`, { headers: this.getHeaders() });
   }
 }
