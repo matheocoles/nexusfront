@@ -11,7 +11,8 @@ import {
   addOutline, searchOutline, menuOutline, playOutline,
   bookOutline, fitnessOutline, rocketOutline, checkmarkCircleOutline,
   checkmarkCircle, locationOutline, trashOutline, createOutline,
-  closeOutline, shieldCheckmarkOutline
+  closeOutline, shieldCheckmarkOutline, chevronBackOutline,
+  chevronForwardOutline, ellipseOutline
 } from 'ionicons/icons';
 
 @Component({
@@ -27,6 +28,7 @@ export class HomePage implements OnInit {
   private actionSheetCtrl = inject(ActionSheetController);
   private cdr = inject(ChangeDetectorRef);
 
+  // States
   courses: any[] = [];
   filteredCourses: any[] = [];
   isLoading = true;
@@ -34,6 +36,11 @@ export class HomePage implements OnInit {
   isEditMode = false;
   isNotifOpen = false;
 
+  // Date Logic
+  currentDate: Date = new Date();
+  displayDateLabel = "Aujourd'hui";
+
+  // Form
   newSessionTitle = '';
   selectedType = 'class';
   selectedDuration = 60;
@@ -53,34 +60,84 @@ export class HomePage implements OnInit {
 
   constructor() {
     addIcons({
-      'add-outline': addOutline, 'search-outline': searchOutline,
-      'menu-outline': menuOutline, 'play-outline': playOutline,
-      'book-outline': bookOutline, 'fitness-outline': fitnessOutline,
-      'rocket-outline': rocketOutline, 'checkmark-circle-outline': checkmarkCircleOutline,
-      'checkmark-circle': checkmarkCircle, 'location-outline': locationOutline,
-      'trash-outline': trashOutline, 'create-outline': createOutline,
-      'close-outline': closeOutline, 'shield-checkmark-outline': shieldCheckmarkOutline
+      'add-outline': addOutline,
+      'search-outline': searchOutline,
+      'menu-outline': menuOutline,
+      'play-outline': playOutline,
+      'book-outline': bookOutline,
+      'fitness-outline': fitnessOutline,
+      'rocket-outline': rocketOutline,
+      'checkmark-circle-outline': checkmarkCircleOutline,
+      'checkmark-circle': checkmarkCircle,
+      'location-outline': locationOutline,
+      'trash-outline': trashOutline,
+      'create-outline': createOutline,
+      'close-outline': closeOutline,
+      'shield-checkmark-outline': shieldCheckmarkOutline,
+      'chevron-back-outline': chevronBackOutline,
+      'chevron-forward-outline': chevronForwardOutline,
+      'ellipse-outline': ellipseOutline
     });
   }
 
   ngOnInit() { this.loadSchedule(); }
 
+  // --- NAVIGATION DATE ---
+  nextDay() {
+    this.currentDate.setDate(this.currentDate.getDate() + 1);
+    this.updateDateLabel();
+    this.loadSchedule();
+  }
+
+  prevDay() {
+    this.currentDate.setDate(this.currentDate.getDate() - 1);
+    this.updateDateLabel();
+    this.loadSchedule();
+  }
+
+  private updateDateLabel() {
+    const today = new Date();
+    const tomorrow = new Date();
+    tomorrow.setDate(today.getDate() + 1);
+
+    if (this.currentDate.toDateString() === today.toDateString()) {
+      this.displayDateLabel = "Aujourd'hui";
+    } else if (this.currentDate.toDateString() === tomorrow.toDateString()) {
+      this.displayDateLabel = "Demain";
+    } else {
+      this.displayDateLabel = this.currentDate.toLocaleDateString('fr-FR', {
+        day: 'numeric',
+        month: 'long'
+      });
+    }
+  }
+
+  // --- DATA LOADING ---
   loadSchedule() {
     this.isLoading = true;
     this.nexusService.getSessions().subscribe({
       next: (res) => {
-        this.courses = res.map((s, i) => ({
-          ...s,
-          name: s.status || 'Mission',
-          room: s.class?.room || s.sport?.place || s.extraActivity?.place || 'Zone Nexus',
-          startTime: this.formatTime(s.dateTimeStart),
-          endTime: this.formatTime(s.dateTimeEnd),
-          displayColor: this.palette[i % this.palette.length],
-          isDone: s.status?.includes('[TERMINÉE]'),
-          duration: this.calcDur(s.dateTimeStart, s.dateTimeEnd)
-        }));
+        const selectedDayStr = this.currentDate.toDateString();
+
+        // On filtre par jour pour l'affichage pro
+        this.courses = res
+          .filter(s => new Date(s.dateTimeStart).toDateString() === selectedDayStr)
+          .map((s, i) => ({
+            ...s,
+            name: s.status || 'Mission',
+            room: s.class?.room || s.sport?.place || s.extraActivity?.place || 'Zone Nexus',
+            startTime: this.formatTime(s.dateTimeStart),
+            endTime: this.formatTime(s.dateTimeEnd),
+            displayColor: this.palette[i % this.palette.length],
+            isDone: s.status?.includes('[TERMINÉE]'),
+            duration: this.calcDur(s.dateTimeStart, s.dateTimeEnd)
+          }));
+
         this.filteredCourses = [...this.courses];
-        setTimeout(() => { this.isLoading = false; this.cdr.detectChanges(); }, 1200);
+        setTimeout(() => {
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        }, 800);
       },
       error: () => { this.isLoading = false; }
     });
@@ -95,7 +152,6 @@ export class HomePage implements OnInit {
     const durationNum = parseInt(this.selectedDuration.toString(), 10);
     const endTime = new Date(Date.now() + (durationNum * 60000)).toISOString();
 
-    // Modèle Activity (Base)
     const baseActivity = {
       Name: this.newSessionTitle,
       Description: this.sessionData.description || "Mission Nexus",
@@ -105,7 +161,6 @@ export class HomePage implements OnInit {
     };
 
     let createObs;
-
     if (this.selectedType === 'class') {
       const payload = { ...baseActivity, Subject: this.newSessionTitle, Teacher: this.sessionData.teacher, Room: this.sessionData.room, Objective: 'Objectif Standard' };
       createObs = this.nexusService.createClass(payload);
@@ -119,10 +174,7 @@ export class HomePage implements OnInit {
 
     createObs.subscribe({
       next: (newEntity: any) => this.injectSession(newEntity.id, loading, now, endTime),
-      error: () => {
-        // Fallback si l'entité existe déjà (évite la 500/400 sur doublon)
-        this.fallbackToExisting(loading, now, endTime);
-      }
+      error: () => this.fallbackToExisting(loading, now, endTime)
     });
   }
 
@@ -132,9 +184,8 @@ export class HomePage implements OnInit {
 
     listObs.subscribe((items: any[]) => {
       const existing = items.find(i => i.name.toLowerCase() === this.newSessionTitle.toLowerCase());
-      if (existing) {
-        this.injectSession(existing.id, loading, start, end);
-      } else {
+      if (existing) this.injectSession(existing.id, loading, start, end);
+      else {
         loading.dismiss();
         this.nexusService.showToast("ERREUR : Liaison impossible");
       }
@@ -160,11 +211,7 @@ export class HomePage implements OnInit {
         this.loadSchedule();
         this.showHUD('SYNC OK', 'MISSION ENREGISTRÉE');
       },
-      error: (err) => {
-        loading.dismiss();
-        console.error("Erreur Session 400:", err.error);
-        this.nexusService.showToast("ERREUR : Session rejetée");
-      }
+      error: () => loading.dismiss()
     });
   }
 
@@ -195,7 +242,7 @@ export class HomePage implements OnInit {
 
   async presentActionSheet(course: any) {
     const sheet = await this.actionSheetCtrl.create({
-      header: 'ACTIONS',
+      header: 'PROTOCOLE NEXUS',
       buttons: [
         { text: 'Supprimer', icon: 'trash-outline', role: 'destructive', handler: () => {
             this.nexusService.deleteSession(course.id).subscribe(() => this.loadSchedule());
@@ -206,8 +253,12 @@ export class HomePage implements OnInit {
     await sheet.present();
   }
 
-  private formatTime(d: string) { return d ? new Date(d).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '--:--'; }
+  private formatTime(d: string) {
+    return d ? new Date(d).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '--:--';
+  }
+
   private calcDur(s: string, e: string) {
+    if (!s || !e) return '0m';
     const diff = Math.round((new Date(e).getTime() - new Date(s).getTime()) / 60000);
     return diff >= 60 ? `${Math.floor(diff/60)}h${diff%60 || ''}` : `${diff}m`;
   }
