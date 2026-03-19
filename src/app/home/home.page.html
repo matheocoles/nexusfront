@@ -1,4 +1,15 @@
-<ion-content [fullscreen]="true">
+<div class="cyber-loader-overlay" *ngIf="isLoading">
+  <div class="loader-content">
+    <div class="glitch-text" data-text="NEXUS_SYSTEM_BOOT">NEXUS_SYSTEM_BOOT</div>
+    <div class="scanline"></div>
+    <div class="loading-bar-container">
+      <div class="loading-bar-fill"></div>
+    </div>
+    <p class="status-msg">CHARGEMENT DES PROTOCOLES...</p>
+  </div>
+</div>
+
+<ion-content [fullscreen]="true" class="nexus-main-bg">
   <div class="main-container">
     <header class="brand-header">
       <div class="logo-container">
@@ -34,12 +45,17 @@
 
         <div class="course-list">
           <div class="course-item" *ngFor="let c of courses; let i = index"
-               [style.background]="c.displayColor" (click)="presentActionSheet(c)">
+               [style.background]="c.displayColor"
+               [class.is-done]="c.isDone"
+               (click)="presentActionSheet(c)">
+
             <div class="course-number">{{ i + 1 }}</div>
+
             <div class="course-time">
               <span class="start">{{ c.startTime }}</span>
               <span class="end">{{ c.endTime }}</span>
             </div>
+
             <div class="course-info">
               <span class="course-name">{{ c.name }}</span>
               <span class="course-room">
@@ -47,8 +63,17 @@
                 {{ c.room }}
               </span>
             </div>
-            <div class="course-duration-badge">{{ c.duration }}</div>
+
+            <div class="validation-slot" (click)="validateSession(c, $event)">
+              <ion-icon [name]="c.isDone ? 'checkmark-circle' : 'play-outline'"></ion-icon>
+            </div>
+
+            <div class="course-duration-badge" *ngIf="!c.isDone">{{ c.duration }}</div>
           </div>
+        </div>
+
+        <div *ngIf="courses.length === 0" class="empty-state">
+          <p>Aucune session détectée dans le système.</p>
         </div>
       </div>
     </section>
@@ -61,37 +86,44 @@
         <div class="modal-handle"></div>
         <header class="modal-header">
           <h3>{{ isEditMode ? 'MODIFIER' : 'NOUVELLE' }} ACTIVITÉ</h3>
-          <p>Configurez les paramètres de session</p>
+          <p>Synchronisation avec Railway API</p>
         </header>
 
         <div class="modal-body">
           <div class="input-group">
-            <label class="section-label">TITRE DE L'ACTIVITÉ</label>
-            <input type="text" [(ngModel)]="newSessionTitle" placeholder="Ex: Musculation...">
-          </div>
-
-          <div class="input-group">
-            <label class="section-label">LIEU / SALLE</label>
-            <input type="text" [(ngModel)]="newSessionRoom" placeholder="Ex: Salle A, Gymnase...">
+            <label class="section-label">TITRE DE L'ACTIVITÉ (STATUS)</label>
+            <input type="text" [(ngModel)]="newSessionTitle" placeholder="Ex: Musculation, Maths...">
           </div>
 
           <label class="section-label">TYPE D'ACTIVITÉ</label>
           <div class="category-grid">
-            <div class="cat-card" [class.active]="selectedType === 'class'" (click)="selectedType = 'class'">
+            <div class="cat-card" [class.active]="selectedType === 'class'" (click)="changeType('class')">
               <div class="icon-circle"><ion-icon [icon]="modalIcons.book"></ion-icon></div>
               <span>COURS</span>
             </div>
-            <div class="cat-card" [class.active]="selectedType === 'sport'" (click)="selectedType = 'sport'">
+            <div class="cat-card" [class.active]="selectedType === 'sport'" (click)="changeType('sport')">
               <div class="icon-circle"><ion-icon [icon]="modalIcons.fitness"></ion-icon></div>
               <span>SPORT</span>
             </div>
-            <div class="cat-card" [class.active]="selectedType === 'extra'" (click)="selectedType = 'extra'">
+            <div class="cat-card" [class.active]="selectedType === 'extra'" (click)="changeType('extra')">
               <div class="icon-circle"><ion-icon [icon]="modalIcons.rocket"></ion-icon></div>
               <span>EXTRA</span>
             </div>
           </div>
 
-          <label class="section-label" style="margin-top: 20px;">DURÉE</label>
+          <div class="input-group" style="margin-top: 20px;">
+            <label class="section-label">CHOISIR DANS LA BASE DE DONNÉES</label>
+            <div class="nexus-select-wrapper">
+              <select [(ngModel)]="selectedCategoryId" class="nexus-custom-select">
+                <option [value]="null" disabled selected>Sélectionnez un élément...</option>
+                <option *ngFor="let item of categoryList" [value]="item.id">
+                  {{ item.name }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <label class="section-label" style="margin-top: 20px;">DURÉE DE LA SESSION</label>
           <div class="duration-selector">
             <div class="duration-chip" [class.active]="selectedDuration === 30" (click)="selectedDuration = 30">30 min</div>
             <div class="duration-chip" [class.active]="selectedDuration === 60" (click)="selectedDuration = 60">1 h</div>

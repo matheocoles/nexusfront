@@ -1,31 +1,46 @@
+/* --- VARIABLES DE COULEURS NEXUS --- */
+$color-pink: #FF2D55; // Accent / Classes
+$color-blue: #007AFF; // Sports
+$color-purple: #AF52DE; // Extra / Travail
+$color-gray-dark: #1C1C1E;
+$color-gray-light: #2C2C2E;
+$color-gray-border: #3A3A3C;
+$color-text-gray: #8E8E93;
+
+/* --- FOND DE PAGE --- */
 .nexus-dark-content {
   --background: #000000;
   color: white;
+  font-family: 'Inter', sans-serif;
 }
 
 .main-wrapper {
-  padding: 24px 16px;
+  padding: 24px 16px 40px;
 }
 
+/* --- HEADER ET BARRE DE RECHERCHE --- */
 .header-container {
+  margin-bottom: 25px;
+
   .title {
     font-size: 32px;
     font-weight: 800;
-    margin-bottom: 20px;
+    margin: 0 0 15px 0;
     color: white;
+    letter-spacing: -1px;
   }
 
   .search-bar {
-    background: #1C1C1E;
+    background: $color-gray-dark;
     border-radius: 12px;
-    padding: 12px;
+    padding: 12px 16px;
     display: flex;
     align-items: center;
 
     ion-icon {
-      color: #8E8E93;
+      color: $color-text-gray;
       font-size: 20px;
-      margin-right: 10px;
+      margin-right: 12px;
     }
 
     input {
@@ -34,48 +49,68 @@
       color: white;
       width: 100%;
       outline: none;
+      font-size: 16px;
+
+      &::placeholder {
+        color: #48484a;
+      }
     }
   }
 }
 
-.dark-datetime {
-  --background: #000000;
-  border-radius: 16px;
-  margin-top: 10px;
-  color: white;
+/* --- CALENDRIER SOMBRE --- */
+.calendar-section {
+  margin-bottom: 20px;
 
-  &::part(calendar-day active), &::part(calendar-day selected) {
-    background: #FF2D55;
+  .dark-datetime {
+    --background: #000000;
+    --background-rgb: 0, 0, 0;
+    border-radius: 16px;
     color: white;
-    box-shadow: 0 0 10px rgba(255, 45, 85, 0.4);
-  }
+    width: 100%;
+    min-height: 380px;
 
-  &::part(calendar-day today) {
-    color: #FF2D55;
-    border: 1px solid #FF2D55;
+    &::part(calendar-day) {
+      color: white;
+      font-weight: 500;
+    }
+
+    &::part(calendar-day active), &::part(calendar-day selected) {
+      background: $color-pink;
+      color: white;
+      font-weight: 700;
+      box-shadow: 0 0 15px rgba(255, 45, 85, 0.5);
+    }
+
+    &::part(calendar-day today) {
+      color: $color-pink;
+      border: 1px solid $color-pink;
+    }
   }
 }
 
-/* POPUP */
+/* --- POPUP MODALE --- */
 .schedule-modal {
   --background: #1C1C1E;
-  --border-radius: 24px 24px 0 0;
+  --border-radius: 30px 30px 0 0;
 
   &::part(handle) {
-    background: #FF2D55;
+    background: $color-pink;
     width: 45px;
+    height: 6px;
+    margin-top: 12px;
   }
 }
 
 .modal-wrapper {
   background: #1C1C1E;
-  padding: 20px 16px;
+  padding: 20px 16px 30px;
   color: white;
   height: 100%;
 }
 
 .modal-header {
-  margin-bottom: 20px;
+  margin-bottom: 25px;
 
   .header-top {
     display: flex;
@@ -83,98 +118,219 @@
     align-items: center;
 
     h2 {
-      font-size: 22px;
+      font-size: 24px;
       font-weight: 800;
       margin: 0;
+      color: white;
     }
 
-    .action-icon {
-      font-size: 28px;
-      background: #2C2C2E;
-      padding: 5px;
+    .action-btn {
+      font-size: 26px;
+      background: $color-gray-light;
+      padding: 6px;
       border-radius: 10px;
-      color: #FF2D55;
+      color: $color-pink;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+
+      &:active {
+        background: $color-gray-border;
+      }
     }
   }
 
-  p {
-    color: #FF2D55;
-    margin: 5px 0 0;
+  .selected-day {
+    color: $color-pink;
+    margin: 6px 0 0;
+    font-size: 14px;
     font-weight: 600;
     text-transform: capitalize;
   }
 }
 
-/* CARTES */
+/* --- CARTES D'ACTIVITÉS --- */
 .nexus-card {
   display: flex;
-  background: #2C2C2E;
-  border-radius: 16px;
+  position: relative;
+  background: $color-gray-light;
+  border-radius: 18px;
   padding: 16px;
   margin-bottom: 12px;
-  border-left: 4px solid #FF2D55;
+  border-left: 4px solid #444;
+  transition: transform 0.1s ease-in-out, background 0.2s;
 
-  .time-box {
-    padding-right: 15px;
-    border-right: 1px solid #3A3A3C;
-    min-width: 55px;
+  &:active {
+    transform: scale(0.98);
+    background: $color-gray-border;
+  }
+
+  .time-part {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-right: 16px;
+    border-right: 1px solid $color-gray-border;
+    min-width: 65px;
 
     .t-start {
-      display: block;
       font-weight: 700;
+      font-size: 15px;
       color: white;
     }
 
     .t-end {
-      display: block;
       font-size: 12px;
-      color: #8E8E93;
+      color: $color-text-gray;
     }
   }
 
-  .info-box {
-    padding-left: 15px;
+  .content-part {
+    padding-left: 16px;
+    padding-right: 40px; // Espace pour le bouton delete
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 
     h3 {
       margin: 0;
       font-size: 16px;
+      font-weight: 600;
+      color: white;
     }
 
     p {
       margin: 4px 0 0;
       font-size: 13px;
-      color: #8E8E93;
+      color: $color-text-gray;
+      display: flex;
+      align-items: center;
+
+      ion-icon {
+        margin-right: 5px;
+        font-size: 14px;
+      }
+    }
+  }
+
+  .delete-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 10px;
+    color: #444;
+    font-size: 18px;
+
+    &:active {
+      color: $color-pink;
+      transform: translateY(-50%) scale(1.2);
+    }
+  }
+
+  /* --- Couleurs par Type --- */
+  &.type-class {
+    border-left-color: $color-pink;
+
+    .t-start {
+      color: $color-pink;
+    }
+  }
+
+  &.type-sport {
+    border-left-color: $color-blue;
+
+    .t-start {
+      color: $color-blue;
+    }
+  }
+
+  &.type-extra {
+    border-left-color: $color-purple;
+
+    .t-start {
+      color: $color-purple;
     }
   }
 }
 
-/* FORMULAIRE */
+/* --- FORMULAIRE D'AJOUT --- */
 .add-form {
+  .section-label {
+    display: block;
+    color: $color-text-gray;
+    font-size: 11px;
+    text-transform: uppercase;
+    margin: 20px 0 8px;
+    letter-spacing: 0.5px;
+  }
+
   .input-group {
     margin-bottom: 15px;
 
     label {
       display: block;
-      color: #8E8E93;
+      color: $color-text-gray;
       font-size: 11px;
       text-transform: uppercase;
-      margin-bottom: 5px;
+      margin-bottom: 6px;
     }
 
-    input {
-      background: #2C2C2E;
+    input, .nexus-select {
+      background: $color-gray-light;
       border: none;
       width: 100%;
-      padding: 12px;
-      border-radius: 10px;
+      padding: 14px;
+      border-radius: 12px;
       color: white;
       outline: none;
+      font-size: 15px;
+    }
+
+    .nexus-select {
+      appearance: none;
+    }
+  }
+
+  .category-grid {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+
+    .cat-card {
+      flex: 1;
+      background: $color-gray-light;
+      padding: 12px;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      color: $color-text-gray;
+      transition: 0.2s;
+
+      ion-icon {
+        font-size: 22px;
+      }
+
+      span {
+        font-size: 9px;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+
+      &.active {
+        background: $color-pink;
+        color: white;
+        box-shadow: 0 4px 10px rgba($color-pink, 0.3);
+      }
     }
   }
 
   .time-row {
     display: flex;
-    gap: 10px;
+    gap: 12px;
 
     .input-group {
       flex: 1;
@@ -183,29 +339,63 @@
 
   .save-btn {
     width: 100%;
-    background: #FF2D55;
+    background: $color-pink;
     color: white;
     border: none;
-    padding: 15px;
-    border-radius: 12px;
-    font-weight: bold;
+    padding: 16px;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 16px;
+    margin-top: 15px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: 10px;
 
     ion-icon {
-      margin-right: 8px;
+      margin-right: 10px;
+      font-size: 20px;
     }
+
+    &:active {
+      opacity: 0.8;
+    }
+  }
+}
+
+/* --- ÉTATS VIDES & LOADERS --- */
+.loader {
+  text-align: center;
+  padding: 40px;
+
+  ion-spinner {
+    --color: #FF2D55;
   }
 }
 
 .empty-popup {
   text-align: center;
-  padding: 40px;
-  color: #444;
+  padding: 60px 20px;
+  color: $color-gray-border;
 
   ion-icon {
-    font-size: 48px;
+    font-size: 50px;
+    margin-bottom: 10px;
+    opacity: 0.5;
+  }
+
+  p {
+    font-size: 15px;
+    font-weight: 500;
+  }
+}
+
+/* --- ALERTE CUSTOM --- */
+.nexus-alert {
+  --background: #1C1C1E;
+  --header-color: white;
+  --message-color: #8E8E93;
+
+  button {
+    color: $color-pink !important;
   }
 }

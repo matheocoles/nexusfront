@@ -1,99 +1,75 @@
-import { inject, Injectable } from "@angular/core";
-import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Observable } from "rxjs";
+import { HttpClient, HttpHeaders } from "@angular/common/http";
+import { inject, Injectable } from "@angular/core";
+import { ToastController } from "@ionic/angular/standalone";
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class NexusService {
-  private readonly apiUrl = 'https://nexusapi.up.railway.app/api';
+  private apiUrl = 'https://nexusapi.up.railway.app/api';
   private readonly http = inject(HttpClient);
+  private toastController = inject(ToastController);
 
-  // ── GESTION DES HEADERS ──────────────────────────────────────────────────
-
-  /** Génération centralisée des headers avec le Token JWT */
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('nexus_token');
-    let headers = new HttpHeaders({
-      'Content-Type': 'application/json'
+    return new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
     });
-
-    if (token) {
-      headers = headers.set('Authorization', `Bearer ${token}`);
-    }
-    return headers;
   }
 
-  // ── AUTHENTIFICATION & PROFIL ─────────────────────────────────────────────
-
-  login(credentials: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/login`, credentials);
-  }
-
+  // --- AUTH & STORAGE ---
   saveSession(token: string, userId: string) {
     localStorage.setItem('nexus_token', token);
     localStorage.setItem('nexus_user_id', userId);
   }
+  getUserId() { return localStorage.getItem('nexus_user_id'); }
+  logout() { localStorage.clear(); location.reload(); }
 
-  logout() {
-    localStorage.removeItem('nexus_token');
-    localStorage.removeItem('nexus_user_id');
+  login(creds: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/Logins/authenticate`, creds);
   }
 
-  getUserId(): string | null {
-    return localStorage.getItem('nexus_user_id');
+  // --- SESSIONS ---
+  getSessions(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/Sessions`, { headers: this.getHeaders() });
+  }
+  createSession(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/Sessions`, data, { headers: this.getHeaders() });
+  }
+  updateSession(id: any, data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/Sessions/${id}`, data, { headers: this.getHeaders() });
+  }
+  deleteSession(id: any): Observable<any> {
+    const token = localStorage.getItem('nexus_token');
+    const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+    return this.http.delete(`${this.apiUrl}/Sessions/${id}`, { headers });
   }
 
-  getUserProfile(id: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/logins/${id}`, { headers: this.getHeaders() });
-  }
-
-  // ── GESTION DES SESSIONS (EMPLOI DU TEMPS) ────────────────────────────────
-
-  /** Récupère toutes les sessions (Schedule) */
-  getSchedule(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/sessions`, { headers: this.getHeaders() });
-  }
-
-  createSession(sessionData: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/sessions`, sessionData, { headers: this.getHeaders() });
-  }
-
-  updateSession(id: number | string, payload: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/sessions/${id}`, payload, { headers: this.getHeaders() });
-  }
-
-  deleteSession(id: number | string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/sessions/${id}`, {
-      headers: this.getHeaders(),
-      body: {} // Nécessaire pour certains serveurs lors d'un DELETE
-    });
-  }
-
-  // ── RESSOURCES LIÉES (CLASSES, SPORTS, ACTIVITÉS, ACHIEVEMENTS) ───────────
-
-  /** GET /api/class — Liste des cours (matière, salle, prof...) */
-  getClasses(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/class`, { headers: this.getHeaders() });
-  }
-
-  /** GET /api/sport — Liste des sports (type, intensité, durée...) */
-  getSports(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/sport`, { headers: this.getHeaders() });
-  }
-
-  /** GET /api/extraactivity — Liste des activités extra-scolaires */
+  // --- CATEGORIES ---
+  getClasses(): Observable<any[]> { return this.http.get<any[]>(`${this.apiUrl}/Class`, { headers: this.getHeaders() }); }
+  getSports(): Observable<any[]> { return this.http.get<any[]>(`${this.apiUrl}/Sport`, { headers: this.getHeaders() }); }
+  getExtra(): Observable<any[]> { return this.http.get<any[]>(`${this.apiUrl}/Extraactivity`, { headers: this.getHeaders() }); }
   getExtraActivities(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/extraactivity`, { headers: this.getHeaders() });
   }
 
-  /** GET /api/achievements — Liste de tous les trophées disponibles */
   getAchievements(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/achievements`, { headers: this.getHeaders() });
   }
-  // ... dans NexusService
-  getSessions(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/sessions`, { headers: this.getHeaders() });
+
+  // --- USER PROFILE ---
+  updateUser(id: number | string, data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/Logins/${id}`, data, { headers: this.getHeaders() });
   }
-// ...
+
+  // --- UI HELPERS ---
+  async showToast(msg: string) {
+    const toast = await this.toastController.create({
+      message: `🚀 ${msg}`,
+      duration: 2000,
+      cssClass: 'nexus-toast-simple',
+      position: 'bottom'
+    });
+    await toast.present();
+  }
 }
