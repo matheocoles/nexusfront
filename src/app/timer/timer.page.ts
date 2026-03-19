@@ -10,7 +10,7 @@ import {
 } from '@ionic/angular/standalone';
 import { NexusService } from '../services/nexus.service';
 import { addIcons } from 'ionicons';
-import { play, pause, stop, timeOutline, add, trash } from 'ionicons/icons';
+import { play, pause, stop, timeOutline, add, trash, trashOutline } from 'ionicons/icons';
 
 import { Chart, registerables } from 'chart.js';
 Chart.register(...registerables);
@@ -127,7 +127,7 @@ export class TimerPage implements OnInit, AfterViewInit, OnDestroy {
   today = new Date().toISOString();
 
   constructor() {
-    addIcons({play, pause, stop, timeOutline, add, trash});
+    addIcons({play, pause, stop, timeOutline, add, trash, trashOutline});
   }
 
   ngOnInit(): void {
@@ -446,11 +446,13 @@ export class TimerPage implements OnInit, AfterViewInit, OnDestroy {
 
   async deleteSession(session: any): Promise<void> {
     const alert = await this.alertCtrl.create({
-      header: '⚠️ Supprimer la session ?',
-      message: `Êtes-vous sûr de vouloir supprimer cette session ?\n\n<strong>${session.title || '—'}</strong>\n${this.formatSessionInterval(session)}`,
+      header:  'Supprimer la session ?',
+      message: `${session.title || '—'}${this.formatSessionInterval(session)}`,
+      cssClass: 'nexus-alert',
       buttons: [
-        { text: 'Annuler', role: 'cancel', cssClass: 'alert-cancel' },
-        { text: 'Supprimer', role: 'destructive', cssClass: 'alert-destructive', handler: () => this.confirmDeleteSession(session) },
+        { text: 'Annuler',    role: 'cancel',      cssClass: 'alert-button-cancel' },
+        { text: 'Supprimer',  role: 'destructive',  cssClass: 'alert-button-confirm',
+          handler: () => this.confirmDeleteSession(session) },
       ],
     });
     await alert.present();
@@ -459,14 +461,8 @@ export class TimerPage implements OnInit, AfterViewInit, OnDestroy {
   private confirmDeleteSession(session: any): void {
     if (!session.id) return;
     this.nexusService.deleteSession(session.id).subscribe({
-      next: () => {
-        this.sessions = this.sessions.filter(s => s.id !== session.id);
-        this.toast('Session supprimée ✓');
-        setTimeout(() => this.renderChart(), 100);
-      },
-      error: () => {
-        this.toast('Erreur lors de la suppression');
-      },
+      next:  () => { this.sessions = this.sessions.filter(s => s.id !== session.id); this.toast('Session supprimée ✓'); setTimeout(() => this.renderChart(), 100); },
+      error: () => { this.toast('Erreur lors de la suppression'); },
     });
   }
 
