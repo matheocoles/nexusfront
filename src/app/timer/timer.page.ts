@@ -148,7 +148,7 @@ export class TimerPage implements OnInit, AfterViewInit, OnDestroy {
 
   loadSchedule() {
     this.loadingActivities = true;
-    this.nexusService.getSchedule().subscribe({
+    this.nexusService.getSessions().subscribe({
       next: (data: any[]) => {
         this.planningActivities = data.sort((a, b) =>
           new Date(a.dateTimeStart).getTime() - new Date(b.dateTimeStart).getTime()
@@ -369,7 +369,7 @@ export class TimerPage implements OnInit, AfterViewInit, OnDestroy {
 
   private loadSessions(): void {
     this.loadingSessions = true;
-    this.nexusService.getSchedule().subscribe({
+    this.nexusService.getSessions().subscribe({
       next: (data) => {
         const now = new Date();
         this.sessions = (data ?? [])

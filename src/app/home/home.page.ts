@@ -77,7 +77,7 @@ export class HomePage implements OnInit {
 
   loadSchedule() {
     this.isLoading = true;
-    this.nexusService.getSchedule().subscribe({
+    this.nexusService.getSessions().subscribe({
       next: (data: any[]) => {
         this.courses = data.sort((a, b) =>
           new Date(a.dateTimeStart).getTime() - new Date(b.dateTimeStart).getTime()

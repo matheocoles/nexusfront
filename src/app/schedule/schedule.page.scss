@@ -1,0 +1,211 @@
+.nexus-dark-content {
+  --background: #000000;
+  color: white;
+}
+
+.main-wrapper {
+  padding: 24px 16px;
+}
+
+.header-container {
+  .title {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 20px;
+    color: white;
+  }
+
+  .search-bar {
+    background: #1C1C1E;
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+
+    ion-icon {
+      color: #8E8E93;
+      font-size: 20px;
+      margin-right: 10px;
+    }
+
+    input {
+      background: transparent;
+      border: none;
+      color: white;
+      width: 100%;
+      outline: none;
+    }
+  }
+}
+
+.dark-datetime {
+  --background: #000000;
+  border-radius: 16px;
+  margin-top: 10px;
+  color: white;
+
+  &::part(calendar-day active), &::part(calendar-day selected) {
+    background: #FF2D55;
+    color: white;
+    box-shadow: 0 0 10px rgba(255, 45, 85, 0.4);
+  }
+
+  &::part(calendar-day today) {
+    color: #FF2D55;
+    border: 1px solid #FF2D55;
+  }
+}
+
+/* POPUP */
+.schedule-modal {
+  --background: #1C1C1E;
+  --border-radius: 24px 24px 0 0;
+
+  &::part(handle) {
+    background: #FF2D55;
+    width: 45px;
+  }
+}
+
+.modal-wrapper {
+  background: #1C1C1E;
+  padding: 20px 16px;
+  color: white;
+  height: 100%;
+}
+
+.modal-header {
+  margin-bottom: 20px;
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h2 {
+      font-size: 22px;
+      font-weight: 800;
+      margin: 0;
+    }
+
+    .action-icon {
+      font-size: 28px;
+      background: #2C2C2E;
+      padding: 5px;
+      border-radius: 10px;
+      color: #FF2D55;
+    }
+  }
+
+  p {
+    color: #FF2D55;
+    margin: 5px 0 0;
+    font-weight: 600;
+    text-transform: capitalize;
+  }
+}
+
+/* CARTES */
+.nexus-card {
+  display: flex;
+  background: #2C2C2E;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 12px;
+  border-left: 4px solid #FF2D55;
+
+  .time-box {
+    padding-right: 15px;
+    border-right: 1px solid #3A3A3C;
+    min-width: 55px;
+
+    .t-start {
+      display: block;
+      font-weight: 700;
+      color: white;
+    }
+
+    .t-end {
+      display: block;
+      font-size: 12px;
+      color: #8E8E93;
+    }
+  }
+
+  .info-box {
+    padding-left: 15px;
+
+    h3 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    p {
+      margin: 4px 0 0;
+      font-size: 13px;
+      color: #8E8E93;
+    }
+  }
+}
+
+/* FORMULAIRE */
+.add-form {
+  .input-group {
+    margin-bottom: 15px;
+
+    label {
+      display: block;
+      color: #8E8E93;
+      font-size: 11px;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+
+    input {
+      background: #2C2C2E;
+      border: none;
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      color: white;
+      outline: none;
+    }
+  }
+
+  .time-row {
+    display: flex;
+    gap: 10px;
+
+    .input-group {
+      flex: 1;
+    }
+  }
+
+  .save-btn {
+    width: 100%;
+    background: #FF2D55;
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 12px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+
+    ion-icon {
+      margin-right: 8px;
+    }
+  }
+}
+
+.empty-popup {
+  text-align: center;
+  padding: 40px;
+  color: #444;
+
+  ion-icon {
+    font-size: 48px;
+  }
+}

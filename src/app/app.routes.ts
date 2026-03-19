@@ -36,6 +36,10 @@ export const routes: Routes = [
         loadComponent: () => import('./home/home.page').then((m) => m.HomePage),
       },
       {
+        path: 'calendar',
+        loadComponent: () => import('./schedule/schedule.page').then((m) => m.SchedulePage),
+      },
+      {
         path: 'profile',
         loadComponent: () => import('./profile/profile.page').then((m) => m.ProfilePage),
       },
@@ -51,4 +55,9 @@ export const routes: Routes = [
     path: '**',
     redirectTo: 'splash',
   },
+  {
+    path: 'schedule',
+    loadComponent: () => import('./schedule/schedule.page').then( m => m.SchedulePage)
+  },
+
 ];
