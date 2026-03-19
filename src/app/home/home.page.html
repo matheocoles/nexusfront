@@ -2,7 +2,7 @@
   <div class="loader-content">
     <div class="glitch-text" data-text="NEXUS">NEXUS</div>
     <div class="loading-bar-container"><div class="loading-bar-fill"></div></div>
-    <p class="status-msg">CHARGEMENT DU TERMINAL...</p>
+    <p class="status-msg">INITIALISATION DES DONNEES...</p>
   </div>
 </div>
 
@@ -28,7 +28,7 @@
       </div>
     </header>
 
-    <div class="session-list" *ngIf="!isLoading">
+    <div class="session-list fade-in" *ngIf="filteredCourses.length > 0; else noData">
       <div class="session-card"
            *ngFor="let c of filteredCourses; let i = index"
            [style.border-left-color]="c.displayColor"
@@ -58,15 +58,20 @@
         </div>
       </div>
     </div>
+
+    <ng-template #noData>
+      <div class="no-data fade-in" *ngIf="!isLoading">
+        <ion-icon name="layers-outline"></ion-icon>
+        <p>Aucune mission programmée</p>
+      </div>
+    </ng-template>
   </div>
 
   <ion-modal [isOpen]="isModalOpen" (didDismiss)="isModalOpen = false" class="nexus-modal-custom">
     <ng-template>
       <div class="modal-wrapper">
-        <div class="modal-header">
-          <div class="handle"></div>
-          <h3>NOUVELLE MISSION</h3>
-        </div>
+        <div class="handle"></div>
+        <h3>NOUVELLE MISSION</h3>
 
         <div class="modal-body">
           <div class="input-block">
@@ -74,7 +79,19 @@
             <input type="text" [(ngModel)]="newSessionTitle" placeholder="Ex: Boxe, Anglais...">
           </div>
 
-          <label class="section-label">CATÉGORIE SYSTÈME</label>
+          <label class="section-label">PLANIFICATION TEMPORELLE</label>
+          <div class="row-inputs">
+            <div class="input-block">
+              <label>DATE</label>
+              <input type="date" [(ngModel)]="selectedStartDate">
+            </div>
+            <div class="input-block">
+              <label>HEURE</label>
+              <input type="time" [(ngModel)]="selectedStartTime">
+            </div>
+          </div>
+
+          <label class="section-label">CATÉGORIE</label>
           <div class="category-grid">
             <div class="cat-card" [class.active]="selectedType === 'class'" (click)="selectedType = 'class'">
               <ion-icon name="book-outline"></ion-icon><span>COURS</span>
@@ -98,21 +115,20 @@
                 <input type="text" [(ngModel)]="sessionData.room">
               </div>
             </div>
-
             <div *ngIf="selectedType === 'sport'" class="input-block">
               <label class="section-label">LIEU</label>
               <input type="text" [(ngModel)]="sessionData.place">
             </div>
           </div>
 
-          <label class="section-label">DURÉE ESTIMÉE</label>
+          <label class="section-label">DURÉE</label>
           <div class="duration-selector">
             <div class="duration-chip" *ngFor="let d of [30, 60, 90, 120]"
                  [class.active]="selectedDuration === d"
                  (click)="selectedDuration = d">{{ d }}m</div>
           </div>
 
-          <button class="btn-confirm" (click)="confirmSave()">INJECTER DANS RAILWAY</button>
+          <button class="btn-confirm" (click)="confirmSave()">AJOUTER</button>
         </div>
       </div>
     </ng-template>
