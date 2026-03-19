@@ -6,12 +6,16 @@
 
   <div *ngIf="userData" class="profile-wrapper">
     <div class="header-background">
-      <div class="avatar-container" (click)="changeAvatar()">
-        <img [src]="userData?.avatarUrl || 'assets/default-avatar.png'" class="user-avatar-img">
-        <div class="avatar-edit-badge">
-          <ion-icon name="camera-outline"></ion-icon>
+      <div class="header-background">
+        <div class="avatar-wrapper" (click)="changeAvatar()">
+          <img [src]="userData?.avatarUrl" class="user-avatar-img">
+
+          <div class="avatar-edit-badge">
+            <ion-icon name="camera-outline"></ion-icon>
+          </div>
         </div>
       </div>
+
       <input type="file" #fileInput (change)="onFileSelected($event)" style="display: none" accept="image/*">
     </div>
 

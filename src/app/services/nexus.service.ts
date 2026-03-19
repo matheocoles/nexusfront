@@ -17,7 +17,6 @@ export class NexusService {
     });
   }
 
-  // --- AUTH & STORAGE ---
   saveSession(token: string, userId: string) {
     localStorage.setItem('nexus_token', token);
     localStorage.setItem('nexus_user_id', userId);
@@ -29,7 +28,6 @@ export class NexusService {
     return this.http.post(`${this.apiUrl}/Logins/authenticate`, creds);
   }
 
-  // --- SESSIONS ---
   getSessions(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/Sessions`, { headers: this.getHeaders() });
   }
@@ -45,7 +43,6 @@ export class NexusService {
     return this.http.delete(`${this.apiUrl}/Sessions/${id}`, { headers });
   }
 
-  // --- CATEGORIES ---
   getClasses(): Observable<any[]> { return this.http.get<any[]>(`${this.apiUrl}/Class`, { headers: this.getHeaders() }); }
   getSports(): Observable<any[]> { return this.http.get<any[]>(`${this.apiUrl}/Sport`, { headers: this.getHeaders() }); }
   getExtra(): Observable<any[]> { return this.http.get<any[]>(`${this.apiUrl}/Extraactivity`, { headers: this.getHeaders() }); }
@@ -57,12 +54,10 @@ export class NexusService {
     return this.http.get<any[]>(`${this.apiUrl}/achievements`, { headers: this.getHeaders() });
   }
 
-  // --- USER PROFILE ---
   updateUser(id: number | string, data: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/Logins/${id}`, data, { headers: this.getHeaders() });
   }
 
-  // --- UI HELPERS ---
   async showToast(msg: string) {
     const toast = await this.toastController.create({
       message: `🚀 ${msg}`,
@@ -71,5 +66,16 @@ export class NexusService {
       position: 'bottom'
     });
     await toast.present();
+  }
+  createClass(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/Class`, data, { headers: this.getHeaders() });
+  }
+
+  createSport(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/Sport`, data, { headers: this.getHeaders() });
+  }
+
+  createExtra(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/Extraactivity`, data, { headers: this.getHeaders() });
   }
 }

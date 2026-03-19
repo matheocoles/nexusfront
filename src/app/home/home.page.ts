@@ -2,21 +2,16 @@ import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
-  IonContent, IonIcon, IonSpinner, ToastController,
-  IonModal, LoadingController,
-  ActionSheetController, AlertController
+  IonContent, IonIcon, IonModal,
+  LoadingController, ActionSheetController
 } from '@ionic/angular/standalone';
 import { NexusService } from '../services/nexus.service';
 import { addIcons } from 'ionicons';
 import {
-  addOutline, searchOutline, menuOutline, calendarOutline,
-  chevronBackOutline, chevronForwardOutline, arrowDownOutline,
-  playOutline, bookOutline, fitnessOutline, rocketOutline,
-  checkmarkCircleOutline, // Contour pour le bouton confirm
-  checkmarkCircle,        // Plein pour la validation HUD (Correction Erreur URL)
-  timeOutline, locationOutline,
-  trashOutline, createOutline, closeOutline, alertCircleOutline,
-  shieldCheckmarkOutline
+  addOutline, searchOutline, menuOutline, playOutline,
+  bookOutline, fitnessOutline, rocketOutline, checkmarkCircleOutline,
+  checkmarkCircle, locationOutline, trashOutline, createOutline,
+  closeOutline, shieldCheckmarkOutline
 } from 'ionicons/icons';
 
 @Component({
@@ -24,277 +19,196 @@ import {
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonContent, IonIcon, IonSpinner, IonModal]
+  imports: [CommonModule, FormsModule, IonContent, IonIcon, IonModal]
 })
 export class HomePage implements OnInit {
   private nexusService = inject(NexusService);
-  private toastController = inject(ToastController);
-  private loadingController = inject(LoadingController);
-  private actionSheetController = inject(ActionSheetController);
-  private alertController = inject(AlertController);
+  private loadingCtrl = inject(LoadingController);
+  private actionSheetCtrl = inject(ActionSheetController);
   private cdr = inject(ChangeDetectorRef);
 
-  // Notifications HUD
-  isNotifOpen = false;
-  notifTitle = '';
-  notifMsg = '';
-
-  // Data
   courses: any[] = [];
-  categoryList: any[] = [];
-  isLoading: boolean = true;
-  private colorPalette = ['#2a0a14', '#5e102e', '#3f255e', '#5e4c85', '#7a6a9e'];
-
-  // Modal & Formulaire
+  filteredCourses: any[] = [];
+  isLoading = true;
   isModalOpen = false;
   isEditMode = false;
-  editingSessionId: number | null = null;
+  isNotifOpen = false;
 
   newSessionTitle = '';
-  newSessionRoom = '';
   selectedType = 'class';
-  selectedCategoryId: number | null = null;
   selectedDuration = 60;
 
-  modalIcons = { book: bookOutline, fitness: fitnessOutline, rocket: rocketOutline };
+  sessionData = {
+    description: 'Mission Nexus Auto-générée',
+    teacher: 'Nexus Core',
+    room: 'Secteur-A1',
+    place: 'Base Nexus',
+    intensity: 'Medium',
+    organiser: 'Nexus Corp',
+    theme: 'Opération Alpha'
+  };
+
+  notifTitle = ''; notifMsg = '';
+  private palette = ['#2a0a14', '#5e102e', '#3f255e', '#5e4c85'];
 
   constructor() {
-    // CORRECTION : Enregistrement strict des noms utilisés dans le HTML
     addIcons({
-      'add-outline': addOutline,
-      'search-outline': searchOutline,
-      'menu-outline': menuOutline,
-      'calendar-outline': calendarOutline,
-      'chevron-back-outline': chevronBackOutline,
-      'chevron-forward-outline': chevronForwardOutline,
-      'arrow-down-outline': arrowDownOutline,
-      'play-outline': playOutline,
-      'book-outline': bookOutline,
-      'fitness-outline': fitnessOutline,
-      'rocket-outline': rocketOutline,
-      'checkmark-circle-outline': checkmarkCircleOutline,
-      'checkmark-circle': checkmarkCircle, // L'icône qui causait l'erreur URL constructor
-      'time-outline': timeOutline,
-      'location-outline': locationOutline,
-      'trash-outline': trashOutline,
-      'create-outline': createOutline,
-      'close-outline': closeOutline,
-      'alert-circle-outline': alertCircleOutline,
-      'shield-checkmark-outline': shieldCheckmarkOutline
+      'add-outline': addOutline, 'search-outline': searchOutline,
+      'menu-outline': menuOutline, 'play-outline': playOutline,
+      'book-outline': bookOutline, 'fitness-outline': fitnessOutline,
+      'rocket-outline': rocketOutline, 'checkmark-circle-outline': checkmarkCircleOutline,
+      'checkmark-circle': checkmarkCircle, 'location-outline': locationOutline,
+      'trash-outline': trashOutline, 'create-outline': createOutline,
+      'close-outline': closeOutline, 'shield-checkmark-outline': shieldCheckmarkOutline
     });
   }
 
-  ngOnInit() {
-    this.loadSchedule();
-  }
+  ngOnInit() { this.loadSchedule(); }
 
   loadSchedule() {
     this.isLoading = true;
     this.nexusService.getSessions().subscribe({
-      next: (data: any[]) => {
-        this.courses = data.sort((a, b) =>
-          new Date(a.dateTimeStart || a.DateTimeStart).getTime() - new Date(b.dateTimeStart || b.DateTimeStart).getTime()
-        ).map((item, index) => ({
-          ...item,
-          name: item.status || item.Status || `Session #${item.id}`,
-          room: item.class?.name || item.sport?.name || item.extraActivity?.name || 'Zone Nexus',
-          startTime: this.formatTime(item.dateTimeStart || item.DateTimeStart),
-          endTime: this.formatTime(item.dateTimeEnd || item.DateTimeEnd),
-          duration: this.calculateDuration(item.dateTimeStart || item.DateTimeStart, item.dateTimeEnd || item.DateTimeEnd),
-          displayColor: this.colorPalette[index % this.colorPalette.length],
-          isDone: item.status?.includes('TERMINÉE') // Persistance basique de l'état
+      next: (res) => {
+        this.courses = res.map((s, i) => ({
+          ...s,
+          name: s.status || 'Mission',
+          room: s.class?.room || s.sport?.place || s.extraActivity?.place || 'Zone Nexus',
+          startTime: this.formatTime(s.dateTimeStart),
+          endTime: this.formatTime(s.dateTimeEnd),
+          displayColor: this.palette[i % this.palette.length],
+          isDone: s.status?.includes('[TERMINÉE]'),
+          duration: this.calcDur(s.dateTimeStart, s.dateTimeEnd)
         }));
-        this.isLoading = false;
-        this.cdr.detectChanges();
+        this.filteredCourses = [...this.courses];
+        setTimeout(() => { this.isLoading = false; this.cdr.detectChanges(); }, 1200);
       },
-      error: () => {
-        this.isLoading = false;
-        this.showToast("Erreur de liaison Nexus");
-      }
+      error: () => { this.isLoading = false; }
     });
-  }
-
-  async loadCategories() {
-    this.categoryList = [];
-    let obs = this.selectedType === 'class' ? this.nexusService.getClasses() :
-      this.selectedType === 'sport' ? this.nexusService.getSports() :
-        this.nexusService.getExtra();
-
-    obs.subscribe({
-      next: (data) => {
-        this.categoryList = data;
-        this.cdr.detectChanges();
-      },
-      error: () => this.showToast("Erreur de chargement")
-    });
-  }
-
-  changeType(type: string) {
-    this.selectedType = type;
-    this.selectedCategoryId = null;
-    this.loadCategories();
   }
 
   async confirmSave() {
-    if (!this.newSessionTitle.trim()) {
-      this.showToast("Titre requis");
-      return;
-    }
-
-    const loading = await this.loadingController.create({
-      message: 'Sync Nexus...',
-      spinner: 'crescent',
-      cssClass: 'nexus-loader'
-    });
+    if (!this.newSessionTitle.trim()) return;
+    const loading = await this.loadingCtrl.create({ message: 'COMMUNICATION RAILWAY...' });
     await loading.present();
 
-    const userId = this.nexusService.getUserId();
-    const now = new Date();
-    const end = new Date(now.getTime() + (this.selectedDuration * 60000));
+    const now = new Date().toISOString();
+    const durationNum = parseInt(this.selectedDuration.toString(), 10);
+    const endTime = new Date(Date.now() + (durationNum * 60000)).toISOString();
 
-    const payload: any = {
-      dateTimeStart: now.toISOString(),
-      dateTimeEnd: end.toISOString(),
-      status: this.newSessionTitle,
-      loginId: userId ? parseInt(userId, 10) : 0,
-      classId: this.selectedType === 'class' ? this.selectedCategoryId : null,
-      sportId: this.selectedType === 'sport' ? this.selectedCategoryId : null,
-      extraActivityId: this.selectedType === 'extra' ? this.selectedCategoryId : null
+    // Modèle Activity (Base)
+    const baseActivity = {
+      Name: this.newSessionTitle,
+      Description: this.sessionData.description || "Mission Nexus",
+      DateTimeStart: now,
+      DateTimeEnd: endTime,
+      Activities: []
     };
 
-    if (this.isEditMode && this.editingSessionId) payload.id = this.editingSessionId;
+    let createObs;
 
-    const request = this.isEditMode
-      ? this.nexusService.updateSession(this.editingSessionId!, payload)
-      : this.nexusService.createSession(payload);
+    if (this.selectedType === 'class') {
+      const payload = { ...baseActivity, Subject: this.newSessionTitle, Teacher: this.sessionData.teacher, Room: this.sessionData.room, Objective: 'Objectif Standard' };
+      createObs = this.nexusService.createClass(payload);
+    } else if (this.selectedType === 'sport') {
+      const payload = { ...baseActivity, Type: 'Training', Place: this.sessionData.place, Duration: durationNum, Intensity: this.sessionData.intensity };
+      createObs = this.nexusService.createSport(payload);
+    } else {
+      const payload = { ...baseActivity, Organiser: this.sessionData.organiser, Place: this.sessionData.place, Theme: this.sessionData.theme, Resource: 'Terminal Nexus' };
+      createObs = this.nexusService.createExtra(payload);
+    }
 
-    request.subscribe({
-      next: async () => {
-        await loading.dismiss();
-        this.isModalOpen = false;
-        this.showNexusNotification(this.isEditMode ? 'MODIFIÉ' : 'AJOUTÉ', 'Base de données mise à jour');
-        this.loadSchedule();
-      },
-      error: async () => {
-        await loading.dismiss();
-        this.showToast("Erreur API Railway");
+    createObs.subscribe({
+      next: (newEntity: any) => this.injectSession(newEntity.id, loading, now, endTime),
+      error: () => {
+        // Fallback si l'entité existe déjà (évite la 500/400 sur doublon)
+        this.fallbackToExisting(loading, now, endTime);
       }
     });
   }
 
-  async deleteSession(id: any) {
-    const numericId = parseInt(id, 10);
-    this.nexusService.deleteSession(numericId).subscribe({
+  private fallbackToExisting(loading: any, start: string, end: string) {
+    const listObs = this.selectedType === 'class' ? this.nexusService.getClasses() :
+      this.selectedType === 'sport' ? this.nexusService.getSports() : this.nexusService.getExtra();
+
+    listObs.subscribe((items: any[]) => {
+      const existing = items.find(i => i.name.toLowerCase() === this.newSessionTitle.toLowerCase());
+      if (existing) {
+        this.injectSession(existing.id, loading, start, end);
+      } else {
+        loading.dismiss();
+        this.nexusService.showToast("ERREUR : Liaison impossible");
+      }
+    });
+  }
+
+  private injectSession(catId: number, loading: any, start: string, end: string) {
+    const payload = {
+      Status: this.newSessionTitle,
+      DateTimeStart: start,
+      DateTimeEnd: end,
+      LoginId: parseInt(this.nexusService.getUserId() || '0'),
+      ClassId: this.selectedType === 'class' ? catId : null,
+      SportId: this.selectedType === 'sport' ? catId : null,
+      ExtraActivityId: this.selectedType === 'extra' ? catId : null,
+      SessionAchievements: []
+    };
+
+    this.nexusService.createSession(payload).subscribe({
       next: () => {
-        this.courses = this.courses.filter(c => c.id !== numericId);
-        this.showNexusNotification('SUPPRIMÉ', 'Session effacée');
-        this.cdr.detectChanges();
+        loading.dismiss();
+        this.isModalOpen = false;
+        this.loadSchedule();
+        this.showHUD('SYNC OK', 'MISSION ENREGISTRÉE');
       },
       error: (err) => {
-        console.error("Erreur 400 Détails:", err.error);
-        this.showToast("Erreur de suppression");
+        loading.dismiss();
+        console.error("Erreur Session 400:", err.error);
+        this.nexusService.showToast("ERREUR : Session rejetée");
       }
     });
   }
 
+  // --- ACTIONS ---
   validateSession(course: any, event: any) {
     event.stopPropagation();
     course.isDone = true;
-
-    // Notification HUD
-    this.notifTitle = "SÉQUENCE TERMINÉE";
-    this.notifMsg = "+100 XP SYSTÈME";
-    this.isNotifOpen = true;
-
-    // Optionnel : Mise à jour réelle en BDD
-    this.nexusService.updateSession(course.id, {
-      ...course,
-      status: course.name + " [TERMINÉE]"
-    }).subscribe();
-
-    this.cdr.detectChanges();
-    setTimeout(() => {
-      this.isNotifOpen = false;
-      this.cdr.detectChanges();
-    }, 2500);
+    this.nexusService.updateSession(course.id, { ...course, status: course.name + " [TERMINÉE]" }).subscribe();
+    this.showHUD('TERMINÉ', '+100 XP');
   }
 
-  // Helpers
-  formatTime(dateStr: string) {
-    if (!dateStr) return '--:--';
-    const date = new Date(dateStr);
-    return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-  }
-
-  calculateDuration(start: string, end: string): string {
-    const diff = new Date(end).getTime() - new Date(start).getTime();
-    const mins = Math.round(diff / 60000);
-    return mins >= 60 ? `${Math.floor(mins/60)}h${mins%60 || ''}` : `${mins}min`;
-  }
-
-  async openEditModal(course: any) {
-    this.isEditMode = true;
-    this.editingSessionId = course.id;
-    this.newSessionTitle = course.name;
-    this.selectedType = course.classId ? 'class' : (course.sportId ? 'sport' : 'extra');
-    this.selectedCategoryId = course.classId || course.sportId || course.extraActivityId;
-    this.loadCategories();
-    this.isModalOpen = true;
+  onSearch(event: any) {
+    const val = event.target.value.toLowerCase();
+    this.filteredCourses = this.courses.filter(c => c.name.toLowerCase().includes(val));
   }
 
   addNewSession() {
     this.isEditMode = false;
-    this.editingSessionId = null;
     this.newSessionTitle = '';
-    this.selectedCategoryId = null;
-    this.loadCategories();
     this.isModalOpen = true;
   }
 
-  async presentActionSheet(course: any) {
-    const actionSheet = await this.actionSheetController.create({
-      header: course.name.toUpperCase(),
-      cssClass: 'nexus-action-sheet',
-      buttons: [
-        { text: 'Modifier', icon: 'create-outline', handler: () => this.openEditModal(course) },
-        { text: 'Supprimer', role: 'destructive', icon: 'trash-outline', handler: () => this.confirmDelete(course) },
-        { text: 'Annuler', icon: 'close-outline', role: 'cancel' }
-      ]
-    });
-    await actionSheet.present();
-  }
-
-  async confirmDelete(course: any) {
-    const alert = await this.alertController.create({
-      header: 'SUPPRESSION',
-      message: `Supprimer "${course.name}" ?`,
-      cssClass: 'nexus-alert',
-      buttons: [
-        { text: 'ANNULER', role: 'cancel' },
-        { text: 'SUPPRIMER', handler: () => this.deleteSession(course.id) }
-      ]
-    });
-    await alert.present();
-  }
-
-  async showNexusNotification(title: string, msg: string) {
-    this.notifTitle = title;
-    this.notifMsg = msg;
-    this.isNotifOpen = true;
+  showHUD(t: string, m: string) {
+    this.notifTitle = t; this.notifMsg = m; this.isNotifOpen = true;
     this.cdr.detectChanges();
-    setTimeout(() => {
-      this.isNotifOpen = false;
-      this.cdr.detectChanges();
-    }, 2500);
+    setTimeout(() => { this.isNotifOpen = false; this.cdr.detectChanges(); }, 2000);
   }
 
-  async showToast(message: string) {
-    const toast = await this.toastController.create({
-      message: `🚀 ${message}`,
-      duration: 2000,
-      position: 'bottom',
-      cssClass: 'nexus-toast-simple'
+  async presentActionSheet(course: any) {
+    const sheet = await this.actionSheetCtrl.create({
+      header: 'ACTIONS',
+      buttons: [
+        { text: 'Supprimer', icon: 'trash-outline', role: 'destructive', handler: () => {
+            this.nexusService.deleteSession(course.id).subscribe(() => this.loadSchedule());
+          }},
+        { text: 'Annuler', role: 'cancel' }
+      ]
     });
-    await toast.present();
+    await sheet.present();
+  }
+
+  private formatTime(d: string) { return d ? new Date(d).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '--:--'; }
+  private calcDur(s: string, e: string) {
+    const diff = Math.round((new Date(e).getTime() - new Date(s).getTime()) / 60000);
+    return diff >= 60 ? `${Math.floor(diff/60)}h${diff%60 || ''}` : `${diff}m`;
   }
 }
