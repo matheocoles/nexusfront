@@ -1,16 +1,9 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import {
-  IonContent, IonDatetime, IonSpinner, IonIcon, IonModal,
-  AlertController, ToastController
-} from '@ionic/angular/standalone';
+import { IonContent, IonDatetime, IonSpinner, IonIcon, IonModal, AlertController, LoadingController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import {
-  searchOutline, addOutline, locationOutline, calendarOutline,
-  closeOutline, checkmarkOutline, trashOutline, bookOutline,
-  fitnessOutline, rocketOutline
-} from 'ionicons/icons';
+import { searchOutline, addOutline, locationOutline, calendarOutline, closeOutline, checkmarkOutline, trashOutline, bookOutline, fitnessOutline, rocketOutline, calendarClearOutline } from 'ionicons/icons';
 import { NexusService } from '../services/nexus.service';
 
 @Component({
@@ -23,7 +16,7 @@ import { NexusService } from '../services/nexus.service';
 export class SchedulePage implements OnInit {
   protected nexusService = inject(NexusService);
   private alertController = inject(AlertController);
-  private toastController = inject(ToastController);
+  private loadingCtrl = inject(LoadingController);
   private cdr = inject(ChangeDetectorRef);
 
   isReady = false;
@@ -31,28 +24,19 @@ export class SchedulePage implements OnInit {
   allSessions: any[] = [];
   filteredSessions: any[] = [];
   categoryList: any[] = [];
-
   isLoading = true;
   isModalOpen = false;
   isAdding = false;
-
   selectedType = 'class';
   selectedCategoryId: number | null = null;
-  newSession = { name: '', startTime: '', endTime: '' };
+  newSession = { name: '', startTime: '08:00', endTime: '09:00' };
 
   constructor() {
-    addIcons({
-      searchOutline, addOutline, locationOutline, calendarOutline,
-      closeOutline, checkmarkOutline, trashOutline, bookOutline,
-      fitnessOutline, rocketOutline
-    });
+    addIcons({ searchOutline, addOutline, locationOutline, calendarOutline, closeOutline, checkmarkOutline, trashOutline, bookOutline, fitnessOutline, rocketOutline, calendarClearOutline });
   }
 
   ngOnInit() { this.loadData(); }
-
-  ionViewDidEnter() {
-    setTimeout(() => { this.isReady = true; }, 100);
-  }
+  ionViewDidEnter() { setTimeout(() => { this.isReady = true; this.cdr.detectChanges(); }, 200); }
 
   loadData() {
     this.isLoading = true;
@@ -61,17 +45,17 @@ export class SchedulePage implements OnInit {
         this.allSessions = data;
         this.filterSessions();
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: () => this.isLoading = false
     });
   }
 
   filterSessions() {
-    const selectedDateObj = new Date(this.selectedDate);
-    this.filteredSessions = this.allSessions.filter(session => {
-      const d = new Date(session.dateTimeStart || session.startTime);
-      return d.toDateString() === selectedDateObj.toDateString();
-    });
+    const selStr = new Date(this.selectedDate).toDateString();
+    this.filteredSessions = this.allSessions
+      .filter(s => new Date(s.dateTimeStart).toDateString() === selStr)
+      .sort((a, b) => new Date(a.dateTimeStart).getTime() - new Date(b.dateTimeStart).getTime());
   }
 
   onDateChange(event: any) {
@@ -92,36 +76,31 @@ export class SchedulePage implements OnInit {
   }
 
   loadCategories() {
-    let obs = this.selectedType === 'class' ? this.nexusService.getClasses() :
-      this.selectedType === 'sport' ? this.nexusService.getSports() :
-        this.nexusService.getExtra();
-
-    obs.subscribe(data => {
-      this.categoryList = data;
-      this.cdr.detectChanges();
-    });
+    const obs = this.selectedType === 'class' ? this.nexusService.getClasses() : this.selectedType === 'sport' ? this.nexusService.getSports() : this.nexusService.getExtra();
+    obs.subscribe(data => { this.categoryList = data; this.cdr.detectChanges(); });
   }
 
-  submitNewSession() {
-    const userId = this.nexusService.getUserId();
-    if (!userId || !this.newSession.startTime) return;
+  async submitNewSession() {
+    const uid = this.nexusService.getUserId();
+    if (!uid || !this.selectedCategoryId) return;
 
-    const datePart = this.selectedDate.split('T')[0];
+    const loader = await this.loadingCtrl.create({ message: 'Sync...' });
+    await loader.present();
+
+    const date = this.selectedDate.split('T')[0];
     const payload = {
-      dateTimeStart: `${datePart}T${this.newSession.startTime}:00`,
-      dateTimeEnd: `${datePart}T${this.newSession.endTime}:00`,
+      dateTimeStart: `${date}T${this.newSession.startTime}:00`,
+      dateTimeEnd: `${date}T${this.newSession.endTime}:00`,
       status: this.newSession.name || "Prévu",
-      loginId: parseInt(userId),
+      loginId: parseInt(uid),
       classId: this.selectedType === 'class' ? this.selectedCategoryId : null,
       sportId: this.selectedType === 'sport' ? this.selectedCategoryId : null,
       extraActivityId: this.selectedType === 'extra' ? this.selectedCategoryId : null
     };
 
     this.nexusService.createSession(payload).subscribe({
-      next: () => {
-        this.isAdding = false;
-        this.loadData();
-      }
+      next: () => { loader.dismiss(); this.isAdding = false; this.loadData(); },
+      error: () => loader.dismiss()
     });
   }
 
@@ -129,18 +108,9 @@ export class SchedulePage implements OnInit {
     event.stopPropagation();
     const alert = await this.alertController.create({
       header: 'SUPPRIMER ?',
-      cssClass: 'nexus-alert',
       buttons: [
         { text: 'NON', role: 'cancel' },
-        { text: 'OUI', handler: () => {
-            this.nexusService.deleteSession(id).subscribe({
-              next: () => {
-                this.allSessions = this.allSessions.filter(s => s.id !== id);
-                this.filterSessions();
-                this.cdr.detectChanges();
-              }
-            });
-          }}
+        { text: 'OUI', handler: () => this.nexusService.deleteSession(id).subscribe(() => this.loadData()) }
       ]
     });
     await alert.present();
