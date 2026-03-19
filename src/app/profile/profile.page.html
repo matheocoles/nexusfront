@@ -1,21 +1,29 @@
 <ion-content class="profile-container">
   <div *ngIf="!userData" class="loading-state">
     <ion-spinner name="crescent" color="primary"></ion-spinner>
-    <p>Initialisation Nexus...</p>
+    <p>Liaison Nexus en cours...</p>
   </div>
 
   <div *ngIf="userData" class="profile-wrapper">
     <div class="header-background">
-      <div class="avatar-container">
-        <ion-icon name="person-circle-outline" class="user-avatar"></ion-icon>
+      <div class="header-background">
+        <div class="avatar-wrapper" (click)="changeAvatar()">
+          <img [src]="userData?.avatarUrl" class="user-avatar-img">
+
+          <div class="avatar-edit-badge">
+            <ion-icon name="camera-outline"></ion-icon>
+          </div>
+        </div>
       </div>
+
+      <input type="file" #fileInput (change)="onFileSelected($event)" style="display: none" accept="image/*">
     </div>
 
     <ion-card class="profile-card">
       <ion-card-content>
-        <div class="user-greeting">Bonjour {{ userData.fullName }}</div>
+        <div class="user-greeting">Bonjour, {{ userData.fullName }}</div>
 
-        <div class="section-header">Temps d'utilisation</div>
+        <div class="section-header">uptime système</div>
         <div class="time-row">
           <div class="time-box box-dark">
             <span class="time-val">{{ days | number:'2.0' }}</span>
@@ -23,59 +31,61 @@
           </div>
           <span class="dots">:</span>
           <div class="time-box box-medium">
-            <span class="time-val">{{ minutes | number:'2.0' }}</span>
-            <span class="time-lab">Min</span>
+            <span class="time-val">{{ hours | number:'2.0' }}</span>
+            <span class="time-lab">Heures</span>
           </div>
           <span class="dots">:</span>
           <div class="time-box box-light">
-            <span class="time-val">{{ seconds | number:'2.0' }}</span>
-            <span class="time-lab">Sec</span>
+            <span class="time-val">{{ minutes | number:'2.0' }}</span>
+            <span class="time-lab">Min</span>
           </div>
         </div>
 
         <div class="progress-container">
           <div class="progress-info">
-            <span>Cycle 24h</span>
+            <span>Cycle de synchronisation</span>
             <span>{{ (progress * 100) | number:'1.0-0' }}%</span>
           </div>
           <ion-progress-bar [value]="progress" class="nexus-progress"></ion-progress-bar>
         </div>
 
         <div class="section-header">
-          Edition
-          <ion-button fill="clear" size="small" (click)="toggleEdit()" style="--color: #b87a8e;">
-            {{ isEditing ? 'Annuler' : 'Modifier' }}
+          Identité
+          <ion-button fill="clear" size="small" (click)="toggleEdit()">
+            <ion-icon [name]="isEditing ? 'close-outline' : 'create-outline'" slot="icon-only"></ion-icon>
           </ion-button>
         </div>
 
         <div class="edit-info-box">
-          <p>username :
+          <div class="input-field">
+            <label>NOM COMPLET</label>
             <ion-input [(ngModel)]="userData.fullName" [readonly]="!isEditing" class="custom-input"></ion-input>
-          </p>
-          <p>password :
-            <ion-input type="password" [(ngModel)]="newPassword"
-                       [placeholder]="isEditing ? 'Nouveau password' : '********'"
-                       [readonly]="!isEditing" class="custom-input"></ion-input>
-          </p>
+          </div>
 
-          <ion-button *ngIf="isEditing" expand="block" color="success" (click)="saveChanges()" style="margin-top: 10px;">
-            SAUVEGARDER
+          <div class="input-field">
+            <label>MOT DE PASSE</label>
+            <ion-input type="password" [(ngModel)]="newPassword"
+                       [placeholder]="isEditing ? 'Nouveau password' : '••••••••'"
+                       [readonly]="!isEditing" class="custom-input"></ion-input>
+          </div>
+
+          <ion-button *ngIf="isEditing" expand="block" class="save-btn" (click)="saveChanges()">
+            APPLIQUER LES MODIFICATIONS
           </ion-button>
         </div>
 
-        <div class="section-header">Trophée</div>
+        <div class="section-header">Succès</div>
         <div class="trophy-card">
           <div class="trophy-icon">🏆</div>
           <div class="trophy-text">
-            <strong>{{ getTrophyTitle() }}</strong>
-            <p *ngIf="days < 7">Continuez comme ça, vous progressez !</p>
-            <p *ngIf="days >= 7">Un véritable pilier de la communauté.</p>
+            <strong>{{ days >= 7 ? 'Habitué Nexus' : 'Nouvelle Recrue' }}</strong>
+            <p>{{ days < 7 ? 'Plus que ' + (7 - days) + ' jours avant le prochain rang.' : 'Rang Elite débloqué.' }}</p>
           </div>
         </div>
 
         <ion-button expand="block" class="logout-btn" (click)="handleLogout()">
           <ion-icon name="log-out-outline" slot="start"></ion-icon>
-          DÉCONNEXION
+          DÉCONNEXION DU TERMINAL
         </ion-button>
       </ion-card-content>
     </ion-card>

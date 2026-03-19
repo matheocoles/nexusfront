@@ -1,125 +1,87 @@
-<ion-content [fullscreen]="true">
+<div class="cyber-loader-overlay" *ngIf="isLoading">
+  <div class="loader-content">
+    <div class="glitch-text" data-text="NEXUS">NEXUS</div>
+    <div class="loading-bar-container"><div class="loading-bar-fill"></div></div>
+    <p class="status-msg">SYNC EN COURS...</p>
+  </div>
+</div>
+
+<ion-content [fullscreen]="true" class="nexus-main-bg">
   <div class="main-container">
     <header class="brand-header">
-      <div class="logo-container">
-        <img src="assets/logo.png" alt="NEXUS" class="vortex-logo">
-      </div>
+      <img src="assets/logo.png" class="vortex-logo">
       <h1 class="brand-title">NEXUS</h1>
     </header>
 
     <section class="schedule-section">
       <div class="schedule-header">
         <h2>Emploi du temps</h2>
-        <div class="add-btn-container" (click)="addNewSession()">
-          <ion-icon name="add-outline"></ion-icon>
-        </div>
+        <div class="add-btn-container" (click)="addNewSession()"><ion-icon name="add-outline"></ion-icon></div>
       </div>
-
       <div class="search-bar">
-        <ion-icon name="menu-outline"></ion-icon>
-        <input type="text" placeholder="Rechercher une activité...">
+        <input type="text" placeholder="Filtrer le buffer..." (input)="onSearch($event)">
         <ion-icon name="search-outline"></ion-icon>
       </div>
 
-      <div *ngIf="isLoading" class="state-container">
-        <ion-spinner name="crescent"></ion-spinner>
-      </div>
-
-      <div class="schedule-container" *ngIf="!isLoading">
-        <div class="date-selector">
-          <ion-icon name="chevron-back-outline"></ion-icon>
-          <span>AUJOURD'HUI</span>
-          <ion-icon name="chevron-forward-outline"></ion-icon>
-        </div>
-
-        <div class="course-list">
-          <div class="course-item" *ngFor="let c of courses; let i = index"
-               [style.background]="c.displayColor" (click)="presentActionSheet(c)">
-            <div class="course-number">{{ i + 1 }}</div>
-            <div class="course-time">
-              <span class="start">{{ c.startTime }}</span>
-              <span class="end">{{ c.endTime }}</span>
-            </div>
-            <div class="course-info">
-              <span class="course-name">{{ c.name }}</span>
-              <span class="course-room">
-                <ion-icon name="location-outline"></ion-icon>
-                {{ c.room }}
-              </span>
-            </div>
-            <div class="course-duration-badge">{{ c.duration }}</div>
+      <div class="course-list" *ngIf="!isLoading">
+        <div class="course-item" *ngFor="let c of filteredCourses" [style.background]="c.displayColor" [class.is-done]="c.isDone" (click)="presentActionSheet(c)">
+          <div class="course-time"><span class="start">{{ c.startTime }}</span></div>
+          <div class="course-info">
+            <span class="course-name">{{ c.name }}</span>
+            <span class="course-room"><ion-icon name="location-outline"></ion-icon> {{ c.room }}</span>
+          </div>
+          <div class="validation-slot" (click)="validateSession(c, $event)">
+            <ion-icon [name]="c.isDone ? 'checkmark-circle' : 'play-outline'"></ion-icon>
           </div>
         </div>
       </div>
     </section>
   </div>
 
-  <ion-modal [isOpen]="isModalOpen" (didDismiss)="isModalOpen = false" class="nexus-modal"
-             [breakpoints]="[0, 0.9]" [initialBreakpoint]="0.9">
+  <ion-modal [isOpen]="isModalOpen" (didDismiss)="isModalOpen = false" class="nexus-modal" [breakpoints]="[0, 0.9]" [initialBreakpoint]="0.9">
     <ng-template>
       <div class="modal-content">
         <div class="modal-handle"></div>
-        <header class="modal-header">
-          <h3>{{ isEditMode ? 'MODIFIER' : 'NOUVELLE' }} ACTIVITÉ</h3>
-          <p>Configurez les paramètres de session</p>
-        </header>
-
+        <header class="modal-header"><h3>NOUVELLE MISSION</h3></header>
         <div class="modal-body">
-          <div class="input-group">
-            <label class="section-label">TITRE DE L'ACTIVITÉ</label>
-            <input type="text" [(ngModel)]="newSessionTitle" placeholder="Ex: Musculation...">
-          </div>
+          <label class="section-label">NOM DE L'ACTIVITÉ</label>
+          <input type="text" [(ngModel)]="newSessionTitle" placeholder="Ex: Boxe, Anglais...">
 
-          <div class="input-group">
-            <label class="section-label">LIEU / SALLE</label>
-            <input type="text" [(ngModel)]="newSessionRoom" placeholder="Ex: Salle A, Gymnase...">
-          </div>
-
-          <label class="section-label">TYPE D'ACTIVITÉ</label>
+          <label class="section-label">CATÉGORIE</label>
           <div class="category-grid">
-            <div class="cat-card" [class.active]="selectedType === 'class'" (click)="selectedType = 'class'">
-              <div class="icon-circle"><ion-icon [icon]="modalIcons.book"></ion-icon></div>
-              <span>COURS</span>
-            </div>
-            <div class="cat-card" [class.active]="selectedType === 'sport'" (click)="selectedType = 'sport'">
-              <div class="icon-circle"><ion-icon [icon]="modalIcons.fitness"></ion-icon></div>
-              <span>SPORT</span>
-            </div>
-            <div class="cat-card" [class.active]="selectedType === 'extra'" (click)="selectedType = 'extra'">
-              <div class="icon-circle"><ion-icon [icon]="modalIcons.rocket"></ion-icon></div>
-              <span>EXTRA</span>
-            </div>
+            <div class="cat-card" [class.active]="selectedType === 'class'" (click)="selectedType = 'class'"><ion-icon name="book-outline"></ion-icon><span>COURS</span></div>
+            <div class="cat-card" [class.active]="selectedType === 'sport'" (click)="selectedType = 'sport'"><ion-icon name="fitness-outline"></ion-icon><span>SPORT</span></div>
+            <div class="cat-card" [class.active]="selectedType === 'extra'" (click)="selectedType = 'extra'"><ion-icon name="rocket-outline"></ion-icon><span>EXTRA</span></div>
           </div>
 
-          <label class="section-label" style="margin-top: 20px;">DURÉE</label>
-          <div class="duration-selector">
-            <div class="duration-chip" [class.active]="selectedDuration === 30" (click)="selectedDuration = 30">30 min</div>
-            <div class="duration-chip" [class.active]="selectedDuration === 60" (click)="selectedDuration = 60">1 h</div>
-            <div class="duration-chip" [class.active]="selectedDuration === 90" (click)="selectedDuration = 90">1h30</div>
-            <div class="duration-chip" [class.active]="selectedDuration === 120" (click)="selectedDuration = 120">2 h</div>
+          <div *ngIf="selectedType === 'class'" class="fade-in">
+            <label class="section-label">PROFESSEUR</label>
+            <input type="text" [(ngModel)]="sessionData.teacher">
+            <label class="section-label">SALLE</label>
+            <input type="text" [(ngModel)]="sessionData.room">
           </div>
 
-          <button class="btn-confirm" (click)="confirmSave()">
-            {{ isEditMode ? 'ENREGISTRER LES MODIFS' : 'CRÉER LA SESSION' }}
-            <ion-icon name="checkmark-circle-outline"></ion-icon>
-          </button>
+          <div *ngIf="selectedType === 'sport'" class="fade-in">
+            <label class="section-label">LIEU</label>
+            <input type="text" [(ngModel)]="sessionData.place">
+            <label class="section-label">INTENSITÉ</label>
+            <input type="text" [(ngModel)]="sessionData.intensity">
+          </div>
+
+          <div *ngIf="selectedType === 'extra'" class="fade-in">
+            <label class="section-label">ORGANISATEUR</label>
+            <input type="text" [(ngModel)]="sessionData.organiser">
+            <label class="section-label">LIEU</label>
+            <input type="text" [(ngModel)]="sessionData.place">
+          </div>
+
+          <button class="btn-confirm" (click)="confirmSave()">INJECTER DANS RAILWAY</button>
         </div>
       </div>
     </ng-template>
   </ion-modal>
 
   <ion-modal [isOpen]="isNotifOpen" (didDismiss)="isNotifOpen = false" class="nexus-hud-modal">
-    <ng-template>
-      <div class="hud-wrapper">
-        <div class="hud-icon">
-          <ion-icon name="shield-checkmark-outline"></ion-icon>
-        </div>
-        <div class="hud-content">
-          <h3 class="hud-title">{{ notifTitle }}</h3>
-          <p class="hud-msg">{{ notifMsg }}</p>
-        </div>
-        <div class="hud-footer">SYSTÈME NEXUS OPTIMISÉ</div>
-      </div>
-    </ng-template>
+    <ng-template><div class="hud-wrapper"><ion-icon name="shield-checkmark-outline" class="hud-icon"></ion-icon><h3 class="hud-title">{{ notifTitle }}</h3><p class="hud-msg">{{ notifMsg }}</p></div></ng-template>
   </ion-modal>
 </ion-content>

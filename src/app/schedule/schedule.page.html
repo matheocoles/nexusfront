@@ -1,5 +1,5 @@
 <ion-content [fullscreen]="true" class="nexus-dark-content">
-  <div class="main-wrapper">
+  <div class="main-wrapper" *ngIf="isReady">
 
     <div class="header-container">
       <h1 class="title">Calendrier</h1>
@@ -30,11 +30,10 @@
 
       <ng-template>
         <div class="modal-wrapper">
-
           <div class="modal-header">
             <div class="header-top">
               <h2>{{ isAdding ? 'Nouveau' : 'Emploi du temps' }}</h2>
-              <div class="action-btn" (click)="isAdding = !isAdding">
+              <div class="action-btn" (click)="toggleAdding()">
                 <ion-icon [name]="isAdding ? 'close-outline' : 'add-outline'"></ion-icon>
               </div>
             </div>
@@ -42,22 +41,26 @@
           </div>
 
           <div class="cards-list" *ngIf="!isAdding">
-
             <div *ngIf="isLoading" class="loader">
               <ion-spinner name="crescent"></ion-spinner>
             </div>
 
-            <div *ngFor="let s of filteredSessions" class="nexus-card">
+            <div *ngFor="let s of filteredSessions"
+                 class="nexus-card"
+                 [class.type-class]="s.classId"
+                 [class.type-sport]="s.sportId"
+                 [class.type-extra]="s.extraActivityId">
+
               <div class="time-part">
                 <span class="t-start">{{ (s.dateTimeStart || s.startTime) | date:'HH:mm' }}</span>
                 <span class="t-end">{{ (s.dateTimeEnd || s.endTime) | date:'HH:mm' }}</span>
               </div>
               <div class="content-part">
-                <h3>{{ s.class?.name || s.sport?.name || s.extraActivity?.name || s.name || 'Activité' }}</h3>
-                <p>
-                  <ion-icon name="location-outline"></ion-icon>
-                  {{ s.status || s.room || 'Prévu' }}
-                </p>
+                <h3>{{ s.class?.name || s.sport?.name || s.extraActivity?.name || s.status || 'Activité' }}</h3>
+                <p><ion-icon name="location-outline"></ion-icon> {{ s.status || 'Prévu' }}</p>
+              </div>
+              <div class="delete-btn" (click)="deleteSession(s.id, $event)">
+                <ion-icon name="trash-outline"></ion-icon>
               </div>
             </div>
 
@@ -69,31 +72,50 @@
 
           <div class="add-form" *ngIf="isAdding">
             <div class="input-group">
-              <label>Nom ou Statut</label>
+              <label>Status / Titre</label>
               <input type="text" [(ngModel)]="newSession.name" placeholder="ex: Séance Cardio">
+            </div>
+
+            <label class="section-label">CATÉGORIE</label>
+            <div class="category-grid">
+              <div class="cat-card" [class.active]="selectedType === 'class'" (click)="changeType('class')">
+                <ion-icon name="book-outline"></ion-icon>
+                <span>COURS</span>
+              </div>
+              <div class="cat-card" [class.active]="selectedType === 'sport'" (click)="changeType('sport')">
+                <ion-icon name="fitness-outline"></ion-icon>
+                <span>SPORT</span>
+              </div>
+              <div class="cat-card" [class.active]="selectedType === 'extra'" (click)="changeType('extra')">
+                <ion-icon name="rocket-outline"></ion-icon>
+                <span>EXTRA</span>
+              </div>
+            </div>
+
+            <div class="input-group" style="margin-top: 15px;">
+              <label>Choix de l'élément</label>
+              <select [(ngModel)]="selectedCategoryId" class="nexus-select">
+                <option [value]="null">Sélectionnez...</option>
+                <option *ngFor="let item of categoryList" [value]="item.id">{{ item.name }}</option>
+              </select>
             </div>
 
             <div class="time-row">
               <div class="input-group">
-                <label>Heure Début</label>
+                <label>Début</label>
                 <input type="time" [(ngModel)]="newSession.startTime">
               </div>
               <div class="input-group">
-                <label>Heure Fin</label>
+                <label>Fin</label>
                 <input type="time" [(ngModel)]="newSession.endTime">
               </div>
             </div>
-
             <button class="save-btn" (click)="submitNewSession()">
-              <ion-icon name="checkmark-outline"></ion-icon>
-              CONFIRMER L'AJOUT
+              <ion-icon name="checkmark-outline"></ion-icon> CONFIRMER L'AJOUT
             </button>
-            <p class="form-hint">L'activité sera ajoutée à la date du {{ selectedDate | date:'dd/MM' }}</p>
           </div>
-
         </div>
       </ng-template>
     </ion-modal>
-
   </div>
 </ion-content>

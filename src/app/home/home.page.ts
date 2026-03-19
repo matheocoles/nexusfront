@@ -2,20 +2,16 @@ import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
-  IonContent, IonIcon, IonSpinner, ToastController,
-  IonModal, IonInput, IonButton, LoadingController,
-  ActionSheetController, AlertController
+  IonContent, IonIcon, IonModal,
+  LoadingController, ActionSheetController
 } from '@ionic/angular/standalone';
 import { NexusService } from '../services/nexus.service';
-import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import {
-  addOutline, searchOutline, menuOutline, calendarOutline,
-  chevronBackOutline, chevronForwardOutline, arrowDownOutline,
-  playOutline, bookOutline, fitnessOutline, rocketOutline,
-  checkmarkCircleOutline, timeOutline, locationOutline,
-  trashOutline, createOutline, closeOutline, alertCircleOutline,
-  shieldCheckmarkOutline // AJOUTÉ : Indispensable pour la notification HUD
+  addOutline, searchOutline, menuOutline, playOutline,
+  bookOutline, fitnessOutline, rocketOutline, checkmarkCircleOutline,
+  checkmarkCircle, locationOutline, trashOutline, createOutline,
+  closeOutline, shieldCheckmarkOutline
 } from 'ionicons/icons';
 
 @Component({
@@ -23,243 +19,196 @@ import {
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
   standalone: true,
-  imports: [
-    CommonModule, FormsModule, IonContent, IonIcon, IonSpinner,
-    IonModal,
-  ]
+  imports: [CommonModule, FormsModule, IonContent, IonIcon, IonModal]
 })
 export class HomePage implements OnInit {
   private nexusService = inject(NexusService);
-  private toastController = inject(ToastController);
-  private loadingController = inject(LoadingController);
-  private actionSheetController = inject(ActionSheetController);
-  private alertController = inject(AlertController);
-  private router = inject(Router);
+  private loadingCtrl = inject(LoadingController);
+  private actionSheetCtrl = inject(ActionSheetController);
   private cdr = inject(ChangeDetectorRef);
 
-  // Variables pour la notification HUD
-  isNotifOpen = false;
-  notifTitle = '';
-  notifMsg = '';
-
   courses: any[] = [];
-  isLoading: boolean = true;
-  private colorPalette = ['#2a0a14', '#5e102e', '#3f255e', '#5e4c85', '#7a6a9e'];
-
+  filteredCourses: any[] = [];
+  isLoading = true;
   isModalOpen = false;
   isEditMode = false;
-  editingSessionId: number | null = null;
+  isNotifOpen = false;
 
   newSessionTitle = '';
-  newSessionRoom = '';
   selectedType = 'class';
   selectedDuration = 60;
 
-  modalIcons = {
-    book: bookOutline,
-    fitness: fitnessOutline,
-    rocket: rocketOutline
+  sessionData = {
+    description: 'Mission Nexus Auto-générée',
+    teacher: 'Nexus Core',
+    room: 'Secteur-A1',
+    place: 'Base Nexus',
+    intensity: 'Medium',
+    organiser: 'Nexus Corp',
+    theme: 'Opération Alpha'
   };
+
+  notifTitle = ''; notifMsg = '';
+  private palette = ['#2a0a14', '#5e102e', '#3f255e', '#5e4c85'];
 
   constructor() {
     addIcons({
-      addOutline, searchOutline, menuOutline, calendarOutline,
-      chevronBackOutline, chevronForwardOutline, arrowDownOutline,
-      playOutline, checkmarkCircleOutline, bookOutline, fitnessOutline, rocketOutline,
-      timeOutline, locationOutline, trashOutline, createOutline, closeOutline,
-      alertCircleOutline, shieldCheckmarkOutline // ENREGISTRÉ ICI
+      'add-outline': addOutline, 'search-outline': searchOutline,
+      'menu-outline': menuOutline, 'play-outline': playOutline,
+      'book-outline': bookOutline, 'fitness-outline': fitnessOutline,
+      'rocket-outline': rocketOutline, 'checkmark-circle-outline': checkmarkCircleOutline,
+      'checkmark-circle': checkmarkCircle, 'location-outline': locationOutline,
+      'trash-outline': trashOutline, 'create-outline': createOutline,
+      'close-outline': closeOutline, 'shield-checkmark-outline': shieldCheckmarkOutline
     });
   }
 
-  ngOnInit() {
-    this.loadSchedule();
-  }
+  ngOnInit() { this.loadSchedule(); }
 
   loadSchedule() {
     this.isLoading = true;
     this.nexusService.getSessions().subscribe({
-      next: (data: any[]) => {
-        this.courses = data.sort((a, b) =>
-          new Date(a.dateTimeStart).getTime() - new Date(b.dateTimeStart).getTime()
-        ).map((item, index) => ({
-          ...item,
-          name: item.status || item.Status || `Activité #${item.id}`,
-          room: item.room || item.Room || 'Zone Nexus',
-          startTime: this.formatTime(item.dateTimeStart),
-          endTime: this.formatTime(item.dateTimeEnd),
-          duration: this.calculateDuration(item.dateTimeStart, item.dateTimeEnd),
-          displayColor: this.colorPalette[index % this.colorPalette.length]
+      next: (res) => {
+        this.courses = res.map((s, i) => ({
+          ...s,
+          name: s.status || 'Mission',
+          room: s.class?.room || s.sport?.place || s.extraActivity?.place || 'Zone Nexus',
+          startTime: this.formatTime(s.dateTimeStart),
+          endTime: this.formatTime(s.dateTimeEnd),
+          displayColor: this.palette[i % this.palette.length],
+          isDone: s.status?.includes('[TERMINÉE]'),
+          duration: this.calcDur(s.dateTimeStart, s.dateTimeEnd)
         }));
-        this.isLoading = false;
-        this.cdr.detectChanges();
+        this.filteredCourses = [...this.courses];
+        setTimeout(() => { this.isLoading = false; this.cdr.detectChanges(); }, 1200);
       },
-      error: () => {
-        this.isLoading = false;
-        this.showToast("Erreur de connexion Nexus");
-      }
+      error: () => { this.isLoading = false; }
     });
-  }
-
-  formatTime(dateStr: string) {
-    if (!dateStr) return '--:--';
-    const date = new Date(dateStr);
-    const h = date.getHours().toString().padStart(2, '0');
-    const m = date.getMinutes().toString().padStart(2, '0');
-    return `${h}:${m}`;
-  }
-
-  calculateDuration(start: string, end: string): string {
-    if (!start || !end) return '1h';
-    const diffMs = new Date(end).getTime() - new Date(start).getTime();
-    const mins = Math.floor(Math.abs(diffMs) / 60000);
-    if (mins < 60) return `${mins}min`;
-    const hrs = Math.floor(mins / 60);
-    const rMins = mins % 60;
-    return rMins > 0 ? `${hrs}h${rMins.toString().padStart(2, '0')}` : `${hrs}h`;
-  }
-
-  async presentActionSheet(course: any) {
-    const actionSheet = await this.actionSheetController.create({
-      header: course.name.toUpperCase(),
-      subHeader: `Lieu : ${course.room}`,
-      cssClass: 'nexus-action-sheet',
-      buttons: [
-        { text: 'Modifier', icon: createOutline, handler: () => this.openEditModal(course) },
-        { text: 'Supprimer', role: 'destructive', icon: trashOutline, handler: () => this.confirmDelete(course) },
-        { text: 'Annuler', icon: closeOutline, role: 'cancel' }
-      ]
-    });
-    await actionSheet.present();
-  }
-
-  async confirmDelete(course: any) {
-    const alert = await this.alertController.create({
-      header: 'SUPPRESSION',
-      message: `Voulez-vous supprimer "${course.name}" ?`,
-      cssClass: 'nexus-alert',
-      buttons: [
-        { text: 'ANNULER', role: 'cancel', cssClass: 'alert-button-cancel' },
-        { text: 'SUPPRIMER', role: 'destructive', cssClass: 'alert-button-confirm', handler: () => this.deleteSession(course.id) }
-      ]
-    });
-    await alert.present();
-  }
-
-  async deleteSession(id: any) {
-    // 1. Suppression visuelle instantanée
-    const idToDelete = String(id);
-    this.courses = [...this.courses.filter(course => String(course.id) !== idToDelete)];
-    this.cdr.detectChanges();
-
-    // 2. Petit loader discret
-    const loading = await this.loadingController.create({
-      spinner: 'crescent',
-      cssClass: 'nexus-loader-small',
-      duration: 1000
-    });
-    await loading.present();
-
-    this.nexusService.deleteSession(id).subscribe({
-      next: async () => {
-        await loading.dismiss();
-        this.showNexusNotification('SUPPRIMÉ', 'La session a été retirée');
-      },
-      error: async () => {
-        await loading.dismiss();
-        this.showNexusNotification('SÉCURITÉ', 'Suppression locale confirmée');
-      }
-    });
-  }
-
-  async showNexusNotification(title: string, msg: string) {
-    this.notifTitle = title;
-    this.notifMsg = msg;
-    this.isNotifOpen = true;
-    this.cdr.detectChanges(); // Force l'affichage du modal
-
-    // Auto-fermeture après 2.5 secondes
-    setTimeout(() => {
-      this.isNotifOpen = false;
-      this.cdr.detectChanges();
-    }, 2500);
   }
 
   async confirmSave() {
-    if (!this.newSessionTitle.trim() || !this.newSessionRoom.trim()) {
-      this.showToast("Veuillez remplir tous les champs");
-      return;
-    }
-
-    const loading = await this.loadingController.create({
-      message: 'Synchronisation...',
-      spinner: 'crescent',
-      cssClass: 'nexus-loader'
-    });
+    if (!this.newSessionTitle.trim()) return;
+    const loading = await this.loadingCtrl.create({ message: 'COMMUNICATION RAILWAY...' });
     await loading.present();
 
-    const userId = this.nexusService.getUserId();
-    const now = new Date();
-    const end = new Date(now.getTime() + (this.selectedDuration * 60000));
+    const now = new Date().toISOString();
+    const durationNum = parseInt(this.selectedDuration.toString(), 10);
+    const endTime = new Date(Date.now() + (durationNum * 60000)).toISOString();
 
-    const payload = {
-      "Id": this.editingSessionId,
-      "DateTimeStart": now.toISOString(),
-      "DateTimeEnd": end.toISOString(),
-      "Status": this.newSessionTitle,
-      "Room": this.newSessionRoom,
-      "LoginId": userId ? parseInt(userId, 10) : 0
+    // Modèle Activity (Base)
+    const baseActivity = {
+      Name: this.newSessionTitle,
+      Description: this.sessionData.description || "Mission Nexus",
+      DateTimeStart: now,
+      DateTimeEnd: endTime,
+      Activities: []
     };
 
-    // On prépare le type de requête
-    const isEdit = !!(this.isEditMode && this.editingSessionId);
-    const request = isEdit
-      ? this.nexusService.updateSession(this.editingSessionId!, payload)
-      : this.nexusService.createSession(payload);
+    let createObs;
 
-    request.subscribe({
-      next: async () => {
-        await loading.dismiss();
-        this.isModalOpen = false;
+    if (this.selectedType === 'class') {
+      const payload = { ...baseActivity, Subject: this.newSessionTitle, Teacher: this.sessionData.teacher, Room: this.sessionData.room, Objective: 'Objectif Standard' };
+      createObs = this.nexusService.createClass(payload);
+    } else if (this.selectedType === 'sport') {
+      const payload = { ...baseActivity, Type: 'Training', Place: this.sessionData.place, Duration: durationNum, Intensity: this.sessionData.intensity };
+      createObs = this.nexusService.createSport(payload);
+    } else {
+      const payload = { ...baseActivity, Organiser: this.sessionData.organiser, Place: this.sessionData.place, Theme: this.sessionData.theme, Resource: 'Terminal Nexus' };
+      createObs = this.nexusService.createExtra(payload);
+    }
 
-        // CHOIX DU MESSAGE SELON LE MODE
-        if (isEdit) {
-          this.showNexusNotification('MODIFIÉ', 'Changements enregistrés');
-        } else {
-          this.showNexusNotification('AJOUTÉ', 'Nouvelle session enregistrée');
-        }
-
-        this.loadSchedule();
-      },
-      error: async () => {
-        await loading.dismiss();
-        this.showToast("Erreur de connexion API");
+    createObs.subscribe({
+      next: (newEntity: any) => this.injectSession(newEntity.id, loading, now, endTime),
+      error: () => {
+        // Fallback si l'entité existe déjà (évite la 500/400 sur doublon)
+        this.fallbackToExisting(loading, now, endTime);
       }
     });
   }
 
-  openEditModal(course: any) {
-    this.isEditMode = true;
-    this.editingSessionId = course.id;
-    this.newSessionTitle = course.name;
-    this.newSessionRoom = course.room;
-    this.isModalOpen = true;
+  private fallbackToExisting(loading: any, start: string, end: string) {
+    const listObs = this.selectedType === 'class' ? this.nexusService.getClasses() :
+      this.selectedType === 'sport' ? this.nexusService.getSports() : this.nexusService.getExtra();
+
+    listObs.subscribe((items: any[]) => {
+      const existing = items.find(i => i.name.toLowerCase() === this.newSessionTitle.toLowerCase());
+      if (existing) {
+        this.injectSession(existing.id, loading, start, end);
+      } else {
+        loading.dismiss();
+        this.nexusService.showToast("ERREUR : Liaison impossible");
+      }
+    });
+  }
+
+  private injectSession(catId: number, loading: any, start: string, end: string) {
+    const payload = {
+      Status: this.newSessionTitle,
+      DateTimeStart: start,
+      DateTimeEnd: end,
+      LoginId: parseInt(this.nexusService.getUserId() || '0'),
+      ClassId: this.selectedType === 'class' ? catId : null,
+      SportId: this.selectedType === 'sport' ? catId : null,
+      ExtraActivityId: this.selectedType === 'extra' ? catId : null,
+      SessionAchievements: []
+    };
+
+    this.nexusService.createSession(payload).subscribe({
+      next: () => {
+        loading.dismiss();
+        this.isModalOpen = false;
+        this.loadSchedule();
+        this.showHUD('SYNC OK', 'MISSION ENREGISTRÉE');
+      },
+      error: (err) => {
+        loading.dismiss();
+        console.error("Erreur Session 400:", err.error);
+        this.nexusService.showToast("ERREUR : Session rejetée");
+      }
+    });
+  }
+
+  // --- ACTIONS ---
+  validateSession(course: any, event: any) {
+    event.stopPropagation();
+    course.isDone = true;
+    this.nexusService.updateSession(course.id, { ...course, status: course.name + " [TERMINÉE]" }).subscribe();
+    this.showHUD('TERMINÉ', '+100 XP');
+  }
+
+  onSearch(event: any) {
+    const val = event.target.value.toLowerCase();
+    this.filteredCourses = this.courses.filter(c => c.name.toLowerCase().includes(val));
   }
 
   addNewSession() {
     this.isEditMode = false;
-    this.editingSessionId = null;
     this.newSessionTitle = '';
-    this.newSessionRoom = '';
     this.isModalOpen = true;
   }
 
-  async showToast(message: string) {
-    const toast = await this.toastController.create({
-      message: `🚀 ${message}`,
-      duration: 2000,
-      position: 'bottom',
-      cssClass: 'nexus-toast-simple'
+  showHUD(t: string, m: string) {
+    this.notifTitle = t; this.notifMsg = m; this.isNotifOpen = true;
+    this.cdr.detectChanges();
+    setTimeout(() => { this.isNotifOpen = false; this.cdr.detectChanges(); }, 2000);
+  }
+
+  async presentActionSheet(course: any) {
+    const sheet = await this.actionSheetCtrl.create({
+      header: 'ACTIONS',
+      buttons: [
+        { text: 'Supprimer', icon: 'trash-outline', role: 'destructive', handler: () => {
+            this.nexusService.deleteSession(course.id).subscribe(() => this.loadSchedule());
+          }},
+        { text: 'Annuler', role: 'cancel' }
+      ]
     });
-    await toast.present();
+    await sheet.present();
+  }
+
+  private formatTime(d: string) { return d ? new Date(d).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '--:--'; }
+  private calcDur(s: string, e: string) {
+    const diff = Math.round((new Date(e).getTime() - new Date(s).getTime()) / 60000);
+    return diff >= 60 ? `${Math.floor(diff/60)}h${diff%60 || ''}` : `${diff}m`;
   }
 }

@@ -1,18 +1,19 @@
-/* --- VARIABLES GLOBALES NEXUS --- */
 :host {
   --nexus-primary: #c2185b;
   --nexus-bg: #0d0d0d;
-  --nexus-card-bg: #161616;
 }
 
-/* --- STRUCTURE PRINCIPALE --- */
+.nexus-main-bg {
+  --background: var(--nexus-bg);
+  color: white;
+}
+
 .main-container {
-  background: var(--nexus-bg);
-  min-height: 100vh;
   padding: 20px;
+  min-height: 100vh;
 }
 
-/* --- HEADER & LOGO --- */
+/* HEADER */
 .brand-header {
   text-align: center;
   margin-bottom: 30px;
@@ -20,18 +21,19 @@
   .vortex-logo {
     width: 80px;
     filter: drop-shadow(0 0 10px var(--nexus-primary));
+    animation: vortexRotation 10s linear infinite;
   }
 
   .brand-title {
     color: white;
     letter-spacing: 10px;
     font-weight: 300;
-    margin-top: 10px;
     text-transform: uppercase;
+    margin-top: 10px;
   }
 }
 
-/* --- SECTION EMPLOI DU TEMPS --- */
+/* SEARCH & LIST */
 .schedule-header {
   display: flex;
   justify-content: space-between;
@@ -54,16 +56,9 @@
     align-items: center;
     justify-content: center;
     box-shadow: 0 4px 15px rgba(194, 24, 91, 0.4);
-    cursor: pointer;
-
-    ion-icon {
-      color: white;
-      font-size: 2rem;
-    }
   }
 }
 
-/* --- BARRE DE RECHERCHE --- */
 .search-bar {
   background: #1a1a1a;
   border-radius: 12px;
@@ -87,113 +82,76 @@
   }
 }
 
-/* --- DATE SELECTOR --- */
-.date-selector {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 30px;
-  color: white;
-  margin-bottom: 25px;
-
-  span {
-    font-weight: 800;
-    letter-spacing: 2px;
-    font-size: 0.9rem;
-  }
-
-  ion-icon {
-    color: var(--nexus-primary);
-    font-size: 1.2rem;
-  }
-}
-
-/* --- CARTES DE COURS (LISTE) --- */
 .course-item {
   display: flex;
   align-items: center;
   padding: 14px 16px;
   margin-bottom: 12px;
   border-radius: 16px;
-  color: white;
-  transition: transform 0.15s ease;
+  transition: all 0.2s;
 
-  &:active {
-    transform: scale(0.97);
+  &.is-done {
+    opacity: 0.5;
+    filter: grayscale(0.8);
   }
 
   .course-number {
     width: 25px;
     font-size: 0.75rem;
     opacity: 0.3;
-    font-weight: bold;
   }
 
   .course-time {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
     min-width: 65px;
     margin-right: 15px;
     border-right: 1px solid rgba(255, 255, 255, 0.1);
 
     .start {
       font-weight: 700;
-      font-size: 1rem;
     }
 
     .end {
       font-size: 0.7rem;
       opacity: 0.5;
-      margin-top: 2px;
     }
   }
 
   .course-info {
     flex: 1;
-    overflow: hidden;
 
     .course-name {
       font-weight: 700;
-      font-size: 0.95rem;
-      display: block;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
 
     .course-room {
       font-size: 0.75rem;
       opacity: 0.7;
-      display: flex;
-      align-items: center;
-      margin-top: 3px;
-
-      ion-icon {
-        margin-right: 4px;
-        font-size: 0.9rem;
-      }
     }
   }
 
+  .validation-slot {
+    font-size: 24px;
+    color: var(--nexus-primary);
+    margin-left: 10px;
+  }
+
   .course-duration-badge {
-    background: rgba(255, 255, 255, 0.9);
-    color: #000;
-    padding: 4px 10px;
-    border-radius: 12px;
+    background: white;
+    color: black;
+    padding: 2px 8px;
+    border-radius: 10px;
     font-size: 0.7rem;
     font-weight: 800;
-    margin-left: 10px;
-    min-width: 55px;
-    text-align: center;
   }
 }
 
-/* --- MODAL D'AJOUT / MODIFICATION --- */
+/* MODAL */
 .nexus-modal {
   --background: var(--nexus-bg);
-  --height: 90%;
+  --height: 70%;
   --border-radius: 40px 40px 0 0;
 
   .modal-content {
@@ -201,46 +159,28 @@
     color: white;
   }
 
-  .modal-handle {
-    width: 40px;
-    height: 4px;
-    background: #333;
-    border-radius: 10px;
-    margin: 0 auto 20px;
-  }
-
   .section-label {
     color: var(--nexus-primary);
     font-size: 0.7rem;
     font-weight: bold;
     letter-spacing: 2px;
-    display: block;
-    margin-bottom: 10px;
-    margin-top: 25px;
     text-transform: uppercase;
+    margin: 20px 0 10px;
   }
 
-  .input-group {
-    margin-bottom: 20px;
-
-    input {
-      width: 100%;
-      background: #161616;
-      border: 1px solid #222;
-      padding: 16px;
-      border-radius: 15px;
-      color: white;
-      outline: none;
-
-      &:focus {
-        border-color: var(--nexus-primary);
-      }
-    }
+  input {
+    width: 100%;
+    background: #161616;
+    border: 1px solid #222;
+    padding: 16px;
+    border-radius: 15px;
+    color: white;
+    outline: none;
   }
 
   .category-grid {
     display: flex;
-    gap: 12px;
+    gap: 10px;
 
     .cat-card {
       flex: 1;
@@ -250,8 +190,8 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 8px;
-      color: #666;
+      gap: 5px;
+      color: #555;
 
       &.active {
         border: 1px solid var(--nexus-primary);
@@ -264,8 +204,8 @@
       }
 
       .icon-circle {
-        width: 42px;
-        height: 42px;
+        width: 36px;
+        height: 36px;
         background: #222;
         border-radius: 50%;
         display: flex;
@@ -274,7 +214,7 @@
       }
 
       span {
-        font-size: 0.7rem;
+        font-size: 0.65rem;
         font-weight: bold;
       }
     }
@@ -287,11 +227,11 @@
     .duration-chip {
       flex: 1;
       background: #161616;
-      padding: 14px 5px;
+      padding: 12px;
       border-radius: 12px;
       text-align: center;
+      color: #555;
       font-weight: bold;
-      color: #666;
 
       &.active {
         background: var(--nexus-primary);
@@ -304,131 +244,44 @@
     width: 100%;
     background: var(--nexus-primary);
     color: white;
-    padding: 22px;
+    padding: 20px;
     border-radius: 20px;
     font-weight: 800;
-    border: none;
-    margin-top: 35px;
-    box-shadow: 0 10px 20px rgba(194, 24, 91, 0.3);
+    margin-top: 30px;
   }
 }
 
-/* --- NOTIFICATION HUD CENTRALE (MODAL NOTIF) --- */
-.nexus-hud-modal {
-  --width: 280px;
-  --height: fit-content;
-  --border-radius: 30px;
-  --background: transparent;
-  --box-shadow: none;
-  align-items: center;
-
-  &::part(content) {
-    background: rgba(10, 10, 10, 0.95);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid var(--nexus-primary);
-    border-radius: 30px;
-    box-shadow: 0 0 40px rgba(194, 24, 91, 0.5);
-    overflow: hidden;
-  }
-
-  .hud-wrapper {
-    padding: 30px 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    position: relative;
-
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 3px;
-      background: var(--nexus-primary);
-      box-shadow: 0 0 15px var(--nexus-primary);
-      animation: scanLoopHUD 2.5s infinite linear;
-    }
-
-    .hud-icon {
-      font-size: 4rem;
-      color: var(--nexus-primary);
-      filter: drop-shadow(0 0 15px var(--nexus-primary));
-      margin-bottom: 15px;
-    }
-
-    .hud-title {
-      color: white;
-      font-weight: 900;
-      font-size: 1.2rem;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      margin: 0;
-    }
-
-    .hud-msg {
-      color: rgba(255, 255, 255, 0.6);
-      font-size: 0.8rem;
-      margin-top: 8px;
-    }
-
-    .hud-footer {
-      margin-top: 20px;
-      font-size: 0.6rem;
-      letter-spacing: 2px;
-      color: var(--nexus-primary);
-      opacity: 0.5;
-      text-transform: uppercase;
-    }
-  }
-}
-
-/* --- ANIMATIONS --- */
-@keyframes scanLoopHUD {
-  0% {
-    top: 0%;
-    opacity: 0;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    top: 100%;
-    opacity: 0;
-  }
-}
-
-/* --- UI HELPERS & OVERLAYS --- */
-.state-container {
+/* CYBER LOADER */
+.cyber-loader-overlay {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 9999;
   display: flex;
   justify-content: center;
-  padding: 40px;
+  align-items: center;
+  flex-direction: column;
 
-  ion-spinner {
-    --color: var(--nexus-primary);
+  .glitch-text {
+    color: var(--nexus-primary);
+    font-size: 2rem;
+    font-weight: 900;
+    letter-spacing: 10px;
+    animation: glitch 1s infinite;
   }
-}
 
-.nexus-action-sheet {
-  --background: #161616;
-  --color: white;
-}
+  .loading-bar-container {
+    height: 2px;
+    width: 200px;
+    background: #111;
+    margin-top: 20px;
 
-.nexus-alert {
-  --background: #161616;
-
-  button {
-    color: var(--nexus-primary) !important;
+    .loading-bar-fill {
+      height: 100%;
+      background: var(--nexus-primary);
+      animation: loadBar 2s infinite;
+    }
   }
-}
-
-.vortex-logo {
-  width: 80px;
-  filter: drop-shadow(0 0 10px var(--nexus-primary));
-
-  animation: vortexRotation 10s linear infinite;
 }
 
 @keyframes vortexRotation {
@@ -437,5 +290,26 @@
   }
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes loadBar {
+  0% {
+    width: 0;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+@keyframes glitch {
+  0%, 100% {
+    transform: translate(0);
+  }
+  20% {
+    transform: translate(-2px, 2px);
+  }
+  40% {
+    transform: translate(2px, -2px);
   }
 }
