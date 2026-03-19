@@ -1,15 +1,17 @@
-import { Observable } from "rxjs";
-import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { inject, Injectable } from "@angular/core";
+import { HttpClient, HttpHeaders } from "@angular/common/http";
+import { Observable } from "rxjs";
 
 @Injectable({
   providedIn: 'root'
 })
 export class NexusService {
-  private apiUrl = 'https://nexusapi.up.railway.app/api';
+  private readonly apiUrl = 'https://nexusapi.up.railway.app/api';
   private readonly http = inject(HttpClient);
 
-  // Génération centralisée des headers avec Token
+  // ── GESTION DES HEADERS ──────────────────────────────────────────────────
+
+  /** Génération centralisée des headers avec le Token JWT */
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('nexus_token');
     let headers = new HttpHeaders({
@@ -22,9 +24,20 @@ export class NexusService {
     return headers;
   }
 
+  // ── AUTHENTIFICATION & PROFIL ─────────────────────────────────────────────
+
+  login(credentials: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/login`, credentials);
+  }
+
   saveSession(token: string, userId: string) {
     localStorage.setItem('nexus_token', token);
     localStorage.setItem('nexus_user_id', userId);
+  }
+
+  logout() {
+    localStorage.removeItem('nexus_token');
+    localStorage.removeItem('nexus_user_id');
   }
 
   getUserId(): string | null {
@@ -35,6 +48,9 @@ export class NexusService {
     return this.http.get(`${this.apiUrl}/logins/${id}`, { headers: this.getHeaders() });
   }
 
+  // ── GESTION DES SESSIONS (EMPLOI DU TEMPS) ────────────────────────────────
+
+  /** Récupère toutes les sessions (Schedule) */
   getSchedule(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/sessions`, { headers: this.getHeaders() });
   }
@@ -48,20 +64,36 @@ export class NexusService {
   }
 
   deleteSession(id: number | string): Observable<any> {
-    const url = `${this.apiUrl}/sessions/${id}`;
-
-    return this.http.delete(url, {
+    return this.http.delete(`${this.apiUrl}/sessions/${id}`, {
       headers: this.getHeaders(),
-      body: {}
+      body: {} // Nécessaire pour certains serveurs lors d'un DELETE
     });
   }
 
-  login(credentials: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/login`, credentials);
+  // ── RESSOURCES LIÉES (CLASSES, SPORTS, ACTIVITÉS, ACHIEVEMENTS) ───────────
+
+  /** GET /api/class — Liste des cours (matière, salle, prof...) */
+  getClasses(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/class`, { headers: this.getHeaders() });
   }
 
-  logout() {
-    localStorage.removeItem('nexus_token');
-    localStorage.removeItem('nexus_user_id');
+  /** GET /api/sport — Liste des sports (type, intensité, durée...) */
+  getSports(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/sport`, { headers: this.getHeaders() });
   }
+
+  /** GET /api/extraactivity — Liste des activités extra-scolaires */
+  getExtraActivities(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/extraactivity`, { headers: this.getHeaders() });
+  }
+
+  /** GET /api/achievements — Liste de tous les trophées disponibles */
+  getAchievements(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/achievements`, { headers: this.getHeaders() });
+  }
+  // ... dans NexusService
+  getSessions(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/sessions`, { headers: this.getHeaders() });
+  }
+// ...
 }

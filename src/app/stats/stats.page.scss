@@ -1,0 +1,455 @@
+/* ───────────────────────────────────────────────────────────────────────────
+   STATS PAGE — NEXUS
+   Reprend les variables du home.page.scss
+─────────────────────────────────────────────────────────────────────────── */
+:host {
+  --nexus-primary: #c2185b;
+  --nexus-bg:      #0d0d0d;
+  --nexus-card-bg: #161616;
+  --nexus-border:  #222;
+}
+
+.main-container {
+  background: var(--nexus-bg);
+  min-height: 100vh;
+  padding: 28px 20px;
+}
+
+/* ── HEADER ──────────────────────────────────────────────────────────────── */
+.brand-header {
+  margin-bottom: 22px;
+
+  .page-title {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: 1px;
+
+    .title-dot {
+      color: var(--nexus-primary);
+      display: inline-block;
+      animation: spin 6s linear infinite;
+    }
+  }
+
+  .page-subtitle {
+    color: white;
+    font-size: 1.3rem;
+    font-weight: 800;
+    margin: 6px 0 0;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-color: var(--nexus-primary);
+  }
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── PERIOD SELECTOR ─────────────────────────────────────────────────────── */
+.period-selector {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+
+  .period-chip {
+    flex: 1;
+    padding: 9px 0;
+    text-align: center;
+    border-radius: 20px;
+    background: var(--nexus-card-bg);
+    color: #555;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    border: 1px solid var(--nexus-border);
+    cursor: pointer;
+    transition: all .2s;
+
+    &.active {
+      background: var(--nexus-primary);
+      color: white;
+      border-color: var(--nexus-primary);
+      box-shadow: 0 4px 14px rgba(194,24,91,.45);
+    }
+  }
+}
+
+/* ── LOADER ──────────────────────────────────────────────────────────────── */
+.state-container {
+  display: flex;
+  justify-content: center;
+  padding: 60px 0;
+
+  ion-spinner { --color: var(--nexus-primary); }
+}
+
+/* ── TITRES DE SECTION ───────────────────────────────────────────────────── */
+.section-title {
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 700;
+  display: block;
+  margin-bottom: 14px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+
+  .section-title { margin-bottom: 0; }
+}
+
+/* ── ① BARRES VERTICALES ─────────────────────────────────────────────────── */
+.activity-bars-section {
+  margin-bottom: 28px;
+
+  .bar-group {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 30px;
+    height: 150px;
+  }
+
+  .bar-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+
+    .bar-track {
+      width: 54px;
+      height: 120px;
+      background: #1a1a1a;
+      border-radius: 27px;
+      display: flex;
+      align-items: flex-end;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      width: 100%;
+      border-radius: 27px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 10px;
+      transition: height .7s cubic-bezier(.34,1.56,.64,1);
+
+      .bar-icon-wrapper {
+        width: 32px; height: 32px;
+        background: rgba(255,255,255,.15);
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+
+        ion-icon { color: white; font-size: 1rem; }
+      }
+    }
+
+    .bar-meta {
+      text-align: center;
+
+      .bar-percent { color: white;  font-size: .8rem;  font-weight: 900; }
+      .bar-label   { color: #555;   font-size: .6rem;  font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+    }
+  }
+}
+
+/* ── ② STATS CARTES ──────────────────────────────────────────────────────── */
+.daily-stats {
+  margin-bottom: 28px;
+
+  .stats-scroll {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+
+    &::-webkit-scrollbar { display: none; }
+  }
+
+  .stat-card {
+    flex-shrink: 0;
+    width: 82px;
+    background: var(--nexus-card-bg);
+    border-radius: 16px;
+    padding: 14px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid var(--nexus-border);
+
+    .stat-card-icon {
+      width: 30px; height: 30px;
+      background: rgba(194,24,91,.12);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+
+      ion-icon { color: var(--nexus-primary); font-size: .95rem; }
+    }
+
+    .stat-value { color: var(--nexus-primary); font-size: .88rem; font-weight: 900; letter-spacing: .5px; }
+    .stat-label { color: rgba(255,255,255,.4); font-size: .58rem; text-align: center; line-height: 1.3; }
+  }
+}
+
+/* ── ③④⑤ SECTIONS CHART.JS ───────────────────────────────────────────────── */
+.chart-section {
+  background: var(--nexus-card-bg);
+  border: 1px solid var(--nexus-border);
+  border-radius: 20px;
+  padding: 18px;
+  margin-bottom: 20px;
+
+  /* ── Toggle Ligne / Barres ── */
+  .chart-type-tabs {
+    display: flex;
+    gap: 6px;
+
+    .chart-tab {
+      padding: 5px 14px;
+      border-radius: 10px;
+      background: #111;
+      border: 1px solid var(--nexus-border);
+      color: #555;
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .15s;
+
+      &.active {
+        background: rgba(194,24,91,.12);
+        border-color: var(--nexus-primary);
+        color: var(--nexus-primary);
+      }
+    }
+  }
+
+  /* ── Navigation semaine ── */
+  .week-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+
+    ion-icon { color: var(--nexus-primary); font-size: 1.1rem; cursor: pointer; flex-shrink: 0; }
+
+    .day-chips {
+      display: flex;
+      flex: 1;
+      gap: 8px;
+
+      .day-chip {
+        flex: 1;
+        background: #1a1a1a;
+        border-radius: 14px;
+        padding: 10px 4px;
+        display: flex; flex-direction: column; align-items: center; gap: 3px;
+
+        &.active {
+          background: var(--nexus-primary);
+          box-shadow: 0 4px 12px rgba(194,24,91,.45);
+        }
+
+        .day-num  { color: white;               font-size: .95rem; font-weight: 900; }
+        .day-name { color: rgba(255,255,255,.5); font-size: .6rem;  text-transform: uppercase; letter-spacing: 1px; }
+      }
+    }
+  }
+
+  /* ── Canvas wrappers ── */
+  .canvas-wrapper {
+    position: relative;
+    width: 100%;
+    height: 200px;
+
+    &--histo { height: 180px; }
+
+    canvas {
+      display: block;
+      width: 100% !important;
+      height: 100% !important;
+    }
+  }
+
+  /* ── Légende ── */
+  .chart-legend {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+
+    .leg-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: rgba(255,255,255,.5);
+      font-size: .68rem;
+      font-weight: 600;
+    }
+  }
+
+  /* ── Répartition barres ── */
+  &.repartition-section .repartition-total {
+    color: rgba(255,255,255,.35);
+    font-size: .75rem;
+    font-weight: 700;
+  }
+
+  .repartition-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    .repartition-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      .repartition-row-icon {
+        width: 36px; height: 36px;
+        border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+        ion-icon { font-size: 1rem; }
+      }
+
+      .repartition-row-body {
+        flex: 1;
+        min-width: 0;
+
+        .repartition-row-top {
+          display: flex;
+          justify-content: space-between;
+          align-items: baseline;
+          margin-bottom: 7px;
+
+          .repartition-row-name { color: rgba(255,255,255,.75); font-size: .8rem; font-weight: 600; }
+          .repartition-row-pct  { font-size: .85rem; font-weight: 900; }
+        }
+
+        .repartition-track {
+          height: 6px;
+          background: #1a1a1a;
+          border-radius: 3px;
+          overflow: hidden;
+
+          .repartition-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width .7s cubic-bezier(.34,1.1,.64,1);
+          }
+        }
+      }
+    }
+  }
+}
+
+/* ── Pastille commune ────────────────────────────────────────────────────── */
+.leg-dot {
+  width: 9px; height: 9px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+/* ── ⑥ ACHIEVEMENTS ──────────────────────────────────────────────────────── */
+.achievements-section {
+  margin-bottom: 24px;
+
+  .achv-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .achv-card {
+    background: var(--nexus-card-bg);
+    border: 1px solid var(--nexus-border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    .achv-rank {
+      width: 28px; height: 28px;
+      background: var(--nexus-primary);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-size: .75rem; font-weight: 900;
+      flex-shrink: 0;
+    }
+
+    .achv-name  { flex: 1; color: white;                   font-size: .85rem; font-weight: 700; }
+    .achv-count {          color: var(--nexus-primary); font-size: .8rem;  font-weight: 900; }
+  }
+}
+
+/* ── ⑦ INSIGHTS ──────────────────────────────────────────────────────────── */
+.insights-section {
+  .insight-card {
+    background: var(--nexus-card-bg);
+    border: 1px solid var(--nexus-border);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 10px;
+
+    .insight-text {
+      color: rgba(255,255,255,.6);
+      font-size: .78rem;
+      margin: 0 0 8px;
+    }
+
+    .insight-value-row {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+
+      .insight-pct    { color: var(--nexus-primary); font-size: 1.4rem; font-weight: 900; }
+      .insight-source { color: rgba(255,255,255,.4); font-size: .75rem; }
+    }
+
+    .insight-tag {
+      display: inline-block;
+      margin-top: 8px;
+      font-size: .6rem; font-weight: 700; letter-spacing: 1px;
+      padding: 3px 10px;
+      border-radius: 10px;
+      text-transform: uppercase;
+
+      &.normal   { background: rgba(194,24, 91,.12); color: #c2185b; }
+      &.elevated { background: rgba(156,39,176,.12); color: #ba68c8; }
+      &.high     { background: rgba(233,30, 99,.12); color: #f48fb1; }
+    }
+  }
+}
+
+/* ── HUD MODAL ───────────────────────────────────────────────────────────── */
+.nexus-hud-modal {
+  --width: 280px;
+  --height: fit-content;
+  --border-radius: 30px;
+  --background: transparent;
+  --box-shadow: none;
+  align-items: center;
+
+  &::part(content) {
+    background: rgba(10,10,10,.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--nexus-primary);
+    border-radius: 30px;
+    box-shadow: 0 0 40px rgba(194,24,91,.5);
+    overflow: hidden;
+  }
+
+  .hud-wrapper {
+    padding: 30px 20px;
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+  }
+
+  .hud-icon   { font-size: 4rem; color: var(--nexus-primary); filter: drop-shadow(0 0 15px var(--nexus-primary)); margin-bottom: 15px; }
+  .hud-title  { color: white; font-weight: 900; font-size: 1.2rem; letter-spacing: 3px; text-transform: uppercase; margin: 0; }
+  .hud-msg    { color: rgba(255,255,255,.6); font-size: .8rem; margin-top: 8px; }
+  .hud-footer { margin-top: 20px; font-size: .6rem; letter-spacing: 2px; color: var(--nexus-primary); opacity: .5; text-transform: uppercase; }
+}

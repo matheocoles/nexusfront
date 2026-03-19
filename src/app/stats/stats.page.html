@@ -1,0 +1,245 @@
+<ion-content [fullscreen]="true">
+  <div class="main-container">
+
+    <!-- HEADER -->
+    <header class="brand-header">
+      <h1 class="page-title">Statistiques <span class="title-dot">◉</span></h1>
+      <p class="page-subtitle">Ton activité</p>
+    </header>
+
+    <!-- PERIOD SELECTOR -->
+    <div class="period-selector">
+      <div class="period-chip"
+           *ngFor="let p of periods"
+           [class.active]="selectedPeriod === p.key"
+           (click)="selectPeriod(p.key)">
+        {{ p.label }}
+      </div>
+    </div>
+
+    <!-- LOADING -->
+    <div *ngIf="isLoading" class="state-container">
+      <ion-spinner name="crescent"></ion-spinner>
+    </div>
+
+    <ng-container *ngIf="!isLoading">
+
+      <!-- ① BARRES VERTICALES ─────────────────────────────── -->
+      <section class="activity-bars-section">
+        <div class="bar-group">
+          <div class="bar-item" *ngFor="let bar of activityBars">
+            <div class="bar-track">
+              <div class="bar-fill"
+                   [style.height.%]="bar.value"
+                   [style.background]="bar.color">
+                <div class="bar-icon-wrapper">
+                  <ion-icon [name]="bar.icon"></ion-icon>
+                </div>
+              </div>
+            </div>
+            <div class="bar-meta">
+              <div class="bar-percent">{{ bar.value }}%</div>
+              <div class="bar-label">{{ bar.label }}</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ② STATS CARTES ──────────────────────────────────── -->
+      <section class="daily-stats">
+        <span class="section-title">Stats {{ periodLabel }}</span>
+        <div class="stats-scroll">
+          <div class="stat-card" *ngFor="let s of periodStats">
+            <div class="stat-card-icon">
+              <ion-icon [name]="s.icon"></ion-icon>
+            </div>
+            <div class="stat-value">{{ s.value }}</div>
+            <div class="stat-label">{{ s.label }}</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ③ GRAPH D'INVESTISSEMENT ────────────────────────── -->
+      <section class="chart-section">
+        <div class="section-header">
+          <span class="section-title">Graph d'investissement</span>
+          <!-- Toggle ligne / barres -->
+          <div class="chart-type-tabs">
+            <button class="chart-tab"
+                    [class.active]="chartMode === 'line'"
+                    (click)="setChartMode('line')">
+              Ligne
+            </button>
+            <button class="chart-tab"
+                    [class.active]="chartMode === 'bar'"
+                    (click)="setChartMode('bar')">
+              Barres
+            </button>
+          </div>
+        </div>
+
+        <!-- Navigation semaine (visible seulement en mode "semaine") -->
+        <div class="week-nav" *ngIf="selectedPeriod === 'semaine'">
+          <ion-icon name="chevron-back-outline" (click)="prevWeek()"></ion-icon>
+          <div class="day-chips">
+            <div class="day-chip"
+                 *ngFor="let d of visibleDays"
+                 [class.active]="d.active">
+              <span class="day-num">{{ d.num }}</span>
+              <span class="day-name">{{ d.name }}</span>
+            </div>
+          </div>
+          <ion-icon name="chevron-forward-outline" (click)="nextWeek()"></ion-icon>
+        </div>
+
+        <!-- Canvas Chart.js -->
+        <div class="canvas-wrapper">
+          <canvas #investCanvas></canvas>
+        </div>
+
+        <!-- Légende manuelle -->
+        <div class="chart-legend">
+          <span class="leg-item">
+            <span class="leg-dot" style="background:#c2185b"></span>Total
+          </span>
+          <span class="leg-item">
+            <span class="leg-dot" style="background:#9c27b0"></span>Sport
+          </span>
+          <span class="leg-item">
+            <span class="leg-dot" style="background:#4a90d9"></span>Cours
+          </span>
+          <span class="leg-item">
+            <span class="leg-dot" style="background:#e91e63"></span>Extra
+          </span>
+        </div>
+      </section>
+
+      <!-- ④ HISTOGRAMME INTENSITÉ ─────────────────────────── -->
+      <section class="chart-section">
+        <div class="section-header">
+          <span class="section-title">Intensité par période</span>
+        </div>
+
+        <div class="canvas-wrapper canvas-wrapper--histo">
+          <canvas #histoCanvas></canvas>
+        </div>
+
+        <div class="chart-legend">
+          <span class="leg-item">
+            <span class="leg-dot" style="background:rgba(194,24,91,0.6)"></span>Normal
+          </span>
+          <span class="leg-item">
+            <span class="leg-dot" style="background:rgba(156,39,176,0.75)"></span>Élevé
+          </span>
+          <span class="leg-item">
+            <span class="leg-dot" style="background:rgba(233,30,99,0.95)"></span>Haut
+          </span>
+        </div>
+      </section>
+
+      <!-- ⑤ RÉPARTITION DU TEMPS ──────────────────────────── -->
+      <section class="chart-section repartition-section">
+        <div class="section-header">
+          <span class="section-title">Répartition du temps</span>
+          <span class="repartition-total">{{ donutTotalH }}</span>
+        </div>
+
+        <div class="repartition-rows">
+          <div class="repartition-row">
+            <div class="repartition-row-icon" style="background:rgba(194,24,91,.12)">
+              <ion-icon name="book-outline" style="color:#c2185b"></ion-icon>
+            </div>
+            <div class="repartition-row-body">
+              <div class="repartition-row-top">
+                <span class="repartition-row-name">Cours</span>
+                <span class="repartition-row-pct" style="color:#c2185b">{{ donutPcts[0] }}%</span>
+              </div>
+              <div class="repartition-track">
+                <div class="repartition-fill" [style.width.%]="donutPcts[0]" style="background:#c2185b"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="repartition-row">
+            <div class="repartition-row-icon" style="background:rgba(156,39,176,.12)">
+              <ion-icon name="fitness-outline" style="color:#9c27b0"></ion-icon>
+            </div>
+            <div class="repartition-row-body">
+              <div class="repartition-row-top">
+                <span class="repartition-row-name">Sport</span>
+                <span class="repartition-row-pct" style="color:#9c27b0">{{ donutPcts[1] }}%</span>
+              </div>
+              <div class="repartition-track">
+                <div class="repartition-fill" [style.width.%]="donutPcts[1]" style="background:#9c27b0"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="repartition-row">
+            <div class="repartition-row-icon" style="background:rgba(233,30,99,.12)">
+              <ion-icon name="rocket-outline" style="color:#e91e63"></ion-icon>
+            </div>
+            <div class="repartition-row-body">
+              <div class="repartition-row-top">
+                <span class="repartition-row-name">Extra</span>
+                <span class="repartition-row-pct" style="color:#e91e63">{{ donutPcts[2] }}%</span>
+              </div>
+              <div class="repartition-track">
+                <div class="repartition-fill" [style.width.%]="donutPcts[2]" style="background:#e91e63"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ⑥ ACHIEVEMENTS ───────────────────────────────────── -->
+      <section class="achievements-section" *ngIf="topAchievements.length > 0">
+        <span class="section-title">🏆 Top Achievements</span>
+        <div class="achv-list">
+          <div class="achv-card" *ngFor="let a of topAchievements; let i = index">
+            <div class="achv-rank">{{ i + 1 }}</div>
+            <div class="achv-name">{{ a.name }}</div>
+            <div class="achv-count">×{{ a.count }}</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ⑦ INSIGHTS ───────────────────────────────────────── -->
+      <section class="insights-section">
+        <span class="section-title">Avis</span>
+
+        <div class="insight-card" *ngFor="let insight of insights">
+          <p class="insight-text">{{ insight.message }}</p>
+          <div class="insight-value-row">
+            <span class="insight-pct">{{ insight.pct }}%</span>
+            <span class="insight-source">{{ insight.source }}</span>
+          </div>
+          <span class="insight-tag"
+                [ngClass]="insight.level.toLowerCase()">
+            {{ insight.level }}
+          </span>
+        </div>
+      </section>
+
+    </ng-container>
+
+    <div style="height: 50px;"></div>
+  </div>
+
+  <!-- HUD MODAL -->
+  <ion-modal [isOpen]="isNotifOpen"
+             (didDismiss)="isNotifOpen = false"
+             class="nexus-hud-modal">
+    <ng-template>
+      <div class="hud-wrapper">
+        <div class="hud-icon">
+          <ion-icon name="shield-checkmark-outline"></ion-icon>
+        </div>
+        <h3 class="hud-title">{{ notifTitle }}</h3>
+        <p class="hud-msg">{{ notifMsg }}</p>
+        <div class="hud-footer">SYSTÈME NEXUS OPTIMISÉ</div>
+      </div>
+    </ng-template>
+  </ion-modal>
+
+</ion-content>
