@@ -25,7 +25,7 @@ export class NexusService {
   logout() { localStorage.clear(); location.reload(); }
 
   login(creds: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/Logins/authenticate`, creds);
+    return this.http.post(`${this.apiUrl}/Login`, creds);
   }
 
   getSessions(): Observable<any[]> {
