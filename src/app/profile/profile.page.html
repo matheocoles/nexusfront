@@ -1,93 +1,100 @@
-<ion-content class="profile-container">
-  <div *ngIf="!userData" class="loading-state">
-    <ion-spinner name="crescent" color="primary"></ion-spinner>
-    <p>Liaison Nexus en cours...</p>
+<ion-content class="profile-container" [fullscreen]="true">
+  <div *ngIf="isLoading" class="loading-state">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Liaison Nexus...</p>
   </div>
 
-  <div *ngIf="userData" class="profile-wrapper">
-    <div class="header-background">
-      <div class="header-background">
-        <div class="avatar-wrapper" (click)="changeAvatar()">
+  <div *ngIf="!isLoading && userData" class="profile-wrapper fade-in">
+    <div class="header-banner">
+      <div class="avatar-container">
+        <div class="avatar-border" (click)="changeAvatar()">
           <img [src]="userData?.avatarUrl" class="user-avatar-img">
-
-          <div class="avatar-edit-badge">
+          <div class="edit-btn">
             <ion-icon name="camera-outline"></ion-icon>
           </div>
         </div>
       </div>
 
+      <div class="session-badge-wrapper">
+        <div class="session-badge" [class.is-active]="isWorking">
+          <ion-icon [name]="isWorking ? 'timer-outline' : 'cafe-outline'"></ion-icon>
+          <span>{{ isWorking ? 'SESSION ACTIVE' : 'HORS SESSION' }}</span>
+        </div>
+      </div>
       <input type="file" #fileInput (change)="onFileSelected($event)" style="display: none" accept="image/*">
     </div>
 
-    <ion-card class="profile-card">
-      <ion-card-content>
-        <div class="user-greeting">Bonjour, {{ userData.fullName }}</div>
+    <div class="main-content">
+      <div class="identity-block">
+        <h1 class="user-full-name">{{ userData.fullName }}</h1>
+        <p class="user-role">{{ userData.section }}</p>
+      </div>
 
-        <div class="section-header">uptime système</div>
-        <div class="time-row">
-          <div class="time-box box-dark">
-            <span class="time-val">{{ days | number:'2.0' }}</span>
-            <span class="time-lab">Jours</span>
+      <div class="nexus-card">
+        <div class="card-title">STATISTIQUES DE PRÉSENCE</div>
+        <div class="uptime-row">
+          <div class="uptime-item">
+            <span class="value">{{ days | number:'2.0' }}</span>
+            <span class="label">JOURS</span>
           </div>
-          <span class="dots">:</span>
-          <div class="time-box box-medium">
-            <span class="time-val">{{ hours | number:'2.0' }}</span>
-            <span class="time-lab">Heures</span>
+          <div class="uptime-item">
+            <span class="value">{{ hours | number:'2.0' }}</span>
+            <span class="label">HEURES</span>
           </div>
-          <span class="dots">:</span>
-          <div class="time-box box-light">
-            <span class="time-val">{{ minutes | number:'2.0' }}</span>
-            <span class="time-lab">Min</span>
+          <div class="uptime-item">
+            <span class="value">{{ minutes | number:'2.0' }}</span>
+            <span class="label">MINUTES</span>
           </div>
         </div>
 
-        <div class="progress-container">
-          <div class="progress-info">
-            <span>Cycle de synchronisation</span>
+        <div class="sync-box">
+          <div class="sync-header">
+            <span>Progression du cycle</span>
             <span>{{ (progress * 100) | number:'1.0-0' }}%</span>
           </div>
-          <ion-progress-bar [value]="progress" class="nexus-progress"></ion-progress-bar>
+          <div class="custom-progress">
+            <div class="progress-fill" [style.width.%]="progress * 100"></div>
+          </div>
         </div>
+      </div>
 
-        <div class="section-header">
-          Identité
-          <ion-button fill="clear" size="small" (click)="toggleEdit()">
+      <div class="nexus-card">
+        <div class="card-header-row">
+          <div class="card-title">CONFIGURATION ÉTUDIANT</div>
+          <ion-button fill="clear" (click)="toggleEdit()" class="edit-icon-btn">
             <ion-icon [name]="isEditing ? 'close-outline' : 'create-outline'" slot="icon-only"></ion-icon>
           </ion-button>
         </div>
 
-        <div class="edit-info-box">
-          <div class="input-field">
+        <div class="form-list">
+          <div class="form-item" [class.is-editing]="isEditing">
             <label>NOM COMPLET</label>
-            <ion-input [(ngModel)]="userData.fullName" [readonly]="!isEditing" class="custom-input"></ion-input>
+            <input [(ngModel)]="userData.fullName" [disabled]="!isEditing" type="text">
           </div>
 
-          <div class="input-field">
-            <label>MOT DE PASSE</label>
-            <ion-input type="password" [(ngModel)]="newPassword"
-                       [placeholder]="isEditing ? 'Nouveau password' : '••••••••'"
-                       [readonly]="!isEditing" class="custom-input"></ion-input>
+          <div class="form-item" [class.is-editing]="isEditing">
+            <label>SECTION / CURSUS</label>
+            <input [(ngModel)]="userData.section" [disabled]="!isEditing" type="text" placeholder="Ex: BTS SIO">
           </div>
 
-          <ion-button *ngIf="isEditing" expand="block" class="save-btn" (click)="saveChanges()">
-            APPLIQUER LES MODIFICATIONS
-          </ion-button>
-        </div>
-
-        <div class="section-header">Succès</div>
-        <div class="trophy-card">
-          <div class="trophy-icon">🏆</div>
-          <div class="trophy-text">
-            <strong>{{ days >= 7 ? 'Habitué Nexus' : 'Nouvelle Recrue' }}</strong>
-            <p>{{ days < 7 ? 'Plus que ' + (7 - days) + ' jours avant le prochain rang.' : 'Rang Elite débloqué.' }}</p>
+          <div class="form-item is-editing" *ngIf="isEditing">
+            <label>SÉCURITÉ (NOUVEAU PASS)</label>
+            <div class="password-wrapper">
+              <input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="newPassword" placeholder="Saisir pour modifier">
+              <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'" (click)="showPassword = !showPassword"></ion-icon>
+            </div>
           </div>
         </div>
 
-        <ion-button expand="block" class="logout-btn" (click)="handleLogout()">
-          <ion-icon name="log-out-outline" slot="start"></ion-icon>
-          DÉCONNEXION DU TERMINAL
+        <ion-button *ngIf="isEditing" expand="block" class="save-profile-btn" (click)="saveChanges()">
+          ENREGISTRER LES MODIFICATIONS
         </ion-button>
-      </ion-card-content>
-    </ion-card>
+      </div>
+
+      <ion-button expand="block" fill="clear" class="logout-link" (click)="handleLogout()">
+        <ion-icon name="log-out-outline" slot="start"></ion-icon>
+        DÉCONNEXION DU TERMINAL
+      </ion-button>
+    </div>
   </div>
 </ion-content>
