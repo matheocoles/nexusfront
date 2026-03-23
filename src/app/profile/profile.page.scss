@@ -1,384 +1,399 @@
 .profile-container {
   --background: #0d0d0d;
 
+  /* --- ÉTAT DE CHARGEMENT --- */
   .loading-state {
+    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100%;
     color: white;
+
+    ion-spinner {
+      --color: #911F45;
+      margin-bottom: 10px;
+    }
   }
 
-  .header-background {
-    background: linear-gradient(135deg, #632c4a 0%, #3e1f5e 100%);
-    height: 160px;
-    margin: 0 -16px;
-    border-radius: 0 0 40px 40px;
+  /* --- HEADER & BANNIÈRE --- */
+  .header-banner {
+    height: 140px;
+    background: linear-gradient(135deg, #911F45, #4A1E60);
+    border-radius: 0 0 30px 30px;
     display: flex;
     justify-content: center;
-    align-items: flex-end;
-    padding-bottom: 20px;
+    position: relative;
+    margin-bottom: 80px; // Augmenté pour laisser de la place au badge de session
 
     .avatar-container {
-      margin-bottom: -50px;
-      z-index: 10;
-      .user-avatar {
-        font-size: 110px;
-        background: #1a1a1a;
-        color: white;
-        border: 5px solid #1a1a1a;
+      position: absolute;
+      bottom: -50px;
+
+      .avatar-border {
+        position: relative;
+        padding: 4px;
+        background: #0d0d0d;
         border-radius: 50%;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+
+        .user-avatar-img {
+          width: 100px;
+          height: 100px;
+          border-radius: 50%;
+          object-fit: cover;
+          border: 2px solid #911F45;
+        }
+
+        .edit-btn {
+          position: absolute;
+          bottom: 5px;
+          right: 5px;
+          background: #911F45;
+          color: white;
+          width: 30px;
+          height: 30px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 2px solid #0d0d0d;
+          font-size: 16px;
+          z-index: 10;
+        }
       }
     }
-  }
 
-  .profile-card {
-    background: #1a1a1a;
-    margin: 40px 0 20px 0;
-    border-radius: 25px;
-    border: 1px solid #333;
-    box-shadow: none;
-
-    ion-card-content {
-      padding: 50px 20px 20px;
-    }
-
-    .user-greeting {
-      text-align: center;
-      font-size: 1.4rem;
-      font-weight: bold;
-      color: white;
-      margin-bottom: 30px;
-    }
-
-    .section-header {
-      font-size: 0.8rem;
-      color: #888;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      border-bottom: 1px solid #262626;
-      padding-bottom: 8px;
-      margin-bottom: 15px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .time-row {
+    /* BADGE DE SESSION DYNAMIQUE */
+    .session-badge-wrapper {
+      position: absolute;
+      bottom: -90px;
+      width: 100%;
       display: flex;
       justify-content: center;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 25px;
-      .dots { color: #632c4a; font-weight: bold; font-size: 1.5rem; }
-      .time-box {
+
+      .session-badge {
         display: flex;
-        flex-direction: column;
         align-items: center;
-        padding: 12px;
-        border-radius: 15px;
-        min-width: 65px;
-        .time-val { font-size: 1.4rem; font-weight: bold; color: white; }
-        .time-lab { font-size: 0.55rem; text-transform: uppercase; color: rgba(255,255,255,0.5); }
-        &.box-dark { background: #4a1028; }
-        &.box-medium { background: #632c4a; }
-        &.box-light { background: #8e2148; }
-      }
-    }
-
-    .edit-info-box {
-      background: #262626;
-      border-radius: 15px;
-      padding: 10px 15px;
-      margin-bottom: 20px;
-      .custom-input {
-        --color: white;
-        --padding-start: 0;
-        font-size: 0.95rem;
-        margin-top: -5px;
-      }
-      p { margin: 10px 0; color: #666; font-size: 0.8rem; }
-    }
-
-    .progress-container {
-      margin-bottom: 25px;
-      .progress-info {
-        display: flex;
-        justify-content: space-between;
-        font-size: 0.7rem;
-        color: #8e2148;
-        font-weight: bold;
-        margin-bottom: 8px;
-      }
-      .nexus-progress {
-        height: 8px;
-        border-radius: 10px;
-        --background: #262626;
-        --progress-background: #8e2148;
-      }
-    }
-
-    .trophy-card {
-      display: flex;
-      align-items: center;
-      background: linear-gradient(to right, #262626, #1a1a1a);
-      border-radius: 15px;
-      padding: 15px;
-      margin-bottom: 25px;
-      border: 1px solid #333;
-      .trophy-icon { font-size: 2rem; margin-right: 15px; }
-      .trophy-text {
-        strong { color: white; font-size: 0.95rem; }
-        p { margin: 4px 0 0; font-size: 0.75rem; color: #666; }
-      }
-    }
-
-    .logout-btn {
-      --background: #f0505c;
-      --border-radius: 15px;
-      font-weight: bold;
-      height: 52px;
-      margin-top: 10px;
-    }
-  }
-}
-
-.user-avatar-img {
-  width: 110px; height: 110px;
-  object-fit: cover;
-  border-radius: 50%;
-  border: 4px solid #FF2D55;
-  box-shadow: 0 0 20px rgba(255, 45, 85, 0.4);
-}
-
-.avatar-edit-badge {
-  position: absolute; bottom: 0; right: 0;
-  background: #FF2D55; border-radius: 50%;
-  padding: 8px; display: flex; align-items: center;
-  ion-icon { color: white; font-size: 16px; }
-}
-
-.profile-container {
-  --background: #0d0d0d;
-
-  /* --- LOADER CYBERPUNK --- */
-  .loading-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    color: white;
-    background: #000;
-  }
-
-  /* --- HEADER & AVATAR --- */
-  .header-background {
-    background: linear-gradient(135deg, #632c4a 0%, #3e1f5e 100%);
-    height: 160px;
-    margin: 0;
-    border-radius: 0 0 40px 40px;
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    padding-bottom: 20px;
-    position: relative; // Important pour le positionnement de l'avatar
-
-    .avatar-wrapper {
-      margin-bottom: -55px; // Fait chevaucher l'avatar sur la carte
-      z-index: 20;
-      position: relative; // Permet au badge caméra de se fixer ici
-      cursor: pointer;
-
-      .user-avatar-img {
-        width: 120px;
-        height: 120px;
-        object-fit: cover;
-        border-radius: 50%;
+        gap: 6px;
+        padding: 5px 15px;
         background: #1a1a1a;
-        border: 4px solid #1a1a1a;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
-        display: block;
-      }
+        border: 1px solid #262626;
+        border-radius: 20px;
+        font-size: 0.65rem;
+        font-weight: 800;
+        color: #555;
+        letter-spacing: 1px;
+        transition: 0.3s ease;
 
-      .avatar-edit-badge {
-        position: absolute;
-        bottom: 2px;
-        right: 2px;
-        background: #f0505c; // Rose Nexus
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 3px solid #1a1a1a;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        &.is-active {
+          border-color: #911F45;
+          color: #911F45;
+          background: rgba(145, 31, 69, 0.05);
+          box-shadow: 0 0 10px rgba(145, 31, 69, 0.1);
+        }
 
         ion-icon {
-          color: white;
-          font-size: 18px;
+          font-size: 1rem;
         }
       }
     }
   }
 
-  /* --- CARTE PROFIL --- */
-  .profile-card {
-    background: #1a1a1a;
-    margin: 60px 16px 20px 16px; // Marge augmentée en haut pour l'avatar
-    border-radius: 25px;
-    border: 1px solid #333;
-    box-shadow: none;
+  .main-content {
+    padding: 0 16px 30px;
+  }
 
-    ion-card-content {
-      padding: 30px 20px 20px;
-    }
+  /* --- IDENTITÉ --- */
+  .identity-block {
+    text-align: center;
+    margin-bottom: 25px;
 
-    .user-greeting {
-      text-align: center;
-      font-size: 1.4rem;
-      font-weight: bold;
+    .user-full-name {
       color: white;
-      margin-bottom: 25px;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 0;
     }
 
-    /* --- TITRES DE SECTION --- */
-    .section-header {
-      font-size: 0.75rem;
+    .user-role {
       color: #888;
+      font-size: 0.9rem;
+      margin-top: 5px;
+    }
+
+    .status-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.7rem;
+      color: #2dd36f;
+      font-weight: 600;
+      margin-top: 8px;
+
+      .dot {
+        width: 8px;
+        height: 8px;
+        background: #2dd36f;
+        border-radius: 50%;
+
+        &.pulse {
+          animation: pulse-green 2s infinite;
+        }
+      }
+    }
+  }
+
+  /* --- CARTES NEXUS --- */
+  .nexus-card {
+    background: #1a1a1a;
+    border-radius: 18px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid #262626;
+
+    .card-title {
+      font-size: 0.7rem;
+      color: #911F45;
+      font-weight: 800;
+      letter-spacing: 1px;
       text-transform: uppercase;
-      letter-spacing: 1.5px;
-      border-bottom: 1px solid #262626;
-      padding-bottom: 8px;
       margin-bottom: 15px;
-      margin-top: 10px;
+    }
+
+    .card-header-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      margin-bottom: 15px;
 
-      ion-button {
-        --color: #f0505c;
-        font-weight: bold;
+      .card-title {
+        margin-bottom: 0;
+      }
+
+      .edit-icon-btn {
+        --color: #911F45;
+        height: 30px;
         margin: 0;
       }
     }
+  }
 
-    /* --- TIMER D'UPTIME --- */
-    .time-row {
+  /* --- STATS GRID --- */
+  .stats-grid {
+    display: flex;
+    justify-content: space-around;
+    background: #121212;
+    border-radius: 12px;
+    padding: 15px 5px;
+    margin-bottom: 5px;
+
+    .stat-item {
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 25px;
+      gap: 4px;
 
-      .dots {
-        color: #f0505c;
-        font-weight: bold;
-        font-size: 1.5rem;
-        margin-top: -15px;
+      ion-icon {
+        font-size: 1.3rem;
       }
 
-      .time-box {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 10px;
-        border-radius: 15px;
-        min-width: 68px;
+      .icon-class {
+        color: #911F45;
+      }
 
-        .time-val { font-size: 1.3rem; font-weight: 800; color: white; }
-        .time-lab { font-size: 0.55rem; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-top: 2px; }
+      .icon-sport {
+        color: #4A1E60;
+      }
 
-        &.box-dark { background: #4a1028; }
-        &.box-medium { background: #632c4a; }
-        &.box-light { background: #8e2148; }
+      .icon-extra {
+        color: #8e2148;
+      }
+
+      .stat-val {
+        color: white;
+        font-weight: 800;
+        font-size: 1.1rem;
+      }
+
+      .stat-lab {
+        color: #555;
+        font-size: 0.55rem;
+        text-transform: uppercase;
+        font-weight: 700;
       }
     }
+  }
 
-    /* --- ZONE D'EDITION --- */
-    .edit-info-box {
+  /* --- UPTIME --- */
+  .uptime-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+
+    .uptime-item {
+      text-align: center;
+      flex: 1;
+
+      .value {
+        display: block;
+        color: white;
+        font-size: 1.4rem;
+        font-weight: 700;
+      }
+
+      .label {
+        color: #555;
+        font-size: 0.6rem;
+        font-weight: 600;
+      }
+    }
+  }
+
+  /* --- PROGRESS BAR --- */
+  .sync-box {
+    .sync-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.65rem;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    .custom-progress {
+      height: 6px;
       background: #262626;
-      border-radius: 18px;
-      padding: 15px;
-      margin-bottom: 20px;
-      border: 1px solid #333;
+      border-radius: 10px;
+      overflow: hidden;
 
-      .input-field {
-        margin-bottom: 12px;
-        label {
-          display: block;
-          color: #555;
-          font-size: 0.65rem;
-          font-weight: bold;
-          margin-bottom: 4px;
+      .progress-fill {
+        height: 100%;
+        background: #911F45;
+        transition: width 0.5s ease;
+      }
+    }
+  }
+
+  /* --- FORMULAIRE & INPUTS --- */
+  .form-list {
+    .form-item {
+      margin-bottom: 18px;
+
+      label {
+        display: block;
+        color: #555;
+        font-size: 0.65rem;
+        font-weight: 700;
+        margin-bottom: 6px;
+      }
+
+      input {
+        width: 100%;
+        background: transparent;
+        border: none;
+        border-bottom: 1px solid #262626;
+        padding: 8px 0;
+        color: white;
+        font-size: 0.95rem;
+        outline: none;
+        transition: 0.3s;
+      }
+
+      &.is-editing input {
+        border-bottom-color: #911F45;
+        background: rgba(145, 31, 69, 0.03);
+        padding: 10px;
+        border-radius: 8px;
+      }
+
+      /* Wrapper spécifique pour le password avec l'œil */
+      .password-wrapper {
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid #262626;
+
+        input {
+          border-bottom: none;
+          flex: 1;
+        }
+
+        ion-icon {
+          color: #911F45;
+          font-size: 1.2rem;
+          cursor: pointer;
+          padding: 5px;
         }
       }
 
-      .custom-input {
-        --color: white;
-        --padding-start: 0;
-        --background: transparent;
-        font-size: 1rem;
-        border-bottom: 1px solid #3d3d3d;
-      }
-
-      .save-btn {
-        --background: #2dd36f; // Vert pour succès
-        --border-radius: 12px;
-        margin-top: 15px;
-        font-weight: bold;
+      &.is-editing .password-wrapper {
+        border-bottom-color: #911F45;
+        background: rgba(145, 31, 69, 0.03);
+        border-radius: 8px;
+        padding: 0 10px;
       }
     }
 
-    /* --- PROGRESSION --- */
-    .progress-container {
-      margin-bottom: 25px;
-      .progress-info {
-        display: flex;
-        justify-content: space-between;
-        font-size: 0.7rem;
-        color: #f0505c;
-        font-weight: bold;
-        margin-bottom: 8px;
-      }
-      .nexus-progress {
-        height: 10px;
-        border-radius: 5px;
-        --background: #262626;
-        --progress-background: #f0505c;
-        box-shadow: 0 0 10px rgba(240, 80, 92, 0.2);
-      }
-    }
-
-    /* --- TROPHÉE --- */
-    .trophy-card {
+    .theme-toggle {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      background: linear-gradient(to right, #262626, #1a1a1a);
-      border-radius: 18px;
-      padding: 15px;
-      margin-bottom: 25px;
-      border: 1px solid #333;
+      margin-top: 15px;
+      padding-top: 10px;
+      border-top: 1px solid #262626;
 
-      .trophy-icon { font-size: 2rem; margin-right: 15px; }
-      .trophy-text {
-        strong { color: white; font-size: 0.95rem; }
-        p { margin: 4px 0 0; font-size: 0.75rem; color: #888; }
+      label {
+        margin-bottom: 0;
+      }
+
+      ion-toggle {
+        --handle-background-checked: #911F45;
+        --track-background-checked: rgba(145, 31, 69, 0.3);
       }
     }
+  }
 
-    /* --- LOGOUT --- */
-    .logout-btn {
-      --background: #f0505c;
-      --border-radius: 15px;
-      --box-shadow: 0 4px 15px rgba(240, 80, 92, 0.3);
-      font-weight: bold;
-      height: 54px;
-      margin-top: 10px;
-      letter-spacing: 1px;
-    }
+  /* --- BOUTONS --- */
+  .save-profile-btn {
+    --background: #911F45;
+    --border-radius: 12px;
+    margin-top: 10px;
+    font-weight: 700;
+    height: 48px;
+    letter-spacing: 1px;
+  }
+
+  .logout-link {
+    --color: #f0505c;
+    font-weight: 700;
+    margin-top: 15px;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+  }
+}
+
+/* --- ANIMATIONS --- */
+.fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-green {
+  0% {
+    box-shadow: 0 0 0 0 rgba(45, 211, 111, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(45, 211, 111, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(45, 211, 111, 0);
   }
 }
