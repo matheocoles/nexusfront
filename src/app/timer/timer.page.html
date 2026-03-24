@@ -7,61 +7,72 @@
       <p class="page-subtitle">Suivi de durée</p>
     </header>
 
-    <!-- ── SÉLECTEUR D'ACTIVITÉ ───────────────────────────────── -->
+    <!-- ── CHRONOMÈTRE ────────────────────────────────────────── -->
     <section class="nexus-section">
       <div class="section-header">
-        <span class="section-title">Activité</span>
-      </div>
-
-      <div *ngIf="loadingActivities" class="state-container">
-        <ion-spinner name="crescent"></ion-spinner>
-      </div>
-
-      <div class="activity-list" *ngIf="!loadingActivities">
-        <div class="course-item"
-             *ngFor="let a of planningActivities; let i = index"
-             [style.background]="a.displayColor"
-             [class.selected]="selectedActivityId === a.id"
-             (click)="selectedActivityId = a.id; onActivityChange()">
-          <div class="course-number">{{ i + 1 }}</div>
-          <div class="course-time">
-            <span class="start">{{ a.startTime }}</span>
-            <span class="end">{{ a.endTime }}</span>
-          </div>
-          <div class="course-info">
-            <span class="course-name">{{ a.name }}</span>
-            <span class="course-room">
-              <ion-icon name="location-outline"></ion-icon>
-              {{ a.room }}
-            </span>
-          </div>
-          <div class="course-duration-badge">{{ a.duration }}</div>
-          <div class="selected-ring" *ngIf="selectedActivityId === a.id">
-            <ion-icon name="checkmark-circle-outline"></ion-icon>
-          </div>
-        </div>
-
-        <div class="empty-state" *ngIf="planningActivities.length === 0">
-          <ion-icon name="calendar-outline"></ion-icon>
-          <p>Aucune activité planifiée</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- ── CHRONOMÈTRE ────────────────────────────────────────── -->
-    <section class="nexus-section" *ngIf="selectedActivityId">
-      <div class="section-header">
         <span class="section-title">Chronomètre</span>
-        <span class="section-badge" *ngIf="isRunning">EN COURS</span>
-        <span class="section-badge section-badge--paused" *ngIf="isPaused">EN PAUSE</span>
+        <span class="section-badge"                        *ngIf="isRunning">EN COURS</span>
+        <span class="section-badge section-badge--paused"  *ngIf="isPaused">EN PAUSE</span>
       </div>
 
-      <div class="timer-card" [class.timer-card--running]="isRunning" [class.timer-card--paused]="isPaused">
+      <div class="nexus-card" [class.timer-card--running]="isRunning" [class.timer-card--paused]="isPaused">
 
-        <!-- Infos démarrage -->
-        <div class="timer-start-row" *ngIf="isRunning || isPaused">
+        <!-- Formulaire pré-démarrage -->
+        <ng-container *ngIf="!isRunning && !isPaused">
+
+          <div class="form-row">
+            <div class="form-field">
+              <label class="field-label">Titre de l'activité *</label>
+              <input type="text" class="nexus-input"
+                     [(ngModel)]="chronoTitle"
+                     placeholder="Ex : Révision éval maths…" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-field">
+              <label class="field-label">Heure de début</label>
+              <input type="time" class="nexus-input" [(ngModel)]="chronoTimeStart" />
+            </div>
+            <div class="form-field">
+              <label class="field-label">Description (facultatif)</label>
+              <input type="text" class="nexus-input"
+                     [(ngModel)]="chronoDescription"
+                     placeholder="Notes, contexte…" />
+            </div>
+          </div>
+
+          <!-- Catégorie -->
+          <div class="form-row">
+            <div class="form-field">
+              <label class="field-label">Catégorie</label>
+              <select class="nexus-input nexus-select" [(ngModel)]="chronoActivityType">
+                <option value="class">📚 Cours</option>
+                <option value="sport">🏃 Sport</option>
+                <option value="extra">🎨 Extra</option>
+              </select>
+            </div>
+            <div class="form-field" *ngIf="getActivityList(chronoActivityType).length > 0">
+              <label class="field-label">Activité spécifique</label>
+              <select class="nexus-input nexus-select" [(ngModel)]="chronoActivityId">
+                <option [value]="0">-- Sélectionner --</option>
+                <option *ngFor="let activity of getActivityList(chronoActivityType)" [value]="activity.id">
+                  {{ activity.name || activity.title || '—' }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+        </ng-container>
+
+        <!-- Résumé pendant le timer -->
+        <div class="rec-summary" *ngIf="isRunning || isPaused">
           <ion-icon name="time-outline"></ion-icon>
-          <span>Démarré à {{ timerStartDate | date:'HH:mm' }} · {{ timerStartDate | date:'dd/MM' }}</span>
+          <span>
+            <strong>{{ chronoTitle }}</strong>
+            <ng-container *ngIf="chronoDescription"> — {{ chronoDescription }}</ng-container>
+            &nbsp;•&nbsp; Démarré à {{ timerStartDate | date:'HH:mm' }}
+          </span>
         </div>
 
         <!-- Affichage temps -->
@@ -73,6 +84,7 @@
         <div class="timer-controls">
           <button class="ctrl-btn ctrl-btn--start"
                   *ngIf="!isRunning && !isPaused"
+                  [disabled]="!chronoTitle.trim()"
                   (click)="startTimer()">
             <ion-icon name="play-outline"></ion-icon>
             <span>Démarrer</span>
@@ -101,12 +113,22 @@
     </section>
 
     <!-- ── SAISIE MANUELLE ────────────────────────────────────── -->
-    <section class="nexus-section" *ngIf="selectedActivityId">
+    <section class="nexus-section">
       <div class="section-header">
         <span class="section-title">Saisie manuelle</span>
       </div>
 
       <div class="nexus-card">
+
+        <div class="form-row">
+          <div class="form-field">
+            <label class="field-label">Titre de l'activité *</label>
+            <input type="text" class="nexus-input"
+                   [(ngModel)]="manualTitle"
+                   placeholder="Ex : Révision éval maths…" />
+          </div>
+        </div>
+
         <div class="form-row">
           <div class="form-field">
             <label class="field-label">Date</label>
@@ -134,104 +156,58 @@
           </div>
         </div>
 
+        <div class="form-row">
+          <div class="form-field">
+            <label class="field-label">Description (facultatif)</label>
+            <input type="text" class="nexus-input"
+                   [(ngModel)]="manualDescription"
+                   placeholder="Notes, contexte…" />
+          </div>
+        </div>
+
+        <!-- Catégorie -->
+        <div class="form-row">
+          <div class="form-field">
+            <label class="field-label">Catégorie</label>
+            <select class="nexus-input nexus-select" [(ngModel)]="manualActivityType">
+              <option value="class">📚 Cours</option>
+              <option value="sport">🏃 Sport</option>
+              <option value="extra">🎨 Extra</option>
+            </select>
+          </div>
+          <div class="form-field" *ngIf="getActivityList(manualActivityType).length > 0">
+            <label class="field-label">Activité spécifique</label>
+            <select class="nexus-input nexus-select" [(ngModel)]="manualActivityId">
+              <option [value]="0">-- Sélectionner --</option>
+              <option *ngFor="let activity of getActivityList(manualActivityType)" [value]="activity.id">
+                {{ activity.name || activity.title || '—' }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Résumé calculé -->
+        <div class="rec-summary"
+             *ngIf="manualTitle.trim() && (manualDurationH > 0 || manualDurationMin > 0)">
+          <ion-icon name="time-outline"></ion-icon>
+          <span>
+            <strong>{{ manualTitle }}</strong> —
+            {{ manualTimeStart }} → {{ manualEndTime }}
+            &nbsp;•&nbsp; {{ manualDurationLabel }}
+            <ng-container *ngIf="manualDescription"> • {{ manualDescription }}</ng-container>
+          </span>
+        </div>
+
         <div class="form-actions">
           <button class="action-btn action-btn--ghost" (click)="resetManualEntry()">
             Réinitialiser
           </button>
           <button class="action-btn action-btn--confirm"
                   (click)="saveManualSession()"
-                  [disabled]="savingSession || (manualDurationH === 0 && manualDurationMin === 0)">
+                  [disabled]="savingSession || !manualTitle.trim() || (manualDurationH === 0 && manualDurationMin === 0)">
             <ion-spinner *ngIf="savingSession" name="crescent" style="width:14px;height:14px"></ion-spinner>
             <ion-icon *ngIf="!savingSession" name="checkmark-circle-outline"></ion-icon>
             <span>{{ savingSession ? 'Enregistrement…' : 'Enregistrer' }}</span>
-          </button>
-        </div>
-      </div>
-    </section>
-
-    <!-- ── RÉCURRENCE ─────────────────────────────────────────── -->
-    <section class="nexus-section" *ngIf="selectedActivityId">
-      <div class="section-header">
-        <span class="section-title">Récurrence</span>
-        <div class="toggle-wrap">
-          <ion-toggle [(ngModel)]="recurrenceEnabled" class="nexus-toggle"></ion-toggle>
-        </div>
-      </div>
-
-      <div class="nexus-card" *ngIf="recurrenceEnabled">
-
-        <div class="form-row">
-          <div class="form-field" style="flex:2">
-            <label class="field-label">Nom (facultatif)</label>
-            <input type="text" class="nexus-input"
-                   [(ngModel)]="recTitle" placeholder="Ex: Musculation hebdo…" />
-          </div>
-          <div class="form-field">
-            <label class="field-label">Type</label>
-            <select class="nexus-input nexus-select" [(ngModel)]="recurrenceType">
-              <option value="daily">Quotidien</option>
-              <option value="weekly">Hebdo</option>
-              <option value="monthly">Mensuel</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Jours de la semaine -->
-        <ng-container *ngIf="recurrenceType === 'weekly'">
-          <label class="field-label" style="display:block;margin-bottom:8px">Jours actifs</label>
-          <div class="day-selector">
-            <button class="day-btn"
-                    *ngFor="let d of weekDays"
-                    [class.active]="selectedDays.includes(d.value)"
-                    (click)="toggleDay(d.value)">
-              {{ d.label }}
-            </button>
-          </div>
-        </ng-container>
-
-        <!-- Horaire -->
-        <div class="form-row">
-          <div class="form-field">
-            <label class="field-label">Début</label>
-            <input type="time" class="nexus-input" [(ngModel)]="recTimeStart" />
-          </div>
-          <div class="form-sep">→</div>
-          <div class="form-field">
-            <label class="field-label">Fin</label>
-            <input type="time" class="nexus-input" [(ngModel)]="recTimeEnd" />
-          </div>
-        </div>
-
-        <!-- Période -->
-        <div class="form-row">
-          <div class="form-field">
-            <label class="field-label">À partir du</label>
-            <input type="date" class="nexus-input" [(ngModel)]="recDateStart" />
-          </div>
-          <div class="form-sep">→</div>
-          <div class="form-field">
-            <label class="field-label">Jusqu'au</label>
-            <input type="date" class="nexus-input"
-                   [(ngModel)]="recDateEnd" [min]="recDateStart" />
-          </div>
-        </div>
-
-        <!-- Résumé -->
-        <div class="rec-summary" *ngIf="recurrenceSummary">
-          <ion-icon name="time-outline"></ion-icon>
-          <span>{{ recurrenceSummary }}</span>
-        </div>
-
-        <div class="form-actions">
-          <button class="action-btn action-btn--ghost" (click)="resetRecurrence()">
-            Réinitialiser
-          </button>
-          <button class="action-btn action-btn--confirm"
-                  (click)="saveRecurrence()"
-                  [disabled]="savingRec">
-            <ion-spinner *ngIf="savingRec" name="crescent" style="width:14px;height:14px"></ion-spinner>
-            <ion-icon *ngIf="!savingRec" name="checkmark-circle-outline"></ion-icon>
-            <span>{{ savingRec ? 'Enregistrement…' : 'Enregistrer' }}</span>
           </button>
         </div>
       </div>
