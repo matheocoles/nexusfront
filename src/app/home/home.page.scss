@@ -16,12 +16,32 @@
   min-height: 100vh;
 }
 
-/* HEADER */
+/* --- HEADER --- */
 .nexus-header {
+  text-align: center;
+
+  .vortex-container {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .vortex-logo {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 0 12px var(--nexus-pink));
+      animation: vortexRotation 12s linear infinite;
+    }
+  }
+
   .top-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-top: 10px;
 
     h1 {
       color: white;
@@ -32,7 +52,13 @@
 
     .add-icon {
       color: var(--nexus-pink);
-      font-size: 2rem;
+      font-size: 2.2rem;
+      cursor: pointer;
+      transition: transform 0.2s;
+
+      &:active {
+        transform: scale(0.9);
+      }
     }
   }
 
@@ -43,6 +69,7 @@
     display: flex;
     align-items: center;
     margin: 20px 0;
+    border: 1px solid #222;
 
     ion-icon {
       color: var(--text-grey);
@@ -70,11 +97,12 @@
     ion-icon {
       color: var(--text-grey);
       font-size: 1.4rem;
+      cursor: pointer;
     }
   }
 }
 
-/* CARDS */
+/* --- CARDS SESSIONS (TOGGLE READY) --- */
 .session-card {
   background: var(--card-dark);
   border-radius: 18px;
@@ -83,7 +111,8 @@
   display: flex;
   align-items: center;
   border-left: 4px solid transparent;
-  transition: 0.3s;
+  transition: all 0.3s ease;
+  cursor: pointer;
 
   .card-left {
     min-width: 90px;
@@ -92,6 +121,7 @@
       color: white;
       font-weight: bold;
       display: block;
+      font-size: 1.1rem;
     }
 
     .time-end {
@@ -113,6 +143,7 @@
       color: white;
       margin: 0;
       font-size: 1rem;
+      font-weight: 600;
     }
 
     span {
@@ -135,33 +166,26 @@
     }
 
     .check-trigger {
-      font-size: 1.6rem;
-      color: #222;
+      font-size: 1.8rem;
+      color: #222; // État non-terminé
+      display: flex;
+      align-items: center;
+      transition: color 0.3s ease;
     }
   }
 
+  /* État coché (Terminé) */
   &.completed {
-    opacity: 0.4;
+    opacity: 0.3; // Carte plus sombre
+    filter: grayscale(0.8);
 
     .check-trigger {
-      color: #00ff88;
+      color: #00ff88 !important; // Vert Nexus brillant
     }
   }
 }
 
-/* NO DATA */
-.no-data {
-  text-align: center;
-  padding-top: 50px;
-  color: #333;
-
-  ion-icon {
-    font-size: 3rem;
-    margin-bottom: 10px;
-  }
-}
-
-/* MODAL OPAQUE */
+/* --- MODAL CUSTOM (AJOUT & MODIF) --- */
 .nexus-modal-custom {
   --background: #0D0D0D;
   --height: 90%;
@@ -187,6 +211,8 @@
       font-weight: 800;
       letter-spacing: 2px;
       margin-bottom: 25px;
+      color: white;
+      text-transform: uppercase;
     }
 
     .section-label {
@@ -198,7 +224,7 @@
       text-transform: uppercase;
     }
 
-    input {
+    input, .nexus-select-custom {
       width: 100%;
       background: #181818;
       border: 1px solid #222;
@@ -211,6 +237,16 @@
       &:focus {
         border-color: var(--nexus-pink);
       }
+    }
+
+    /* Sélecteur de récurrence stylé */
+    .nexus-select-custom {
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23911F45' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 15px center;
+      background-size: 15px;
+      font-weight: bold;
     }
 
     input[type="date"], input[type="time"] {
@@ -230,6 +266,8 @@
         flex-direction: column;
         align-items: center;
         color: #444;
+        transition: 0.3s;
+        cursor: pointer;
 
         &.active {
           border: 1px solid var(--nexus-pink);
@@ -247,6 +285,7 @@
         span {
           font-size: 0.6rem;
           font-weight: bold;
+          margin-top: 4px;
         }
       }
     }
@@ -259,7 +298,14 @@
       border-radius: 18px;
       font-weight: 900;
       margin-top: 30px;
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+      margin-bottom: 20px;
+      box-shadow: 0 10px 20px rgba(145, 31, 69, 0.3);
+      border: none;
+      text-transform: uppercase;
+
+      &:active {
+        transform: scale(0.98);
+      }
     }
 
     .row-inputs {
@@ -273,7 +319,7 @@
   }
 }
 
-/* LOADER & ANIMATIONS */
+/* --- LOADER & FEEDBACK --- */
 .cyber-loader-overlay {
   position: fixed;
   inset: 0;
@@ -289,21 +335,36 @@
     font-size: 2.5rem;
     font-weight: 900;
     letter-spacing: 15px;
+    text-shadow: 2px 2px #4A1E60;
   }
 
   .loading-bar-container {
     height: 2px;
     width: 200px;
     background: #111;
+    margin-top: 20px;
 
     .loading-bar-fill {
       height: 100%;
       background: var(--nexus-pink);
       animation: loadBar 2s infinite linear;
+      box-shadow: 0 0 10px var(--nexus-pink);
     }
   }
 }
 
+.no-data {
+  text-align: center;
+  padding-top: 50px;
+  color: #333;
+
+  ion-icon {
+    font-size: 3.5rem;
+    margin-bottom: 10px;
+  }
+}
+
+/* --- KEYFRAMES --- */
 @keyframes loadBar {
   0% {
     width: 0%;
@@ -313,23 +374,19 @@
   }
 }
 
-.fade-in {
-  animation: fadeIn 0.4s ease-out;
+@keyframes vortexRotation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -337,40 +394,6 @@
   }
 }
 
-/* --- VORTEX LOGO ANIMATION --- */
-.vortex-container {
-  position: relative;
-  width: 80px;
-  height: 80px;
-  margin: 0 auto 15px; // Centré en haut
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  .vortex-logo {
-    width: 100%;
-    height: 100%;
-    filter: drop-shadow(0 0 12px var(--nexus-pink));
-    animation: vortexRotation 12s linear infinite;
-  }
-}
-
-/* --- KEYFRAMES --- */
-@keyframes vortexRotation {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-@keyframes logoScan {
-  0%, 100% { top: 0%; opacity: 0; }
-  50% { top: 100%; opacity: 0.8; }
-}
-
-/* Ajustement du titre pour qu'il soit bien sous le logo */
-.nexus-header {
-  text-align: center; // Centre les textes du header
-  .top-row {
-    justify-content: space-between; // Garde le titre et le bouton (+) alignés
-    margin-top: 10px;
-  }
+.fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
 }

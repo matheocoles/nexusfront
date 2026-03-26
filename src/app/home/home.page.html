@@ -75,7 +75,7 @@
     <ng-template>
       <div class="modal-wrapper">
         <div class="handle"></div>
-        <h3>NOUVELLE MISSION</h3>
+        <h3>{{ isEditing ? 'MODIFIER MISSION' : 'NOUVELLE MISSION' }}</h3>
 
         <div class="modal-body">
           <div class="input-block">
@@ -95,33 +95,29 @@
             </div>
           </div>
 
-          <label class="section-label">CATÉGORIE</label>
-          <div class="category-grid">
-            <div class="cat-card" [class.active]="selectedType === 'class'" (click)="selectedType = 'class'">
-              <ion-icon name="book-outline"></ion-icon><span>COURS</span>
-            </div>
-            <div class="cat-card" [class.active]="selectedType === 'sport'" (click)="selectedType = 'sport'">
-              <ion-icon name="fitness-outline"></ion-icon><span>SPORT</span>
-            </div>
-            <div class="cat-card" [class.active]="selectedType === 'extra'" (click)="selectedType = 'extra'">
-              <ion-icon name="rocket-outline"></ion-icon><span>EXTRA</span>
-            </div>
+          <div *ngIf="!isEditing" class="fade-in">
+            <label class="section-label">RÉCURRENCE HEBDOMADAIRE</label>
+            <select [(ngModel)]="repeatWeeks" class="nexus-select-custom">
+              <option [value]="0">Une seule fois</option>
+              <option [value]="1">Sur 2 semaines</option>
+              <option [value]="3">Sur 1 mois (4 sem.)</option>
+              <option [value]="11">Sur un trimestre (12 sem.)</option>
+            </select>
           </div>
 
-          <div class="dynamic-inputs fade-in">
-            <div *ngIf="selectedType === 'class'" class="row-inputs">
-              <div class="input-block">
-                <label class="section-label">PROFESSEUR</label>
-                <input type="text" [(ngModel)]="sessionData.teacher">
-              </div>
-              <div class="input-block">
-                <label class="section-label">SALLE</label>
-                <input type="text" [(ngModel)]="sessionData.room">
-              </div>
+          <label class="section-label">CATÉGORIE {{ isEditing ? '(Verrouillée)' : '' }}</label>
+          <div class="category-grid" [style.opacity]="isEditing ? '0.5' : '1'">
+            <div class="cat-card" [class.active]="selectedType === 'class'"
+                 (click)="!isEditing && (selectedType = 'class')">
+              <ion-icon name="book-outline"></ion-icon><span>COURS</span>
             </div>
-            <div *ngIf="selectedType === 'sport'" class="input-block">
-              <label class="section-label">LIEU</label>
-              <input type="text" [(ngModel)]="sessionData.place">
+            <div class="cat-card" [class.active]="selectedType === 'sport'"
+                 (click)="!isEditing && (selectedType = 'sport')">
+              <ion-icon name="fitness-outline"></ion-icon><span>SPORT</span>
+            </div>
+            <div class="cat-card" [class.active]="selectedType === 'extra'"
+                 (click)="!isEditing && (selectedType = 'extra')">
+              <ion-icon name="rocket-outline"></ion-icon><span>EXTRA</span>
             </div>
           </div>
 
@@ -132,7 +128,9 @@
                  (click)="selectedDuration = d">{{ d }}m</div>
           </div>
 
-          <button class="btn-confirm" (click)="confirmSave()">AJOUTER</button>
+          <button class="btn-confirm" (click)="confirmSave()">
+            {{ isEditing ? 'METTRE À JOUR' : 'AJOUTER À LA BDD' }}
+          </button>
         </div>
       </div>
     </ng-template>
