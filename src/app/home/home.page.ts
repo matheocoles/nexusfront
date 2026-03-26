@@ -4,10 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { IonContent, IonIcon, IonModal, LoadingController, ActionSheetController } from '@ionic/angular/standalone';
 import { NexusService } from '../services/nexus.service';
 import { addIcons } from 'ionicons';
+import { forkJoin, of } from 'rxjs';
 import {
   addOutline, searchOutline, menuOutline, playOutline, bookOutline, fitnessOutline,
   rocketOutline, checkmarkCircle, locationOutline, trashOutline, closeOutline,
-  shieldCheckmarkOutline, chevronBackOutline, chevronForwardOutline, ellipseOutline, layersOutline
+  shieldCheckmarkOutline, chevronBackOutline, chevronForwardOutline, ellipseOutline, layersOutline, createOutline
 } from 'ionicons/icons';
 
 @Component({
@@ -25,8 +26,12 @@ export class HomePage implements OnInit {
 
   courses: any[] = [];
   filteredCourses: any[] = [];
-  isLoading = true; // Loader actif au début
+  isLoading = true;
   isModalOpen = false;
+
+  isEditing = false;
+  editingSessionId: number | null = null;
+  repeatWeeks = 0; // 0 = une fois, 1 = 2 semaines, etc.
 
   currentDate: Date = new Date();
   displayDateLabel = "Aujourd'hui";
@@ -47,22 +52,22 @@ export class HomePage implements OnInit {
       'rocket-outline': rocketOutline, 'checkmark-circle': checkmarkCircle, 'location-outline': locationOutline,
       'trash-outline': trashOutline, 'close-outline': closeOutline, 'shield-checkmark-outline': shieldCheckmarkOutline,
       'chevron-back-outline': chevronBackOutline, 'chevron-forward-outline': chevronForwardOutline,
-      'ellipse-outline': ellipseOutline, 'layers-outline': layersOutline
+      'ellipse-outline': ellipseOutline, 'layers-outline': layersOutline, 'create-outline': createOutline
     });
   }
 
-  ngOnInit() { this.loadSchedule(true); } // showLoader = true
+  ngOnInit() { this.loadSchedule(true); }
 
   nextDay() {
     this.currentDate.setDate(this.currentDate.getDate() + 1);
     this.updateDateLabel();
-    this.loadSchedule(false); // Silent load
+    this.loadSchedule(false);
   }
 
   prevDay() {
     this.currentDate.setDate(this.currentDate.getDate() - 1);
     this.updateDateLabel();
-    this.loadSchedule(false); // Silent load
+    this.loadSchedule(false);
   }
 
   private updateDateLabel() {
@@ -98,71 +103,112 @@ export class HomePage implements OnInit {
     });
   }
 
+  addNewSession() {
+    this.isEditing = false;
+    this.editingSessionId = null;
+    this.newSessionTitle = '';
+    this.repeatWeeks = 0;
+    this.isModalOpen = true;
+  }
+
+  async editSession(course: any) {
+    this.isEditing = true;
+    this.editingSessionId = course.id;
+    this.newSessionTitle = course.name;
+
+    const start = new Date(course.dateTimeStart);
+    this.selectedStartDate = start.toISOString().split('T')[0];
+    this.selectedStartTime = start.toTimeString().split(' ')[0].substring(0, 5);
+
+    const diff = Math.round((new Date(course.dateTimeEnd).getTime() - start.getTime()) / 60000);
+    this.selectedDuration = diff;
+
+    this.selectedType = course.classId ? 'class' : (course.sportId ? 'sport' : 'extra');
+    this.isModalOpen = true;
+  }
+
   async confirmSave() {
     if (!this.newSessionTitle.trim()) return;
-    const loading = await this.loadingCtrl.create({ message: 'INJECTION...' });
+    const loading = await this.loadingCtrl.create({
+      message: this.isEditing ? 'MISE À JOUR...' : 'INJECTION...'
+    });
     await loading.present();
 
-    const start = new Date(`${this.selectedStartDate}T${this.selectedStartTime}:00`);
-    const end = new Date(start.getTime() + (this.selectedDuration * 60000));
-    const isoStart = start.toISOString();
-    const isoEnd = end.toISOString();
+    const startBase = new Date(`${this.selectedStartDate}T${this.selectedStartTime}:00`);
+    const iterations = this.isEditing ? 0 : this.repeatWeeks;
+    const requests = [];
 
-    const base = { Name: this.newSessionTitle, Description: this.sessionData.description, DateTimeStart: isoStart, DateTimeEnd: isoEnd, Activities: [] };
-    let createObs;
+    for (let i = 0; i <= iterations; i++) {
+      const start = new Date(startBase.getTime() + (i * 7 * 24 * 60 * 60 * 1000));
+      const end = new Date(start.getTime() + (this.selectedDuration * 60000));
 
-    if (this.selectedType === 'class') createObs = this.nexusService.createClass({ ...base, Subject: this.newSessionTitle, Teacher: this.sessionData.teacher, Room: this.sessionData.room, Objective: 'Nexus' });
-    else if (this.selectedType === 'sport') createObs = this.nexusService.createSport({ ...base, Type: 'Training', Place: this.sessionData.place, Duration: this.selectedDuration, Intensity: this.sessionData.intensity });
-    else createObs = this.nexusService.createExtra({ ...base, Organiser: this.sessionData.organiser, Place: this.sessionData.place, Theme: this.sessionData.theme, Resource: 'Web' });
+      const payload = {
+        Status: this.newSessionTitle,
+        DateTimeStart: start.toISOString(),
+        DateTimeEnd: end.toISOString(),
+        LoginId: parseInt(this.nexusService.getUserId() || '0'),
+        ClassId: this.isEditing ? this.courses.find(c => c.id === this.editingSessionId).classId : null,
+        SportId: this.isEditing ? this.courses.find(c => c.id === this.editingSessionId).sportId : null,
+        ExtraActivityId: this.isEditing ? this.courses.find(c => c.id === this.editingSessionId).extraActivityId : null
+      };
 
-    createObs.subscribe({
-      next: (ent: any) => this.injectSession(ent.id, loading, isoStart, isoEnd),
-      error: () => this.fallbackToExisting(loading, isoStart, isoEnd)
-    });
-  }
+      if (this.isEditing) {
+        requests.push(this.nexusService.updateSession(this.editingSessionId!, payload));
+      } else {
+        // Logique simplifiée : on crée la session directement
+        // Si tu veux recréer l'entité parente (Class/Sport), il faudrait wrapper dans un forkJoin complexe
+        requests.push(this.nexusService.createSession(payload));
+      }
+    }
 
-  private injectSession(catId: number, loading: any, start: string, end: string) {
-    const payload = {
-      Status: this.newSessionTitle, DateTimeStart: start, DateTimeEnd: end,
-      LoginId: parseInt(this.nexusService.getUserId() || '0'),
-      ClassId: this.selectedType === 'class' ? catId : null,
-      SportId: this.selectedType === 'sport' ? catId : null,
-      ExtraActivityId: this.selectedType === 'extra' ? catId : null,
-      SessionAchievements: []
-    };
-    this.nexusService.createSession(payload).subscribe(() => {
-      loading.dismiss(); this.isModalOpen = false; this.loadSchedule(false);
-    });
-  }
-
-  private fallbackToExisting(loading: any, start: string, end: string) {
-    const obs = this.selectedType === 'class' ? this.nexusService.getClasses() : this.selectedType === 'sport' ? this.nexusService.getSports() : this.nexusService.getExtra();
-    obs.subscribe(items => {
-      const ex = items.find(i => i.name.toLowerCase() === this.newSessionTitle.toLowerCase());
-      if (ex) this.injectSession(ex.id, loading, start, end); else loading.dismiss();
+    forkJoin(requests).subscribe({
+      next: () => {
+        loading.dismiss();
+        this.isModalOpen = false;
+        this.loadSchedule(false);
+      },
+      error: () => loading.dismiss()
     });
   }
 
   validateSession(course: any, event: any) {
-    event.stopPropagation(); course.isDone = true;
-    this.nexusService.updateSession(course.id, { ...course, status: course.name + " [TERMINÉE]" }).subscribe();
-  }
+    event.stopPropagation();
 
-  onSearch(event: any) {
-    const val = event.target.value.toLowerCase();
-    this.filteredCourses = this.courses.filter(c => c.name.toLowerCase().includes(val));
-  }
+    let newStatus: string;
+    const tag = " [TERMINÉE]";
 
-  addNewSession() { this.newSessionTitle = ''; this.isModalOpen = true; }
-  private formatTime(d: string) { return d ? new Date(d).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '--:--'; }
-  private calcDur(s: string, e: string) { const diff = Math.round((new Date(e).getTime() - new Date(s).getTime()) / 60000); return diff >= 60 ? `${Math.floor(diff/60)}h${diff%60 || ''}` : `${diff}m`; }
+    if (course.isDone) {
+      newStatus = course.name.replace(tag, "");
+      course.isDone = false;
+    } else {
+      newStatus = course.name + tag;
+      course.isDone = true;
+    }
+
+    this.nexusService.updateSession(course.id, { ...course, status: newStatus }).subscribe({
+      next: () => {
+        this.loadSchedule(false);
+      },
+      error: () => {
+        course.isDone = !course.isDone;
+        this.cdr.detectChanges();
+      }
+    });
+  }
 
   async presentActionSheet(course: any) {
     const sheet = await this.actionSheetCtrl.create({
-      header: 'ACTIONS',
+      header: 'MISSION: ' + course.name.toUpperCase(),
       buttons: [
         {
-          text: 'Supprimer', icon: 'trash-outline', role: 'destructive',
+          text: 'Modifier',
+          icon: 'create-outline',
+          handler: () => { this.editSession(course); }
+        },
+        {
+          text: 'Supprimer',
+          icon: 'trash-outline',
+          role: 'destructive',
           handler: () => {
             this.nexusService.deleteSession(course.id).subscribe(() => this.loadSchedule(false));
           }
@@ -171,5 +217,16 @@ export class HomePage implements OnInit {
       ]
     });
     await sheet.present();
+  }
+
+  onSearch(event: any) {
+    const val = event.target.value.toLowerCase();
+    this.filteredCourses = this.courses.filter(c => c.name.toLowerCase().includes(val));
+  }
+
+  private formatTime(d: string) { return d ? new Date(d).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '--:--'; }
+  private calcDur(s: string, e: string) {
+    const diff = Math.round((new Date(e).getTime() - new Date(s).getTime()) / 60000);
+    return diff >= 60 ? `${Math.floor(diff/60)}h${diff%60 || ''}` : `${diff}m`;
   }
 }
