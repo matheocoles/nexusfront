@@ -225,6 +225,7 @@ export class StatsPage implements OnInit, OnDestroy {
     this.computeWeekNav();
     this.computeInsights(filtered);
     this.computeAchievements(filtered);
+    this.buildDonutChart(filtered);
     this.cdr.detectChanges();
 
     // Graphiques Canvas
