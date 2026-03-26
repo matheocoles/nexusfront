@@ -324,7 +324,6 @@ export class StatsPage implements OnInit, OnDestroy {
     ] as const;
     const totals = groups.map(g => ss.filter(s => s.type === g.type).reduce((a, b) => a + b.durationMins, 0));
     const max = Math.max(...totals, 1);
-    const fmt = (m: number) => `${Math.floor(m / 60)}h${Math.round(m % 60).toString().padStart(2, '0')}`;
     this.activityBars = groups.map((g, i) => ({
       ...g, mins: totals[i],
       value: Math.max(Math.round(totals[i] / max * 100), 5),
