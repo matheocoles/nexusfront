@@ -6,6 +6,9 @@
         <h1>Calendrier</h1>
         <p>{{ selectedDate | date:'EEEE dd MMMM yyyy' }}</p>
       </div>
+      <button class="add-trigger-btn" (click)="openAddModal()">
+        <ion-icon name="add-outline"></ion-icon>
+      </button>
     </header>
 
     <section class="calendar-container">
@@ -14,6 +17,7 @@
           presentation="date"
           [(ngModel)]="selectedDate"
           (ionChange)="onDateChange($event)"
+          [highlightedDates]="highlightedDates"
           class="custom-datetime"
           locale="fr-FR"
           [firstDayOfWeek]="1">
@@ -26,109 +30,94 @@
         <ion-segment-button value="all"><ion-label>Tous</ion-label></ion-segment-button>
         <ion-segment-button value="class"><ion-label>Cours</ion-label></ion-segment-button>
         <ion-segment-button value="sport"><ion-label>Sport</ion-label></ion-segment-button>
-        <ion-segment-button value="extra"><ion-label>Extra</ion-label></ion-segment-button>
+        <ion-segment-button value="extra"><ion-label>Extras</ion-label></ion-segment-button>
       </ion-segment>
     </div>
 
-    <ion-modal [isOpen]="isModalOpen" (didDismiss)="isModalOpen = false; isAdding = false"
-               [initialBreakpoint]="0.65" [breakpoints]="[0, 0.65, 0.95]" class="nexus-timeline-modal">
+    <div class="main-timeline fade-in">
+      <div *ngIf="isLoading" class="loader-wrap"><ion-spinner name="crescent"></ion-spinner></div>
+
+      <div class="timeline-scroll" *ngIf="!isLoading">
+        <div *ngFor="let s of filteredSessions" class="timeline-item"
+             [class.is-now]="isNow(s.dateTimeStart, s.dateTimeEnd)"
+             [class.type-class]="s.classId" [class.type-sport]="s.sportId" [class.type-extra]="s.extraActivityId">
+
+          <div class="time-marker">
+            <span class="t-val">{{ s.dateTimeStart | date:'HH:mm' }}</span>
+            <div class="connector"></div>
+          </div>
+
+          <div class="session-info-card">
+            <div class="live-tag" *ngIf="isNow(s.dateTimeStart, s.dateTimeEnd)">EN DIRECT</div>
+            <div class="card-content">
+              <h3>{{ s.class?.name || s.sport?.name || s.extraActivity?.name || s.status }}</h3>
+              <div class="meta-info">
+                <span><ion-icon name="location-outline"></ion-icon> {{ s.status || 'Non défini' }}</span>
+                <span class="duration"><ion-icon name="time-outline"></ion-icon> {{ getDuration(s.dateTimeStart, s.dateTimeEnd) }}</span>
+              </div>
+            </div>
+            <button class="delete-action" (click)="deleteSession(s.id, $event)">
+              <ion-icon name="trash-outline"></ion-icon>
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="filteredSessions.length === 0" class="empty-state">
+          <p>Aucun événement pour cette date.</p>
+        </div>
+      </div>
+    </div>
+
+    <ion-modal [isOpen]="isModalOpen" (didDismiss)="isModalOpen = false"
+               [initialBreakpoint]="0.85" [breakpoints]="[0, 0.85, 0.95]" class="nexus-modal">
       <ng-template>
         <div class="modal-body">
           <div class="modal-header">
-            <div class="title-group">
-              <h2>{{ isAdding ? 'Nouveau Créneau' : 'Timeline' }}</h2>
-              <span class="date-label">{{ selectedDate | date:'dd/MM/yyyy' }}</span>
-            </div>
-            <button class="toggle-btn" [class.active]="isAdding" (click)="toggleAdding()">
-              <ion-icon [name]="isAdding ? 'close-outline' : 'add-outline'"></ion-icon>
+            <h2>Nouveau Slot</h2>
+            <button class="close-modal" (click)="isModalOpen = false">
+              <ion-icon name="close-outline"></ion-icon>
             </button>
           </div>
 
-          <!-- VUE TIMELINE -->
-          <div class="view-container fade-in" *ngIf="!isAdding">
-            <div *ngIf="isLoading" class="loader-wrap"><ion-spinner name="crescent"></ion-spinner></div>
-
-            <div class="timeline-scroll" *ngIf="!isLoading">
-              <div *ngFor="let s of filteredSessions" class="timeline-item"
-                   [class.is-now]="isNow(s.dateTimeStart, s.dateTimeEnd)"
-                   [class.type-class]="s.classId" [class.type-sport]="s.sportId" [class.type-extra]="s.extraActivityId">
-
-                <div class="time-marker">
-                  <span class="t-val">{{ s.dateTimeStart | date:'HH:mm' }}</span>
-                  <div class="connector"></div>
-                </div>
-
-                <div class="session-info-card">
-                  <div class="live-tag" *ngIf="isNow(s.dateTimeStart, s.dateTimeEnd)">
-                    <span class="pulse-dot"></span> EN DIRECT
-                  </div>
-
-                  <div class="card-content">
-                    <h3>{{ s.class?.name || s.sport?.name || s.extraActivity?.name || s.status }}</h3>
-                    <div class="meta-info">
-                      <span><ion-icon name="location-outline"></ion-icon> {{ s.status || 'Non défini' }}</span>
-                      <span class="duration"><ion-icon name="time-outline"></ion-icon> {{ getDuration(s.dateTimeStart, s.dateTimeEnd) }}</span>
-                    </div>
-                  </div>
-
-                  <button class="delete-action" (click)="deleteSession(s.id, $event)">
-                    <ion-icon name="trash-outline"></ion-icon>
-                  </button>
-                </div>
-              </div>
-
-              <div *ngIf="filteredSessions.length === 0" class="empty-state">
-                <ion-icon name="calendar-clear-outline"></ion-icon>
-                <p>Aucune activité répertoriée.</p>
-              </div>
+          <div class="form-container">
+            <div class="input-box">
+              <label>TITRE / SALLE</label>
+              <input type="text" [(ngModel)]="newSession.name" placeholder="Ex: Salle 202...">
             </div>
-          </div>
 
-          <div class="view-container fade-in" *ngIf="isAdding">
-            <div class="form-container">
-              <div class="input-box">
-                <label>NOM DE LA SESSION</label>
-                <input type="text" [(ngModel)]="newSession.name" placeholder="Note ou lieu...">
-              </div>
-
-              <div class="type-grid">
-                <div class="t-card" [class.selected]="selectedType === 'class'" (click)="changeType('class')">
-                  <ion-icon name="book-outline"></ion-icon><span>COURS</span>
-                </div>
-                <div class="t-card" [class.selected]="selectedType === 'sport'" (click)="changeType('sport')">
-                  <ion-icon name="fitness-outline"></ion-icon><span>SPORT</span>
-                </div>
-                <div class="t-card" [class.selected]="selectedType === 'extra'" (click)="changeType('extra')">
-                  <ion-icon name="rocket-outline"></ion-icon><span>EXTRA</span>
-                </div>
-              </div>
-
-              <div class="input-box">
-                <label>ÉLÉMENT LIÉ</label>
-                <select [(ngModel)]="selectedCategoryId" class="nexus-select">
-                  <option [value]="null">-- Sélectionner --</option>
-                  <option *ngFor="let item of categoryList" [value]="item.id">{{ item.name }}</option>
-                </select>
-              </div>
-
-              <div class="time-split">
-                <div class="input-box">
-                  <label>DÉBUT</label>
-                  <input type="time" [(ngModel)]="newSession.startTime">
-                </div>
-                <div class="input-box">
-                  <label>FIN</label>
-                  <input type="time" [(ngModel)]="newSession.endTime">
-                </div>
-              </div>
-
-              <ion-button expand="block" class="submit-btn" (click)="submitNewSession()">
-                PROGRAMMER
-              </ion-button>
+            <div class="type-grid">
+              <div class="t-card" [class.selected]="selectedType === 'class'" (click)="changeType('class')">COURS</div>
+              <div class="t-card" [class.selected]="selectedType === 'sport'" (click)="changeType('sport')">SPORT</div>
+              <div class="t-card" [class.selected]="selectedType === 'extra'" (click)="changeType('extra')">EXTRA</div>
             </div>
+
+            <div class="input-box">
+              <label>CHOIX ACTIVITÉ</label>
+              <select [(ngModel)]="selectedCategoryId" class="nexus-select">
+                <option [value]="null">-- Choisir --</option>
+                <option *ngFor="let item of categoryList" [value]="item.id">{{ item.name }}</option>
+              </select>
+            </div>
+
+            <div class="time-split">
+              <div class="input-box"><label>DÉBUT</label><input type="time" [(ngModel)]="newSession.startTime"></div>
+              <div class="input-box"><label>FIN</label><input type="time" [(ngModel)]="newSession.endTime"></div>
+            </div>
+
+            <div class="input-box">
+              <label>RÉCURRENCE</label>
+              <select [(ngModel)]="newSession.repeatWeeks" class="nexus-select">
+                <option [value]="0">Aujourd'hui seulement</option>
+                <option [value]="1">Sur 2 semaines</option>
+                <option [value]="3">Sur 1 mois</option>
+              </select>
+            </div>
+
+            <button class="submit-btn" (click)="submitNewSession()">PROGRAMMER EN BDD</button>
           </div>
         </div>
       </ng-template>
     </ion-modal>
+
   </div>
 </ion-content>

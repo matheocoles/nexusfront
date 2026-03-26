@@ -1,14 +1,3 @@
-/*
- * App Global CSS
- * ----------------------------------------------------------------------------
- * Put style rules here that you want to apply globally. These styles are for
- * the entire app and not just one component. Additionally, this file can be
- * used as an entry point to import other CSS/Sass files to be included in the
- * output CSS.
- * For more information on global stylesheets, visit the documentation:
- * https://ionicframework.com/docs/layout/global-stylesheets
- */
-
 /* Core CSS required for Ionic components to work properly */
 @import "@ionic/angular/css/core.css";
 
@@ -18,35 +7,38 @@
 @import "@ionic/angular/css/typography.css";
 @import "@ionic/angular/css/display.css";
 
-/* Optional CSS utils that can be commented out */
+/* Optional CSS utils */
 @import "@ionic/angular/css/padding.css";
 @import "@ionic/angular/css/float-elements.css";
 @import "@ionic/angular/css/text-alignment.css";
 @import "@ionic/angular/css/text-transformation.css";
 @import "@ionic/angular/css/flex-utils.css";
 
-/**
- * Ionic Dark Mode
- * -----------------------------------------------------
- * For more info, please see:
- * https://ionicframework.com/docs/theming/dark-mode
- */
-
-/* @import "@ionic/angular/css/palettes/dark.always.css"; */
-/* @import "@ionic/angular/css/palettes/dark.class.css"; */
+/* Dark Mode Palette */
 @import '@ionic/angular/css/palettes/dark.system.css';
 
+/**
+ * NEXUS GLOBAL THEME
+ */
+:root {
+  /* Écrase le bleu natif d'Ionic par ton bordeaux partout dans l'app */
+  --ion-color-primary: #911F45 !important;
+  --ion-color-primary-rgb: 145, 31, 69 !important;
+  --ion-color-primary-contrast: #ffffff !important;
+  --ion-color-primary-shade: #801b3d !important;
+  --ion-color-primary-tint: #9c3558 !important;
+}
+
+/* --- LOADER CYBER --- */
 .cyber-loader-overlay {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   background: #000; z-index: 9999; display: flex; justify-content: center; align-items: center;
 
   .loader-content { text-align: center; width: 80%; }
-
   .glitch-text {
     color: #FF2D55; font-size: 1.5rem; font-weight: 900; letter-spacing: 5px;
     position: relative; animation: glitch 1s infinite;
   }
-
   .loading-bar-container {
     height: 4px; width: 100%; background: #1a1a1a; margin-top: 20px; overflow: hidden;
     .loading-bar-fill {
@@ -54,7 +46,6 @@
       animation: loadingSwipe 1.5s infinite ease-in-out;
     }
   }
-
   .status-msg { color: #444; font-size: 0.7rem; margin-top: 10px; font-family: monospace; }
 }
 
@@ -66,4 +57,45 @@
   60% { transform: translate(2px, 2px); }
   80% { transform: translate(2px, -2px); }
   100% { transform: translate(0); }
+}
+
+/* --- STYLE CALENDRIER NEXUS FINAL --- */
+ion-datetime {
+  --accent-color: #911F45 !important;
+  --highlight-color-active: #911F45 !important;
+
+  /* Jour sélectionné : Gros cercle bordeaux plein (PRIORITÉ MAX) */
+  &::part(calendar-day-active) {
+    background: #911F45 !important;
+    background-color: #911F45 !important;
+    color: white !important;
+    border: 2px solid white !important;
+    border-radius: 50% !important;
+    opacity: 1 !important;
+  }
+
+  /* Jours avec activité (ceux qu'on a marqué dans le .ts) */
+  &::part(calendar-day-highlighted) {
+    font-weight: 800 !important;
+    /* On s'assure que si c'est sélectionné, le style active gagne */
+    &:not(.calendar-day-active) {
+      // Si tu veux quand même tenter le point ici, c'est le dernier moment :
+      &::after {
+        content: '.' !important;
+        position: absolute !important;
+        bottom: 2px !important;
+        font-size: 25px !important;
+        color: #911F45 !important;
+      }
+    }
+  }
+
+  /* Boutons et Today */
+  &::part(calendar-day-today) {
+    color: #911F45 !important;
+  }
+
+  button {
+    color: #911F45 !important;
+  }
 }
