@@ -5,7 +5,7 @@ import { ToastController } from "@ionic/angular/standalone";
 
 @Injectable({ providedIn: 'root' })
 export class NexusService {
-  private apiUrl = 'https://nexusapi.up.railway.app/api';
+  private apiUrl = 'http://localhost:5032/api';
   private readonly http = inject(HttpClient);
   private toastController = inject(ToastController);
 
