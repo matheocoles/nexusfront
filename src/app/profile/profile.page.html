@@ -5,10 +5,11 @@
   </div>
 
   <div *ngIf="!isLoading && userData" class="profile-wrapper fade-in">
+
     <div class="header-banner">
       <div class="avatar-container">
-        <div class="avatar-border" (click)="changeAvatar()">
-          <img [src]="userData?.avatarUrl" class="user-avatar-img">
+        <div class="avatar-border" (click)="changeAvatar()" role="button" aria-label="Changer l'avatar">
+          <img [src]="userData?.avatarUrl" class="user-avatar-img" alt="Avatar">
           <div class="edit-btn">
             <ion-icon name="camera-outline"></ion-icon>
           </div>
@@ -26,8 +27,8 @@
 
     <div class="main-content">
       <div class="identity-block">
-        <h1 class="user-full-name">{{ userData.fullName }}</h1>
-        <p class="user-role">{{ userData.section }}</p>
+        <h1 class="user-full-name">{{ userData?.fullName }}</h1>
+        <p class="user-role">{{ userData?.section }}</p>
       </div>
 
       <div class="nexus-card">
@@ -69,7 +70,7 @@
         <div class="form-list">
           <div class="form-item" [class.is-editing]="isEditing">
             <label>NOM COMPLET</label>
-            <input [(ngModel)]="userData.fullName" [disabled]="!isEditing" type="text">
+            <input [(ngModel)]="userData.fullName" [disabled]="!isEditing" type="text" spellcheck="false">
           </div>
 
           <div class="form-item" [class.is-editing]="isEditing">
@@ -78,7 +79,7 @@
           </div>
 
           <div class="form-item is-editing" *ngIf="isEditing">
-            <label>SÉCURITÉ (NOUVEAU PASS)</label>
+            <label>SÉCURITÉ (NOUVEAU MOT DE PASSE)</label>
             <div class="password-wrapper">
               <input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="newPassword" placeholder="Saisir pour modifier">
               <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'" (click)="showPassword = !showPassword"></ion-icon>

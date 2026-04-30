@@ -1,7 +1,10 @@
 .profile-container {
   --background: #0d0d0d;
+  --nexus-red: #911F45;
+  --nexus-gradient: linear-gradient(135deg, #911F45, #4A1E60);
+  --card-bg: #1a1a1a;
+  --border-color: #262626;
 
-  /* --- ÉTAT DE CHARGEMENT --- */
   .loading-state {
     height: 100%;
     display: flex;
@@ -11,20 +14,19 @@
     color: white;
 
     ion-spinner {
-      --color: #911F45;
+      --color: var(--nexus-red);
       margin-bottom: 10px;
     }
   }
 
-  /* --- HEADER & BANNIÈRE --- */
   .header-banner {
     height: 140px;
-    background: linear-gradient(135deg, #911F45, #4A1E60);
+    background: var(--nexus-gradient);
     border-radius: 0 0 30px 30px;
     display: flex;
     justify-content: center;
     position: relative;
-    margin-bottom: 80px; // Augmenté pour laisser de la place au badge de session
+    margin-bottom: 80px;
 
     .avatar-container {
       position: absolute;
@@ -33,22 +35,23 @@
       .avatar-border {
         position: relative;
         padding: 4px;
-        background: #0d0d0d;
+        background: var(--background);
         border-radius: 50%;
+        cursor: pointer;
 
         .user-avatar-img {
           width: 100px;
           height: 100px;
           border-radius: 50%;
           object-fit: cover;
-          border: 2px solid #911F45;
+          border: 2px solid var(--nexus-red);
         }
 
         .edit-btn {
           position: absolute;
           bottom: 5px;
           right: 5px;
-          background: #911F45;
+          background: var(--nexus-red);
           color: white;
           width: 30px;
           height: 30px;
@@ -56,14 +59,12 @@
           display: flex;
           align-items: center;
           justify-content: center;
-          border: 2px solid #0d0d0d;
+          border: 2px solid var(--background);
           font-size: 16px;
-          z-index: 10;
         }
       }
     }
 
-    /* BADGE DE SESSION DYNAMIQUE */
     .session-badge-wrapper {
       position: absolute;
       bottom: -90px;
@@ -75,25 +76,21 @@
         display: flex;
         align-items: center;
         gap: 6px;
-        padding: 5px 15px;
-        background: #1a1a1a;
-        border: 1px solid #262626;
+        padding: 6px 16px;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
         border-radius: 20px;
-        font-size: 0.65rem;
+        font-size: 0.7rem;
         font-weight: 800;
         color: #555;
         letter-spacing: 1px;
         transition: 0.3s ease;
 
         &.is-active {
-          border-color: #911F45;
-          color: #911F45;
-          background: rgba(145, 31, 69, 0.05);
-          box-shadow: 0 0 10px rgba(145, 31, 69, 0.1);
-        }
-
-        ion-icon {
-          font-size: 1rem;
+          border-color: var(--nexus-red);
+          color: var(--nexus-red);
+          background: rgba(145, 31, 69, 0.08);
+          box-shadow: 0 0 15px rgba(145, 31, 69, 0.15);
         }
       }
     }
@@ -103,14 +100,13 @@
     padding: 0 16px 30px;
   }
 
-  /* --- IDENTITÉ --- */
   .identity-block {
     text-align: center;
     margin-bottom: 25px;
 
     .user-full-name {
       color: white;
-      font-size: 1.5rem;
+      font-size: 1.6rem;
       font-weight: 700;
       margin: 0;
     }
@@ -118,44 +114,22 @@
     .user-role {
       color: #888;
       font-size: 0.9rem;
-      margin-top: 5px;
-    }
-
-    .status-indicator {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.7rem;
-      color: #2dd36f;
-      font-weight: 600;
-      margin-top: 8px;
-
-      .dot {
-        width: 8px;
-        height: 8px;
-        background: #2dd36f;
-        border-radius: 50%;
-
-        &.pulse {
-          animation: pulse-green 2s infinite;
-        }
-      }
+      margin-top: 4px;
     }
   }
 
-  /* --- CARTES NEXUS --- */
   .nexus-card {
-    background: #1a1a1a;
+    background: var(--card-bg);
     border-radius: 18px;
     padding: 20px;
     margin-bottom: 20px;
-    border: 1px solid #262626;
+    border: 1px solid var(--border-color);
 
     .card-title {
-      font-size: 0.7rem;
-      color: #911F45;
+      font-size: 0.75rem;
+      color: var(--nexus-red);
       font-weight: 800;
-      letter-spacing: 1px;
+      letter-spacing: 1.5px;
       text-transform: uppercase;
       margin-bottom: 15px;
     }
@@ -165,66 +139,10 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 15px;
-
-      .card-title {
-        margin-bottom: 0;
-      }
-
-      .edit-icon-btn {
-        --color: #911F45;
-        height: 30px;
-        margin: 0;
-      }
+      .card-title { margin-bottom: 0; }
     }
   }
 
-  /* --- STATS GRID --- */
-  .stats-grid {
-    display: flex;
-    justify-content: space-around;
-    background: #121212;
-    border-radius: 12px;
-    padding: 15px 5px;
-    margin-bottom: 5px;
-
-    .stat-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-
-      ion-icon {
-        font-size: 1.3rem;
-      }
-
-      .icon-class {
-        color: #911F45;
-      }
-
-      .icon-sport {
-        color: #4A1E60;
-      }
-
-      .icon-extra {
-        color: #8e2148;
-      }
-
-      .stat-val {
-        color: white;
-        font-weight: 800;
-        font-size: 1.1rem;
-      }
-
-      .stat-lab {
-        color: #555;
-        font-size: 0.55rem;
-        text-transform: uppercase;
-        font-weight: 700;
-      }
-    }
-  }
-
-  /* --- UPTIME --- */
   .uptime-row {
     display: flex;
     justify-content: space-between;
@@ -233,167 +151,88 @@
     .uptime-item {
       text-align: center;
       flex: 1;
-
-      .value {
-        display: block;
-        color: white;
-        font-size: 1.4rem;
-        font-weight: 700;
-      }
-
-      .label {
-        color: #555;
-        font-size: 0.6rem;
-        font-weight: 600;
-      }
+      .value { color: white; font-size: 1.5rem; font-weight: 700; display: block; }
+      .label { color: #555; font-size: 0.65rem; font-weight: 600; }
     }
   }
 
-  /* --- PROGRESS BAR --- */
   .sync-box {
     .sync-header {
       display: flex;
       justify-content: space-between;
-      font-size: 0.65rem;
+      font-size: 0.7rem;
       color: #666;
       margin-bottom: 8px;
     }
-
     .custom-progress {
       height: 6px;
-      background: #262626;
+      background: var(--border-color);
       border-radius: 10px;
-      overflow: hidden;
-
       .progress-fill {
         height: 100%;
-        background: #911F45;
-        transition: width 0.5s ease;
+        background: var(--nexus-red);
+        transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
       }
     }
   }
 
-  /* --- FORMULAIRE & INPUTS --- */
   .form-list {
     .form-item {
       margin-bottom: 18px;
-
-      label {
-        display: block;
-        color: #555;
-        font-size: 0.65rem;
-        font-weight: 700;
-        margin-bottom: 6px;
-      }
+      label { display: block; color: #555; font-size: 0.7rem; font-weight: 700; margin-bottom: 6px; }
 
       input {
         width: 100%;
         background: transparent;
         border: none;
-        border-bottom: 1px solid #262626;
-        padding: 8px 0;
+        border-bottom: 1px solid var(--border-color);
+        padding: 10px 0;
         color: white;
-        font-size: 0.95rem;
+        font-size: 1rem;
         outline: none;
         transition: 0.3s;
       }
 
       &.is-editing input {
-        border-bottom-color: #911F45;
-        background: rgba(145, 31, 69, 0.03);
-        padding: 10px;
+        border-bottom-color: var(--nexus-red);
+        background: rgba(145, 31, 69, 0.04);
+        padding: 12px;
         border-radius: 8px;
       }
 
-      /* Wrapper spécifique pour le password avec l'œil */
       .password-wrapper {
         display: flex;
         align-items: center;
-        border-bottom: 1px solid #262626;
-
-        input {
-          border-bottom: none;
-          flex: 1;
-        }
-
-        ion-icon {
-          color: #911F45;
-          font-size: 1.2rem;
-          cursor: pointer;
-          padding: 5px;
-        }
+        border-bottom: 1px solid var(--border-color);
+        input { border: none; flex: 1; }
+        ion-icon { color: var(--nexus-red); font-size: 1.3rem; padding: 8px; }
       }
 
       &.is-editing .password-wrapper {
-        border-bottom-color: #911F45;
-        background: rgba(145, 31, 69, 0.03);
+        border-bottom-color: var(--nexus-red);
+        background: rgba(145, 31, 69, 0.04);
         border-radius: 8px;
-        padding: 0 10px;
-      }
-    }
-
-    .theme-toggle {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 15px;
-      padding-top: 10px;
-      border-top: 1px solid #262626;
-
-      label {
-        margin-bottom: 0;
-      }
-
-      ion-toggle {
-        --handle-background-checked: #911F45;
-        --track-background-checked: rgba(145, 31, 69, 0.3);
       }
     }
   }
 
-  /* --- BOUTONS --- */
   .save-profile-btn {
-    --background: #911F45;
+    --background: var(--nexus-red);
     --border-radius: 12px;
-    margin-top: 10px;
+    margin-top: 15px;
     font-weight: 700;
-    height: 48px;
-    letter-spacing: 1px;
+    height: 52px;
   }
 
   .logout-link {
     --color: #f0505c;
     font-weight: 700;
-    margin-top: 15px;
-    font-size: 0.85rem;
-    letter-spacing: 0.5px;
+    margin-top: 20px;
   }
 }
 
-/* --- ANIMATIONS --- */
-.fade-in {
-  animation: fadeIn 0.4s ease-out;
-}
-
+.fade-in { animation: fadeIn 0.5s ease-out; }
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes pulse-green {
-  0% {
-    box-shadow: 0 0 0 0 rgba(45, 211, 111, 0.4);
-  }
-  70% {
-    box-shadow: 0 0 0 8px rgba(45, 211, 111, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(45, 211, 111, 0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }

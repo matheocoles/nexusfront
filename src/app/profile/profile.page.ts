@@ -37,24 +37,18 @@ export class ProfilePage implements OnInit, OnDestroy {
   private loadingController = inject(LoadingController);
   private cdr = inject(ChangeDetectorRef);
 
-  // Données utilisateur
   userData: any = null;
   isEditing: boolean = false;
   isLoading: boolean = true;
   newPassword: string = "";
   showPassword = false;
-  isWorking = false; // Statut session active
+  isWorking = false;
 
-  // Paramètres système
-  isDarkMode: boolean = true;
-  stats = { classes: 0, sports: 0, extras: 0 };
-
-  // Timer States
   days: number = 0;
   hours: number = 0;
   minutes: number = 0;
   progress: number = 0;
-  timerInterval: any;
+  private timerInterval: any;
 
   constructor() {
     addIcons({
@@ -68,14 +62,13 @@ export class ProfilePage implements OnInit, OnDestroy {
   ngOnInit() {
     this.loadProfileData();
     this.initPersistentTimer();
-    this.loadActivityStats();
-    this.checkCurrentSession(); // Vérifie si un cours est en cours
-    this.checkTheme();
+    this.checkCurrentSession();
 
+    // Simulation de chargement initial
     setTimeout(() => {
       this.isLoading = false;
       this.cdr.detectChanges();
-    }, 1500);
+    }, 800);
   }
 
   ngOnDestroy() {
@@ -86,6 +79,7 @@ export class ProfilePage implements OnInit, OnDestroy {
     const token = localStorage.getItem('nexus_token');
     const savedAvatar = localStorage.getItem('nexus_avatar');
     const savedSection = localStorage.getItem('nexus_section');
+    const localFullName = localStorage.getItem('nexus_fullname');
 
     if (!token) {
       this.router.navigate(['/login']);
@@ -94,77 +88,79 @@ export class ProfilePage implements OnInit, OnDestroy {
 
     try {
       const decoded: any = jwtDecode(token);
+
+      // Correction ici : On récupère le username du token en priorité
+      // Certains serveurs utilisent 'unique_name', d'autres 'sub' ou 'Username'
+      const tokenUsername = decoded.unique_name || decoded.sub || decoded.Username || 'nexus_user';
+
+      // On ne recrée l'objet que s'il n'existe pas déjà pour éviter d'écraser les saisies en cours
       this.userData = {
         id: decoded.UserId || decoded.nameid || '0',
-        fullName: decoded.FullName || 'Membre Nexus',
-        username: decoded.unique_name || 'nexus_user',
+        fullName: localFullName || decoded.FullName || 'Membre Nexus',
+        username: tokenUsername, // On fixe le username une bonne fois pour toutes
         section: savedSection || 'Étudiant Nexus',
-        avatarUrl: savedAvatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${decoded.unique_name}`
+        avatarUrl: savedAvatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${tokenUsername}`
       };
     } catch (e) {
+      console.error("Erreur décodage token", e);
       this.router.navigate(['/login']);
     }
-  }
-
-  checkCurrentSession() {
-    this.nexusService.getSessions().subscribe(sessions => {
-      const now = new Date();
-      this.isWorking = sessions.some(s => {
-        const start = new Date(s.dateTimeStart);
-        const end = new Date(s.dateTimeEnd);
-        return now >= start && now <= end;
-      });
-      this.cdr.detectChanges();
-    });
-  }
-
-  loadActivityStats() {
-    this.nexusService.getSessions().subscribe(sessions => {
-      this.stats.classes = sessions.filter(s => s.classId).length;
-      this.stats.sports = sessions.filter(s => s.sportId).length;
-      this.stats.extras = sessions.filter(s => s.extraActivityId).length;
-      this.cdr.detectChanges();
-    });
   }
 
   async saveChanges() {
     if (!this.userData) return;
 
     const loading = await this.loadingController.create({
-      message: 'Synchronisation du profil...',
+      message: 'Synchronisation Nexus...',
       spinner: 'crescent'
     });
     await loading.present();
 
     const updateData: any = {
       id: parseInt(this.userData.id, 10),
-      username: this.userData.username,
+      username: this.userData.username, // On renvoie bien le username stocké
       fullName: this.userData.fullName
     };
 
-    // On n'ajoute le password que s'il est saisi
     if (this.newPassword.trim()) {
       updateData.password = this.newPassword;
     }
 
     this.nexusService.updateUser(this.userData.id, updateData).subscribe({
       next: () => {
-        // Sauvegarde locale du cursus (Section)
+        // On sauvegarde les nouvelles valeurs localement
         localStorage.setItem('nexus_section', this.userData.section);
+        localStorage.setItem('nexus_fullname', this.userData.fullName);
 
         loading.dismiss();
         this.isEditing = false;
         this.newPassword = "";
-        this.nexusService.showToast("Profil mis à jour avec succès");
-        this.loadProfileData();
+        this.nexusService.showToast("Profil synchronisé");
+
+        // IMPORTANT : On ne rappelle PAS loadProfileData() ici,
+        // car le token contient toujours les ANCIENNES valeurs.
+        // L'objet userData est déjà à jour dans la vue grâce au ngModel.
       },
-      error: () => {
+      error: (err) => {
         loading.dismiss();
-        this.nexusService.showToast("Erreur lors de l'enregistrement");
+        this.nexusService.showToast("Échec de la liaison au serveur");
       }
     });
   }
 
+  checkCurrentSession() {
+    this.nexusService.getSessions().subscribe({
+      next: (sessions) => {
+        const now = new Date();
+        this.isWorking = sessions.some(s => {
+          const start = new Date(s.dateTimeStart);
+          const end = new Date(s.dateTimeEnd);
+          return now >= start && now <= end;
+        });
+        this.cdr.detectChanges();
+      }
+    });
+  }
 
   initPersistentTimer() {
     let startTime = localStorage.getItem('nexus_start_time');
@@ -172,8 +168,10 @@ export class ProfilePage implements OnInit, OnDestroy {
       startTime = new Date().getTime().toString();
       localStorage.setItem('nexus_start_time', startTime);
     }
+
     const startTimestamp = parseInt(startTime);
-    this.timerInterval = setInterval(() => {
+
+    const updateTimer = () => {
       const now = new Date().getTime();
       const diff = Math.floor((now - startTimestamp) / 1000);
       this.days = Math.floor(diff / 86400);
@@ -181,7 +179,10 @@ export class ProfilePage implements OnInit, OnDestroy {
       this.minutes = Math.floor((diff % 3600) / 60);
       this.progress = (diff % 86400) / 86400;
       this.cdr.detectChanges();
-    }, 1000);
+    };
+
+    updateTimer();
+    this.timerInterval = setInterval(updateTimer, 60000); // Mise à jour par minute pour la performance
   }
 
   changeAvatar() {
@@ -191,6 +192,10 @@ export class ProfilePage implements OnInit, OnDestroy {
   onFileSelected(event: any) {
     const file = event.target.files[0];
     if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        this.nexusService.showToast("Image trop lourde (max 2Mo)");
+        return;
+      }
       const reader = new FileReader();
       reader.onload = () => {
         const base64 = reader.result as string;
@@ -202,33 +207,28 @@ export class ProfilePage implements OnInit, OnDestroy {
     }
   }
 
-  checkTheme() {
-    const theme = localStorage.getItem('nexus_theme');
-    this.isDarkMode = theme === 'dark' || !theme;
-    document.body.classList.toggle('dark', this.isDarkMode);
-  }
-
-  toggleTheme(event: any) {
-    this.isDarkMode = event.detail.checked;
-    document.body.classList.toggle('dark', this.isDarkMode);
-    localStorage.setItem('nexus_theme', this.isDarkMode ? 'dark' : 'light');
-  }
-
   toggleEdit() {
     this.isEditing = !this.isEditing;
-    if (!this.isEditing) this.newPassword = "";
+    if (!this.isEditing) {
+      this.newPassword = "";
+      this.loadProfileData(); // Reset si annulation
+    }
   }
 
   async handleLogout() {
     const alert = await this.alertController.create({
       header: 'DÉCONNEXION',
       message: 'Voulez-vous couper la liaison Nexus ?',
+      cssClass: 'nexus-alert',
       buttons: [
         { text: 'ANNULER', role: 'cancel' },
-        { text: 'CONFIRMER', handler: () => {
+        {
+          text: 'CONFIRMER',
+          handler: () => {
             this.nexusService.logout();
             this.router.navigate(['/login']);
-          }}
+          }
+        }
       ]
     });
     await alert.present();
