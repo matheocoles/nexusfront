@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { IonContent, IonIcon, IonModal, LoadingController, ActionSheetController } from '@ionic/angular/standalone';
 import { NexusService } from '../services/nexus.service';
 import { addIcons } from 'ionicons';
-import { forkJoin, of } from 'rxjs';
+import {forkJoin, Observable, of} from 'rxjs';
 import {
   addOutline, searchOutline, menuOutline, playOutline, bookOutline, fitnessOutline,
   rocketOutline, checkmarkCircle, locationOutline, trashOutline, closeOutline,
@@ -24,6 +24,7 @@ export class HomePage implements OnInit {
   private actionSheetCtrl = inject(ActionSheetController);
   private cdr = inject(ChangeDetectorRef);
 
+  currentEditingSession: any = null;
   courses: any[] = [];
   filteredCourses: any[] = [];
   isLoading = true;
@@ -41,8 +42,23 @@ export class HomePage implements OnInit {
   newSessionTitle = '';
   selectedType = 'class';
   selectedDuration = 60;
-  sessionData = { description: 'Mission Nexus', teacher: 'Core', room: 'S-1', place: 'Nexus Base', intensity: 'Medium', organiser: 'Nexus', theme: 'Dev' };
-
+  sessionData = {
+    // Champs communs (Activity)
+    description: 'Mission Nexus',
+    // Champs Class
+    subject: '',
+    teacher: '',
+    room: '',
+    objective: '',
+    // Champs Sport
+    type: '',
+    place: '',
+    intensity: 'Medium',
+    // Champs ExtraActivity
+    organiser: '',
+    theme: '',
+    resource: ''
+  };
   private palette = ['#911F45', '#4A1E60', '#2a0a14', '#5e102e'];
 
   constructor() {
@@ -113,8 +129,9 @@ export class HomePage implements OnInit {
 
   async editSession(course: any) {
     this.isEditing = true;
+    this.currentEditingSession = course; // On garde une copie complète
     this.editingSessionId = course.id;
-    this.newSessionTitle = course.name;
+    this.newSessionTitle = course.name.replace(" [TERMINÉE]", ""); // On nettoie le titre
 
     const start = new Date(course.dateTimeStart);
     this.selectedStartDate = start.toISOString().split('T')[0];
@@ -123,51 +140,90 @@ export class HomePage implements OnInit {
     const diff = Math.round((new Date(course.dateTimeEnd).getTime() - start.getTime()) / 60000);
     this.selectedDuration = diff;
 
-    this.selectedType = course.classId ? 'class' : (course.sportId ? 'sport' : 'extra');
+    // On détermine le type pour l'affichage (visuel seulement car verrouillé en édition)
+    if (course.classId) this.selectedType = 'class';
+    else if (course.sportId) this.selectedType = 'sport';
+    else if (course.extraActivityId) this.selectedType = 'extra';
+
     this.isModalOpen = true;
   }
 
   async confirmSave() {
     if (!this.newSessionTitle.trim()) return;
-    const loading = await this.loadingCtrl.create({
-      message: this.isEditing ? 'MISE À JOUR...' : 'INJECTION...'
-    });
+    const loading = await this.loadingCtrl.create({ message: 'SYNCHRONISATION...' });
     await loading.present();
 
-    const startBase = new Date(`${this.selectedStartDate}T${this.selectedStartTime}:00`);
-    const iterations = this.isEditing ? 0 : this.repeatWeeks;
-    const requests = [];
+    // On prépare l'activité (Class, Sport ou Extra) selon le diagramme image_efb419.png
+    let obs: Observable<any>;
+    const baseActivity = { Name: this.newSessionTitle, Description: this.sessionData.description };
 
-    for (let i = 0; i <= iterations; i++) {
-      const start = new Date(startBase.getTime() + (i * 7 * 24 * 60 * 60 * 1000));
-      const end = new Date(start.getTime() + (this.selectedDuration * 60000));
-
-      const payload = {
-        Status: this.newSessionTitle,
-        DateTimeStart: start.toISOString(),
-        DateTimeEnd: end.toISOString(),
-        LoginId: parseInt(this.nexusService.getUserId() || '0'),
-        ClassId: this.isEditing ? this.courses.find(c => c.id === this.editingSessionId).classId : null,
-        SportId: this.isEditing ? this.courses.find(c => c.id === this.editingSessionId).sportId : null,
-        ExtraActivityId: this.isEditing ? this.courses.find(c => c.id === this.editingSessionId).extraActivityId : null
-      };
-
-      if (this.isEditing) {
-        requests.push(this.nexusService.updateSession(this.editingSessionId!, payload));
-      } else {
-        // Logique simplifiée : on crée la session directement
-        // Si tu veux recréer l'entité parente (Class/Sport), il faudrait wrapper dans un forkJoin complexe
-        requests.push(this.nexusService.createSession(payload));
-      }
+    if (this.selectedType === 'class') {
+      obs = this.nexusService.createClass({
+        ...baseActivity,
+        Subject: this.sessionData.subject,
+        Teacher: this.sessionData.teacher,
+        Room: this.sessionData.room,
+        Objective: this.sessionData.objective
+      });
+    } else if (this.selectedType === 'sport') {
+      obs = this.nexusService.createSport({
+        ...baseActivity,
+        Type: this.sessionData.type,
+        Place: this.sessionData.place,
+        Intensity: this.sessionData.intensity,
+        Duration: this.selectedDuration.toString()
+      });
+    } else {
+      obs = this.nexusService.createExtra({
+        ...baseActivity,
+        Organiser: this.sessionData.organiser,
+        Place: this.sessionData.place,
+        Theme: this.sessionData.theme,
+        Resource: this.sessionData.resource
+      });
     }
 
-    forkJoin(requests).subscribe({
-      next: () => {
-        loading.dismiss();
-        this.isModalOpen = false;
-        this.loadSchedule(false);
+    obs.subscribe({
+      next: (entity) => {
+        const start = new Date(`${this.selectedStartDate}T${this.selectedStartTime}:00`);
+        const end = new Date(start.getTime() + (this.selectedDuration * 60000));
+
+        // Construction du payload Session (doit correspondre à ta capture d'écran de la DB)
+        const sessionPayload = {
+          Id: this.editingSessionId, // CRITIQUE : Doit être présent
+          DateTimeStart: new Date(`${this.selectedStartDate}T${this.selectedStartTime}:00`).toISOString(),
+          DateTimeEnd: new Date(new Date(`${this.selectedStartDate}T${this.selectedStartTime}:00`).getTime() + (this.selectedDuration * 60000)).toISOString(),
+          Status: this.newSessionTitle, // Avec Majuscule
+          LoginId: 7, // Ton ID utilisateur dans la DB
+
+          // Renvoyer les IDs de ton schéma
+          ClassId: this.selectedType === 'class' ? this.currentEditingSession.classId : null,
+          SportId: this.selectedType === 'sport' ? this.currentEditingSession.sportId : null,
+          ExtraActivityId: this.selectedType === 'extra' ? this.currentEditingSession.extraActivityId : null
+        };
+
+        const request = this.isEditing
+          ? this.nexusService.updateSession(this.editingSessionId, sessionPayload)
+          : this.nexusService.createSession(sessionPayload);
+
+        request.subscribe({
+          next: () => {
+            loading.dismiss();
+            this.isModalOpen = false;
+            this.loadSchedule(false);
+            this.nexusService.showToast('BDD MISE À JOUR');
+          },
+          error: () => {
+            loading.dismiss();
+            this.nexusService.showToast('ERREUR SESSION');
+          }
+        });
       },
-      error: () => loading.dismiss()
+      error: (err) => {
+        console.error("Erreur 500 sur l'activité. Vérifiez les champs du diagramme.", err);
+        loading.dismiss();
+        this.nexusService.showToast('ERREUR CRÉATION ACTIVITÉ');
+      }
     });
   }
 

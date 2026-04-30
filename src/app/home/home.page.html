@@ -79,8 +79,35 @@
 
         <div class="modal-body">
           <div class="input-block">
-            <label class="section-label">NOM DE L'ACTIVITÉ</label>
-            <input type="text" [(ngModel)]="newSessionTitle" placeholder="Ex: Boxe, Anglais...">
+            <label class="section-label">NOM DE LA MISSION (ACTIVITY NAME)</label>
+            <input type="text" [(ngModel)]="newSessionTitle">
+          </div>
+
+          <!-- SECTION CLASS -->
+          <div *ngIf="selectedType === 'class'" class="fade-in">
+            <div class="input-block"><label>MATIÈRE (SUBJECT)</label><input type="text" [(ngModel)]="sessionData.subject"></div>
+            <div class="input-block"><label>PROFESSEUR (TEACHER)</label><input type="text" [(ngModel)]="sessionData.teacher"></div>
+            <div class="input-block"><label>SALLE (ROOM)</label><input type="text" [(ngModel)]="sessionData.room"></div>
+          </div>
+
+          <!-- SECTION SPORT -->
+          <div *ngIf="selectedType === 'sport'" class="fade-in">
+            <div class="input-block"><label>TYPE DE SPORT</label><input type="text" [(ngModel)]="sessionData.type"></div>
+            <div class="input-block"><label>LIEU (PLACE)</label><input type="text" [(ngModel)]="sessionData.place"></div>
+            <div class="input-block">
+              <label>INTENSITÉ</label>
+              <select [(ngModel)]="sessionData.intensity" class="nexus-select-custom">
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- SECTION EXTRA -->
+          <div *ngIf="selectedType === 'extra'" class="fade-in">
+            <div class="input-block"><label>ORGANISATEUR</label><input type="text" [(ngModel)]="sessionData.organiser"></div>
+            <div class="input-block"><label>THÈME</label><input type="text" [(ngModel)]="sessionData.theme"></div>
           </div>
 
           <label class="section-label">PLANIFICATION TEMPORELLE</label>
@@ -105,18 +132,15 @@
             </select>
           </div>
 
-          <label class="section-label">CATÉGORIE {{ isEditing ? '(Verrouillée)' : '' }}</label>
-          <div class="category-grid" [style.opacity]="isEditing ? '0.5' : '1'">
-            <div class="cat-card" [class.active]="selectedType === 'class'"
-                 (click)="!isEditing && (selectedType = 'class')">
+          <label class="section-label">CATÉGORIE</label>
+          <div class="category-grid">
+            <div class="cat-card" [class.active]="selectedType === 'class'" (click)="selectedType = 'class'">
               <ion-icon name="book-outline"></ion-icon><span>COURS</span>
             </div>
-            <div class="cat-card" [class.active]="selectedType === 'sport'"
-                 (click)="!isEditing && (selectedType = 'sport')">
+            <div class="cat-card" [class.active]="selectedType === 'sport'" (click)="selectedType = 'sport'">
               <ion-icon name="fitness-outline"></ion-icon><span>SPORT</span>
             </div>
-            <div class="cat-card" [class.active]="selectedType === 'extra'"
-                 (click)="!isEditing && (selectedType = 'extra')">
+            <div class="cat-card" [class.active]="selectedType === 'extra'" (click)="selectedType = 'extra'">
               <ion-icon name="rocket-outline"></ion-icon><span>EXTRA</span>
             </div>
           </div>
