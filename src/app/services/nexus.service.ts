@@ -5,10 +5,14 @@ import { ToastController } from "@ionic/angular/standalone";
 
 @Injectable({ providedIn: 'root' })
 export class NexusService {
+  // L'URL de base s'arrête à /api car le RoutePrefix du backend s'en occupe
   private apiUrl = 'http://localhost:5032/api';
   private readonly http = inject(HttpClient);
   private toastController = inject(ToastController);
 
+  /**
+   * Headers pour l'authentification JWT
+   */
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('nexus_token');
     return new HttpHeaders({
@@ -17,65 +21,87 @@ export class NexusService {
     });
   }
 
-  saveSession(token: string, userId: string) {
-    localStorage.setItem('nexus_token', token);
-    localStorage.setItem('nexus_user_id', userId);
-  }
-  getUserId() { return localStorage.getItem('nexus_user_id'); }
-  logout() { localStorage.clear(); location.reload(); }
+  // --- AUTHENTIFICATION ---
 
   login(creds: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/Login`, creds);
   }
 
+  logout(): void {
+    localStorage.clear();
+    location.reload();
+  }
+
+  // --- GESTION DES SESSIONS (EMPLOI DU TEMPS) ---
+
   getSessions(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/Sessions`, { headers: this.getHeaders() });
   }
+
   createSession(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/Sessions`, data, { headers: this.getHeaders() });
   }
-  updateSession(id: any, data: any): Observable<any> {
+
+  updateSession(id: number | string, data: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/Sessions/${id}`, data, { headers: this.getHeaders() });
   }
-  deleteSession(id: any): Observable<any> {
-    const token = localStorage.getItem('nexus_token');
-    const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
-    return this.http.delete(`${this.apiUrl}/Sessions/${id}`, { headers });
+
+  deleteSession(id: number | string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/Sessions/${id}`, { headers: this.getHeaders() });
   }
 
-  getClasses(): Observable<any[]> { return this.http.get<any[]>(`${this.apiUrl}/Class`, { headers: this.getHeaders() }); }
-  getSports(): Observable<any[]> { return this.http.get<any[]>(`${this.apiUrl}/Sport`, { headers: this.getHeaders() }); }
-  getExtra(): Observable<any[]> { return this.http.get<any[]>(`${this.apiUrl}/Extraactivity`, { headers: this.getHeaders() }); }
-  getExtraActivities(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/extraactivity`, { headers: this.getHeaders() });
+  // --- GESTION DES CLASSES (COURS) ---
+
+  getClasses(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/Class`, { headers: this.getHeaders() });
   }
 
-  getAchievements(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/achievements`, { headers: this.getHeaders() });
-  }
-
-  updateUser(id: number | string, data: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/Logins/${id}`, data, { headers: this.getHeaders() });
-  }
-
-  async showToast(msg: string) {
-    const toast = await this.toastController.create({
-      message: `🚀 ${msg}`,
-      duration: 2000,
-      cssClass: 'nexus-toast-simple',
-      position: 'bottom'
-    });
-    await toast.present();
-  }
   createClass(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/Class`, data, { headers: this.getHeaders() });
+  }
+
+  updateClass(id: number | string, data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/Class/${id}`, data, { headers: this.getHeaders() });
+  }
+
+  // --- GESTION DES SPORTS ---
+
+  getSports(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/Sport`, { headers: this.getHeaders() });
   }
 
   createSport(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/Sport`, data, { headers: this.getHeaders() });
   }
 
+  updateSport(id: number | string, data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/Sport/${id}`, data, { headers: this.getHeaders() });
+  }
+
+  // --- GESTION DES ACTIVITÉS EXTRA ---
+
+  getExtra(): Observable<any[]> {
+    // Note : Vérifie si ton endpoint est "Extraactivity" ou "ExtraActivity" (sensible à la casse sous Linux)
+    return this.http.get<any[]>(`${this.apiUrl}/Extraactivity`, { headers: this.getHeaders() });
+  }
+
   createExtra(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/Extraactivity`, data, { headers: this.getHeaders() });
+  }
+
+  updateExtra(id: number | string, data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/Extraactivity/${id}`, data, { headers: this.getHeaders() });
+  }
+
+  // --- UTILITAIRES ---
+
+  async showToast(msg: string): Promise<void> {
+    const toast = await this.toastController.create({
+      message: `🚀 ${msg}`,
+      duration: 2000,
+      position: 'bottom',
+      cssClass: 'nexus-toast-simple'
+    });
+    await toast.present();
   }
 }

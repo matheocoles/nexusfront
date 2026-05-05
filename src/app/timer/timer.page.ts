@@ -173,7 +173,10 @@ export class TimerPage implements OnInit, AfterViewInit, OnDestroy {
   private loadActivityLists(): void {
     this.nexusService.getClasses().subscribe({ next: d => this.classes = d ?? [], error: () => {} });
     this.nexusService.getSports().subscribe({  next: d => this.sports  = d ?? [], error: () => {} });
-    this.nexusService.getExtra().subscribe({   next: d => this.extras  = d ?? [], error: () => {} });
+    this.nexusService.getExtra().subscribe({
+      next: (d: any) => this.extras = d ?? [],
+      error: () => {}
+    });
   }
 
   getActivityList(type: ActivityType): ActivityItem[] {
