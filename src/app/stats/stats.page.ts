@@ -152,7 +152,7 @@ export class StatsPage implements OnInit, OnDestroy {
       sessions: this.nexusService.getSessions().pipe(catchError(() => of([]))),
       classes:  this.nexusService.getClasses().pipe(catchError(() => of([]))),
       sports:   this.nexusService.getSports().pipe(catchError(() => of([]))),
-      extras:   this.nexusService.getExtraActivities().pipe(catchError(() => of([]))),
+      extras:   this.nexusService.getExtra().pipe(catchError(() => of([]))),
     }).subscribe({
       next: ({ sessions, classes, sports, extras }) => {
         (classes as GetClassDto[]).forEach(c => { if (c.id) this.classDict[c.id] = c; });

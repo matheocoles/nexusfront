@@ -79,21 +79,20 @@
 
         <div class="modal-body">
           <div class="input-block">
-            <label class="section-label">NOM DE LA MISSION (ACTIVITY NAME)</label>
+            <label class="section-label">NOM DE LA MISSION</label>
             <input type="text" [(ngModel)]="newSessionTitle">
           </div>
 
-          <!-- SECTION CLASS -->
+          <!-- DYNAMIQUE SELON TYPE -->
           <div *ngIf="selectedType === 'class'" class="fade-in">
-            <div class="input-block"><label>MATIÈRE (SUBJECT)</label><input type="text" [(ngModel)]="sessionData.subject"></div>
-            <div class="input-block"><label>PROFESSEUR (TEACHER)</label><input type="text" [(ngModel)]="sessionData.teacher"></div>
-            <div class="input-block"><label>SALLE (ROOM)</label><input type="text" [(ngModel)]="sessionData.room"></div>
+            <div class="input-block"><label>MATIÈRE</label><input type="text" [(ngModel)]="sessionData.subject"></div>
+            <div class="input-block"><label>PROFESSEUR</label><input type="text" [(ngModel)]="sessionData.teacher"></div>
+            <div class="input-block"><label>SALLE</label><input type="text" [(ngModel)]="sessionData.room"></div>
           </div>
 
-          <!-- SECTION SPORT -->
           <div *ngIf="selectedType === 'sport'" class="fade-in">
             <div class="input-block"><label>TYPE DE SPORT</label><input type="text" [(ngModel)]="sessionData.type"></div>
-            <div class="input-block"><label>LIEU (PLACE)</label><input type="text" [(ngModel)]="sessionData.place"></div>
+            <div class="input-block"><label>LIEU</label><input type="text" [(ngModel)]="sessionData.place"></div>
             <div class="input-block">
               <label>INTENSITÉ</label>
               <select [(ngModel)]="sessionData.intensity" class="nexus-select-custom">
@@ -104,13 +103,12 @@
             </div>
           </div>
 
-          <!-- SECTION EXTRA -->
           <div *ngIf="selectedType === 'extra'" class="fade-in">
             <div class="input-block"><label>ORGANISATEUR</label><input type="text" [(ngModel)]="sessionData.organiser"></div>
             <div class="input-block"><label>THÈME</label><input type="text" [(ngModel)]="sessionData.theme"></div>
           </div>
 
-          <label class="section-label">PLANIFICATION TEMPORELLE</label>
+          <label class="section-label">PLANIFICATION</label>
           <div class="row-inputs">
             <div class="input-block">
               <label>DATE</label>
@@ -120,16 +118,6 @@
               <label>HEURE</label>
               <input type="time" [(ngModel)]="selectedStartTime">
             </div>
-          </div>
-
-          <div *ngIf="!isEditing" class="fade-in">
-            <label class="section-label">RÉCURRENCE HEBDOMADAIRE</label>
-            <select [(ngModel)]="repeatWeeks" class="nexus-select-custom">
-              <option [value]="0">Une seule fois</option>
-              <option [value]="1">Sur 2 semaines</option>
-              <option [value]="3">Sur 1 mois (4 sem.)</option>
-              <option [value]="11">Sur un trimestre (12 sem.)</option>
-            </select>
           </div>
 
           <label class="section-label">CATÉGORIE</label>
@@ -153,7 +141,7 @@
           </div>
 
           <button class="btn-confirm" (click)="confirmSave()">
-            {{ isEditing ? 'METTRE À JOUR' : 'AJOUTER À LA BDD' }}
+            {{ isEditing ? 'METTRE À JOUR' : 'ENREGISTRER' }}
           </button>
         </div>
       </div>

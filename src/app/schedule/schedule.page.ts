@@ -133,7 +133,10 @@ export class SchedulePage implements OnInit {
   loadCategories() {
     const obs = this.selectedType === 'class' ? this.nexusService.getClasses() :
       this.selectedType === 'sport' ? this.nexusService.getSports() : this.nexusService.getExtra();
-    obs.subscribe(data => { this.categoryList = data || []; this.cdr.detectChanges(); });
+    obs.subscribe((data: any) => {
+      this.categoryList = data || [];
+      this.cdr.detectChanges();
+    });
   }
 
   async submitNewSession() {
