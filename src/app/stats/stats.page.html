@@ -63,7 +63,6 @@
       <section class="chart-section">
         <div class="section-header">
           <span class="section-title">Graph d'investissement</span>
-          <!-- Toggle ligne / barres -->
           <div class="chart-type-tabs">
             <button class="chart-tab"
                     [class.active]="chartMode === 'line'"
@@ -78,7 +77,6 @@
           </div>
         </div>
 
-        <!-- Navigation semaine (visible seulement en mode "semaine") -->
         <div class="week-nav" *ngIf="selectedPeriod === 'semaine'">
           <ion-icon name="chevron-back-outline" (click)="prevWeek()"></ion-icon>
           <div class="day-chips">
@@ -92,52 +90,19 @@
           <ion-icon name="chevron-forward-outline" (click)="nextWeek()"></ion-icon>
         </div>
 
-        <!-- Canvas Chart.js -->
         <div class="canvas-wrapper">
           <canvas #investCanvas></canvas>
         </div>
 
-        <!-- Légende manuelle -->
         <div class="chart-legend">
-          <span class="leg-item">
-            <span class="leg-dot" style="background:#c2185b"></span>Total
-          </span>
-          <span class="leg-item">
-            <span class="leg-dot" style="background:#9c27b0"></span>Sport
-          </span>
-          <span class="leg-item">
-            <span class="leg-dot" style="background:#4a90d9"></span>Cours
-          </span>
-          <span class="leg-item">
-            <span class="leg-dot" style="background:#e91e63"></span>Extra
-          </span>
+          <span class="leg-item"><span class="leg-dot" style="background:#c2185b"></span>Total</span>
+          <span class="leg-item"><span class="leg-dot" style="background:#9c27b0"></span>Sport</span>
+          <span class="leg-item"><span class="leg-dot" style="background:#4a90d9"></span>Cours</span>
+          <span class="leg-item"><span class="leg-dot" style="background:#e91e63"></span>Extra</span>
         </div>
       </section>
 
-      <!-- ④ HISTOGRAMME INTENSITÉ ─────────────────────────── -->
-      <section class="chart-section">
-        <div class="section-header">
-          <span class="section-title">Intensité par période</span>
-        </div>
-
-        <div class="canvas-wrapper canvas-wrapper--histo">
-          <canvas #histoCanvas></canvas>
-        </div>
-
-        <div class="chart-legend">
-          <span class="leg-item">
-            <span class="leg-dot" style="background:rgba(194,24,91,0.6)"></span>Normal
-          </span>
-          <span class="leg-item">
-            <span class="leg-dot" style="background:rgba(156,39,176,0.75)"></span>Élevé
-          </span>
-          <span class="leg-item">
-            <span class="leg-dot" style="background:rgba(233,30,99,0.95)"></span>Haut
-          </span>
-        </div>
-      </section>
-
-      <!-- ⑤ RÉPARTITION DU TEMPS ──────────────────────────── -->
+      <!-- ④ RÉPARTITION DU TEMPS ──────────────────────────── -->
       <section class="chart-section repartition-section">
         <div class="section-header">
           <span class="section-title">Répartition du temps</span>
@@ -192,7 +157,7 @@
         </div>
       </section>
 
-      <!-- ⑥ ACHIEVEMENTS ───────────────────────────────────── -->
+      <!-- ⑤ ACHIEVEMENTS ───────────────────────────────────── -->
       <section class="achievements-section" *ngIf="topAchievements.length > 0">
         <span class="section-title">🏆 Top Achievements</span>
         <div class="achv-list">
@@ -204,18 +169,16 @@
         </div>
       </section>
 
-      <!-- ⑦ INSIGHTS ───────────────────────────────────────── -->
+      <!-- ⑥ INSIGHTS ───────────────────────────────────────── -->
       <section class="insights-section">
         <span class="section-title">Avis</span>
-
         <div class="insight-card" *ngFor="let insight of insights">
           <p class="insight-text">{{ insight.message }}</p>
           <div class="insight-value-row">
             <span class="insight-pct">{{ insight.pct }}%</span>
             <span class="insight-source">{{ insight.source }}</span>
           </div>
-          <span class="insight-tag"
-                [ngClass]="insight.level.toLowerCase()">
+          <span class="insight-tag" [ngClass]="insight.level.toLowerCase()">
             {{ insight.level }}
           </span>
         </div>

@@ -1,5 +1,5 @@
 {
-  "name": "Nexus",
+  "name": "nexus",
   "version": "0.0.1",
   "author": "Ionic Framework",
   "homepage": "https://ionicframework.com/",
@@ -30,6 +30,7 @@
     "@capacitor/status-bar": "8.0.1",
     "@ionic/angular": "^8.0.0",
     "cors": "^2.8.6",
+    "docx": "^9.6.1",
     "ionicons": "^7.0.0",
     "jwt-decode": "^4.0.0",
     "rxjs": "~7.8.0",
@@ -66,5 +67,15 @@
     "karma-jasmine-html-reporter": "~2.1.0",
     "typescript": "~5.9.0"
   },
-  "description": "An Ionic project"
+  "description": "An Ionic project",
+  "main": "karma.conf.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/matheocoles/nexusfront.git"
+  },
+  "keywords": [],
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/matheocoles/nexusfront/issues"
+  }
 }
